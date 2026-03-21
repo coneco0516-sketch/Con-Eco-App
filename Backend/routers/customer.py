@@ -19,7 +19,8 @@ def get_products(user = Depends(check_customer)):
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
         "SELECT p.product_id as item_id, p.name, p.description, p.price, 'Product' as type, v.company_name as vendor_name "
-        "FROM Products p JOIN Vendors v ON p.vendor_id = v.vendor_id"
+        "FROM Products p JOIN Vendors v ON p.vendor_id = v.vendor_id "
+        "WHERE v.verification_status='Verified'"
     )
     items = cursor.fetchall()
     cursor.close()
@@ -32,7 +33,8 @@ def get_services(user = Depends(check_customer)):
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
         "SELECT s.service_id as item_id, s.name, s.description, s.price, 'Service' as type, v.company_name as vendor_name "
-        "FROM Services s JOIN Vendors v ON s.vendor_id = v.vendor_id"
+        "FROM Services s JOIN Vendors v ON s.vendor_id = v.vendor_id "
+        "WHERE v.verification_status='Verified'"
     )
     items = cursor.fetchall()
     cursor.close()

@@ -143,11 +143,11 @@ def get_profile(request: Request):
             
         # Fetch role-specific info
         if user['role'] == 'Customer':
-            cursor.execute("SELECT city, state FROM Customers WHERE customer_id=%s", (user['user_id'],))
+            cursor.execute("SELECT city, state, verification_status FROM Customers WHERE customer_id=%s", (user['user_id'],))
             extra = cursor.fetchone()
             if extra: user.update(extra)
         elif user['role'] == 'Vendor':
-            cursor.execute("SELECT company_name, gst_number, address, city, state FROM Vendors WHERE vendor_id=%s", (user['user_id'],))
+            cursor.execute("SELECT company_name, gst_number, address, city, state, verification_status, qc_score FROM Vendors WHERE vendor_id=%s", (user['user_id'],))
             extra = cursor.fetchone()
             if extra: user.update(extra)
             

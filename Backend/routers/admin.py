@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from database import get_db_connection
 from routers.auth import get_current_user_from_cookie
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter()
 
@@ -63,6 +64,11 @@ class StatusUpdate(BaseModel):
     id: int
     status: str
 
+class VendorQCUpdate(BaseModel):
+    vendor_id: int
+    verification_status: str
+    qc_score: int
+
 @router.post("/customers/update_status")
 def update_customer_status(data: StatusUpdate, user = Depends(check_admin)):
     conn = get_db_connection()
@@ -81,7 +87,7 @@ def get_vendors(user = Depends(check_admin)):
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            "SELECT v.vendor_id, u.name, v.company_name, u.email, u.phone, v.verification_status "
+            "SELECT v.vendor_id, u.name, v.company_name, u.email, u.phone, v.verification_status, v.qc_score "
             "FROM Vendors v JOIN Users u ON v.vendor_id = u.user_id"
         )
         vendors = cursor.fetchall()
@@ -99,6 +105,26 @@ def update_vendor_status(data: StatusUpdate, user = Depends(check_admin)):
         conn.commit()
         cursor.close()
         return {"status": "success"}
+    finally:
+        conn.close()
+
+@router.post("/vendors/update_qc")
+def update_vendor_qc(data: VendorQCUpdate, user = Depends(check_admin)):
+    """Update vendor QC verification status and score"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        # Validate QC score is between 0-100
+        qc_score = max(0, min(100, data.qc_score))
+        cursor.execute(
+            "UPDATE Vendors SET verification_status=%s, qc_score=%s WHERE vendor_id=%s", 
+            (data.verification_status, qc_score, data.vendor_id)
+        )
+        conn.commit()
+        cursor.close()
+        return {"status": "success", "message": f"Vendor QC updated. Status: {data.verification_status}, QC Score: {qc_score}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
 

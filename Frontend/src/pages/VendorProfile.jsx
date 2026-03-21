@@ -73,10 +73,59 @@ function VendorProfile() {
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
         {loading ? <p>Loading profile...</p> : (
-          <div className="glass-panel" style={{ padding: '2rem' }}>
-            {msg && <p style={{ color: 'var(--primary-color)', marginBottom: '1rem' }}>{msg}</p>}
-            
-            {!editMode ? (
+          <div>
+            {/* QC Verification Status Banner */}
+            <div style={{
+              padding: '1.5rem',
+              marginBottom: '1.5rem',
+              background: profile?.verification_status === 'Verified' 
+                ? 'rgba(36, 134, 54, 0.2)' 
+                : profile?.verification_status === 'Rejected'
+                ? 'rgba(248, 81, 73, 0.2)'
+                : 'rgba(212, 162, 11, 0.2)',
+              border: `2px solid ${
+                profile?.verification_status === 'Verified' 
+                  ? '#238636' 
+                  : profile?.verification_status === 'Rejected'
+                  ? '#f85149'
+                  : '#d4a20b'
+              }`,
+              borderRadius: '8px'
+            }}>
+              <h3 style={{ 
+                color: profile?.verification_status === 'Verified' 
+                  ? '#238636' 
+                  : profile?.verification_status === 'Rejected'
+                  ? '#f85149'
+                  : '#d4a20b',
+                margin: '0 0 0.5rem 0'
+              }}>
+                {profile?.verification_status === 'Verified' 
+                  ? '✓ QC Verified' 
+                  : profile?.verification_status === 'Rejected'
+                  ? '✗ QC Rejected'
+                  : '⏳ Pending QC Verification'
+                }
+              </h3>
+              <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>
+                {profile?.verification_status === 'Verified' 
+                  ? 'Your business has been verified. Your products and services are visible to customers.' 
+                  : profile?.verification_status === 'Rejected'
+                  ? 'Your business verification was rejected. Please contact admin for details.'
+                  : 'Your business is under review. Please wait for admin approval. Your products won\'t be visible to customers until verified.'
+                }
+              </p>
+              {profile?.qc_score !== undefined && profile?.verification_status === 'Verified' && (
+                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem' }}>
+                  <strong>QC Score:</strong> {profile.qc_score}/100
+                </p>
+              )}
+            </div>
+
+            <div className="glass-panel" style={{ padding: '2rem' }}>
+              {msg && <p style={{ color: 'var(--primary-color)', marginBottom: '1rem' }}>{msg}</p>}
+              
+              {!editMode ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <p><strong>Business Name:</strong> {profile.company_name}</p>
                 <p><strong>Owner Name:</strong> {profile.name}</p>
@@ -131,6 +180,7 @@ function VendorProfile() {
                 </div>
               </form>
             )}
+            </div>
           </div>
         )}
       </main>
