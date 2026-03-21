@@ -4,9 +4,13 @@ import jwt
 from datetime import datetime, timedelta
 from typing import Optional
 from database import get_db_connection
-from passlib.context import CryptContext
+import bcrypt
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
 
 router = APIRouter()
 
@@ -65,7 +69,7 @@ def login(request: LoginRequest, response: Response):
         cursor.close()
         
         # Verify the raw login password string against the stored bcrypt hash:
-        if not user or not pwd_context.verify(request.password, user['password_hash']):
+        if not user or not verify_password(request.password, user['password_hash']):
             return {"status": "error", "message": "Invalid credentials or User not found."}
             
         token = create_access_token({"user_id": user['user_id'], "role": user['role']})
@@ -102,7 +106,7 @@ def register(request: RegisterRequest):
         # The database columns are name, email, phone, password_hash, role
         try:
             # Securely hash the password before saving it to the database:
-            hashed_password = pwd_context.hash(request.password)
+            hashed_password = hash_password(request.password)
             cursor.execute("INSERT INTO Users (name, email, phone, password_hash, role) VALUES (%s, %s, %s, %s, %s)", 
                            (request.full_name, request.email, request.phone_number, hashed_password, request.role))
             user_id = cursor.lastrowid

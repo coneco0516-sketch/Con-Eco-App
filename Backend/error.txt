@@ -1,0 +1,1 @@
+{"db":"failed","error":"Pool not initialized. DB Error: 1049 (42000): Unknown database 'DB_NAME' | Config attempted: Host=caboose.proxy.rlwy.net, User=root"}
