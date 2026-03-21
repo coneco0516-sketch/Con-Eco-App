@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Card Payment</title>
+<link rel="stylesheet" href="CardPayment.css">
+</head>
+
+<body>
+
+<header>
+    <h1>Card Payment</h1>
+</header>
+
+<main class="container">
+
+    <h2>Enter Card Details</h2>
+
+    <form onsubmit="return payCard()">
+
+        <input type="text" placeholder="Card Number" required>
+        <input type="text" placeholder="Expiry (MM/YY)" required>
+        <input type="password" placeholder="CVV" required>
+
+        <button type="submit">Pay Now</button>
+
+    </form>
+
+</main>
+
+<script>
+function payCard() {
+    alert("Payment Successful!");
+    window.location.href = "OrderSuccess.html";
+    return false;
+}
+</script>
+
+</body>
+</html>

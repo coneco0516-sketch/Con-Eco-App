@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics</title>
+    <link rel="stylesheet" href="AdminAnalytics.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>ConEco - Admin Analytics</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="AdminDashboard.html">Dashboard</a></li>
+        <li><a href="VendorVerification.html">Vendor Verification</a></li>
+        <li><a href="CustomerVerification.html">Customer Verification</a></li>
+        <li><a href="AdminOrderSummary.html">Orders</a></li>
+        <li><a href="Payments.html">Payments</a></li>
+    </ul>
+
+    <p>
+        <a href="AdminProfile.html">My Profile</a> | 
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </p>
+</nav>
+
+<hr>
+
+<!-- MAIN DASHBOARD -->
+<main>
+
+    <!-- SUMMARY CARDS -->
+    <section class="card-container">
+
+        <div class="card">
+            <h3>Total Vendors</h3>
+            <p>120</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Customers</h3>
+            <p>350</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Orders</h3>
+            <p>540</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Revenue</h3>
+            <p>₹12,50,000</p>
+        </div>
+
+    </section>
+
+    <!-- CHART PLACEHOLDER -->
+    <section class="chart-section">
+        <h2>Platform Growth</h2>
+        <div class="chart-box">
+            <p>📊 Chart will be integrated (using Chart.js)</p>
+        </div>
+    </section>
+
+    <!-- RECENT ACTIVITY -->
+    <section class="activity">
+        <h2>Recent Activity</h2>
+
+        <table>
+            <tr>
+                <th>Date</th>
+                <th>User</th>
+                <th>Action</th>
+            </tr>
+
+            <tr>
+                <td>20 Mar</td>
+                <td>Vendor A</td>
+                <td>Registered</td>
+            </tr>
+
+            <tr>
+                <td>20 Mar</td>
+                <td>Customer B</td>
+                <td>Placed Order</td>
+            </tr>
+
+            <tr>
+                <td>19 Mar</td>
+                <td>Vendor C</td>
+                <td>Verified</td>
+            </tr>
+
+        </table>
+    </section>
+
+</main>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> |
+        <a href="Terms.html">Terms</a> |
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<script src="../shared/auth.js"></script>
+</body>
+</html>
+

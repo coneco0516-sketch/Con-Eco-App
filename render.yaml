@@ -1,0 +1,28 @@
+# render.yaml - ConEco Full-Stack Deployment Configuration
+# Deploy this entire project to Render.com with one click
+
+services:
+  # ── FastAPI Backend ──────────────────────────────────────────────
+  - type: web
+    name: coneco-backend
+    runtime: python
+    rootDir: Backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_HOST
+        sync: false          # Set manually in Render Dashboard
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASS
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true  # Render auto-generates a secure random value
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false          # e.g. https://coneco.com,https://www.coneco.com

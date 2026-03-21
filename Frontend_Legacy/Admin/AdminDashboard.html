@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="AdminDashboard.css">
+</head>
+<header>
+    <h1>ConEco</h1>
+    <div class="top-bar">
+        <h2>Admin Dashboard</h2>
+        <a href="javascript:void(0)" onclick="logout()" class="logout">Logout</a>
+    </div>
+</header>
+
+<hr>
+
+<body>
+    <div class="container">
+
+        <!-- LEFT PANEL -->
+        <aside class="sidebar">
+            <h3>Platform Control Center</h3>
+            <ul>
+                <li><a href="VendorVerification.html">Vendor Verification</a></li>
+                <li><a href="CustomerVerification.html">Customer Verification</a></li>
+                <li><a href="AdminOrderSummary.html">Orders Details</a></li>
+                <li><a href="Payments.html">Payments</a></li>
+                <li><a href="AdminProfile.html">My Account</a></li>
+                <li><a href="PlatformSettings.html">Platform Settings</a></li>
+            </ul>
+        </aside>
+
+        <!-- RIGHT CONTENT -->
+        <main class="dashboard">
+
+            <div class="card-row">
+
+                <div class="card">
+                    <h3>Vendor Verification</h3>
+                    <p style="text-align:center; font-size:1.5rem; margin:10px 0;">Pending: <span id="dash-vendors" style="font-weight:bold;">...</span></p>
+                    <a href="VendorVerification.html" class="btn green">Verify Vendor</a>
+                </div>
+
+                <div class="card">
+                    <h3>Customer Verification</h3>
+                    <p style="text-align:center; font-size:1.5rem; margin:10px 0;">Pending: <span id="dash-customers" style="font-weight:bold;">...</span></p>
+                    <a href="CustomerVerification.html" class="btn blue">Verify Customers</a>
+                </div>
+
+            </div>
+
+            <div class="card-row">
+
+                <div class="card small">
+                    <h4>Orders Details</h4>
+                    <p style="text-align:center; font-size:1.2rem; margin:5px 0;">Total: <span id="dash-orders" style="font-weight:bold;">...</span></p>
+                    <a href="AdminOrderSummary.html" class="btn orange">Manage Orders</a>
+                </div>
+
+                <div class="card small">
+                    <h4>Payments</h4>
+                    <p style="text-align:center; font-size:1.2rem; margin:5px 0;">₹ <span id="dash-revenue" style="font-weight:bold;">...</span></p>
+                    <a href="Payments.html" class="btn yellow">View Payments</a>
+                </div>
+
+                <div class="card small">
+                    <h4>Analytics</h4>
+                    <p style="height: 1.2rem; margin:5px 0;"></p>
+                    <a href="AdminAnalytics.html" class="btn pink">View Analytics</a>
+                </div>
+
+            </div>
+
+            <script src="../shared/auth.js"></script>
+            <script>
+                function loadStats() {
+                    authFetch('http://localhost:8000/api/admin/dashboard_stats')
+                    .then(res => res.json())
+                        .then(data => {
+                            if (data.stats) {
+                                document.getElementById('dash-vendors').innerText = data.stats.pending_vendors;
+                                document.getElementById('dash-customers').innerText = data.stats.pending_customers;
+                                document.getElementById('dash-orders').innerText = data.stats.total_orders;
+                                document.getElementById('dash-revenue').innerText = data.stats.total_revenue;
+                            }
+                        });
+                }
+                document.addEventListener('DOMContentLoaded', loadStats);
+            </script>
+
+        </main>
+
+    </div>
+</body>
+
+<hr>
+
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p><a href="FAQ.html">FAQ</a> | <a href="Terms.html">Terms</a> | <a href="Privacy.html">Privacy</a></p>
+</footer>
+</html>

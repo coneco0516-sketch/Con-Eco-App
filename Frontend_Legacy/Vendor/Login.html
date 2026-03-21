@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="Login.css">
+</head>
+<header>
+    <h1>ConEco - Login</h1>
+    <h3>Welcome back! Please login to your account.</h3>
+</header>
+
+<hr>
+
+<nav>
+    <ol>
+        <li><a href="Main.html">Home</a></li>
+        <li><a href="About.html">About Us</a></li>
+        <li><a href="Contact.html">Contact Us</a></li>
+        <li><a href="Register.html">Register</a></li>
+        <li><a href="Login.html">Login</a></li>
+    </ol>
+</nav>
+
+<hr>
+
+<body>
+    <section>
+        <h2>Login</h2>
+        <form action="submit_login_form.php" method="post">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+
+            <!-- Verify OTP need to be added --><br><br>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p>Don't have an account?<a href="Register.html">Register here</a></p>
+    </section>
+</body>
+
+<hr>
+
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p><a href="FAQ.html">FAQ</a> | <a href="Terms.html">Terms</a> | <a href="Privacy.html">Privacy</a></p>
+</footer>
+
+</html>

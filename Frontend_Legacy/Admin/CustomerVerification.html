@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Verification</title>
+    <link rel="stylesheet" href="CustomerVerification.css">
+</head>
+
+<body>
+
+<header>
+    <h1>ConEco - Admin Panel</h1>
+    <div class="top-bar">
+        <h2>Customer Management</h2>
+        <a href="javascript:void(0)" onclick="logout()" class="logout">Logout</a>
+    </div>
+</header>
+
+<hr>
+
+<div class="container">
+    <aside class="sidebar">
+        <h3>Control Center</h3>
+        <ul>
+            <li><a href="AdminDashboard.html">Dashboard</a></li>
+            <li><a href="VendorVerification.html">Vendor Verification</a></li>
+            <li><a href="CustomerVerification.html">Customer Verification</a></li>
+            <li><a href="AdminOrderSummary.html">Orders</a></li>
+            <li><a href="Payments.html">Payments</a></li>
+        </ul>
+    </aside>
+
+    <main class="verification">
+        <h2>Customer List</h2>
+        <div id="customer-list" style="display: flex; flex-wrap: wrap; gap: 20px; padding: 20px;"></div>
+
+        <script src="../shared/auth.js"></script>
+        <script>
+            function loadCustomers() {
+                authFetch('http://localhost:8000/api/admin/customers')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        let html = '';
+                        data.customers.forEach(cust => {
+                            let statusClass = cust.verification_status.toLowerCase();
+                            let actionBtn = cust.verification_status === 'Pending' ? 
+                                `<button onclick="updateStatus(${cust.customer_id}, 'Verified')">Verify</button>` : 
+                                `<button onclick="updateStatus(${cust.customer_id}, 'Blocked')">Block</button>`;
+
+                            html += `
+                            <div class="customer-card" style="border: 1px solid #ddd; padding: 15px; width: 250px; background: #fff;">
+                                <h3>${cust.name}</h3>
+                                <p><strong>Email:</strong> ${cust.email}</p>
+                                <p><strong>Status:</strong> <span class="status ${statusClass}">${cust.verification_status}</span></p>
+                                <div class="actions" style="margin-top: 10px;">
+                                    ${actionBtn}
+                                </div>
+                            </div>`;
+                        });
+                        document.getElementById('customer-list').innerHTML = html || 'No customers found.';
+                    }
+                });
+            }
+
+            function updateStatus(id, newStatus) {
+                authFetch('http://localhost:8000/api/admin/customers/update_status', {
+                    method: 'POST',
+                    body: JSON.stringify({id: id, status: newStatus})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') loadCustomers();
+                    else alert("Error: " + data.message);
+                });
+            }
+
+            window.onload = loadCustomers;
+        </script>
+    </main>
+</div>
+
+</body>
+</html>

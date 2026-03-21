@@ -1,0 +1,107 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* BODY */
+body {
+    background: #f4f8ff;
+}
+
+/* HEADER */
+header {
+    background: #0d6efd;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* NAVBAR */
+nav {
+    background: #e3f0ff;
+    padding: 10px;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+}
+
+nav ul li {
+    display: inline-block;
+    margin: 10px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #0d6efd;
+    font-weight: bold;
+}
+
+/* MAIN */
+main {
+    padding: 20px;
+}
+
+/* SERVICE CARD */
+.service-card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* HEADER */
+.service-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* STATUS */
+.status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: 12px;
+}
+
+.completed {
+    background: #28a745;
+}
+
+.upcoming {
+    background: #0d6efd;
+}
+
+.cancelled {
+    background: red;
+}
+
+/* TEXT */
+.service-card p {
+    margin: 5px 0;
+}
+
+/* AMOUNT */
+.service-card h4 {
+    margin-top: 10px;
+    color: #0d6efd;
+}
+
+/* FOOTER */
+footer {
+    background: #0d6efd;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+}

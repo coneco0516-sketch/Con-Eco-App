@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="Register.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>ConEco - Register</h1>
+    <h3>Create your account to get started</h3>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ol>
+        <li><a href="Main.html">Home</a></li>
+        <li><a href="About.html">About Us</a></li>
+        <li><a href="Contact.html">Contact Us</a></li>
+        <li><a href="Register.html">Register</a></li>
+        <li><a href="Login.html">Login</a></li>
+    </ol>
+</nav>
+
+<hr>
+
+<!-- FORM -->
+<section>
+    <h2>Register</h2>
+
+    <form action="submit_register_form.php" method="post" onsubmit="return validateForm()">
+
+        <!-- COMMON FIELDS -->
+        <label>Name:</label>
+        <input type="text" name="name" required>
+
+        <label>Phone No:</label>
+        <input type="tel" name="phone" required>
+
+        <label>Email:</label>
+        <input type="email" name="email" required>
+
+        <!-- ROLE -->
+        <label>Role:</label>
+        <select id="role" name="role" onchange="toggleSections()" required>
+            <option value="">Select a role</option>
+            <option value="customer">Customer</option>
+            <option value="vendor">Vendor</option>
+            <option value="admin">Admin</option>
+        </select>
+
+        <!-- VENDOR SECTION -->
+        <div id="vendorSection" class="hidden">
+            <h3>Vendor Details</h3>
+
+            <label>Company Name:</label>
+            <input type="text" name="company">
+
+            <label>GST Number:</label>
+            <input type="text" name="gst">
+
+            <label>Address:</label>
+            <input type="text" name="address">
+
+            <label>City:</label>
+            <input type="text" name="vendorCity">
+
+            <label>State:</label>
+            <input type="text" name="vendorState">
+        </div>
+
+        <!-- CUSTOMER SECTION -->
+        <div id="customerSection" class="hidden">
+            <h3>Customer Details</h3>
+
+            <label>City:</label>
+            <input type="text" name="customerCity">
+
+            <label>State:</label>
+            <input type="text" name="customerState">
+        </div>
+
+        <!-- PASSWORD -->
+        <label>Password:</label>
+        <input type="password" id="password" required>
+
+        <label>Confirm Password:</label>
+        <input type="password" id="confirmPassword" required>
+
+        <p id="error" style="color:red;"></p>
+
+        <!-- BUTTON -->
+        <button type="submit">Register</button>
+
+    </form>
+
+    <p>Already have an account? <a href="Login.html">Login here</a></p>
+</section>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> |
+        <a href="Terms.html">Terms</a> |
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<!-- JAVASCRIPT -->
+<script>
+function toggleSections() {
+    let role = document.getElementById("role").value;
+
+    document.getElementById("vendorSection").style.display = "none";
+    document.getElementById("customerSection").style.display = "none";
+
+    if (role === "vendor") {
+        document.getElementById("vendorSection").style.display = "block";
+    }
+    else if (role === "customer") {
+        document.getElementById("customerSection").style.display = "block";
+    }
+}
+
+function validateForm() {
+    let pass = document.getElementById("password").value;
+    let confirm = document.getElementById("confirmPassword").value;
+    let error = document.getElementById("error");
+
+    if (pass !== confirm) {
+        error.innerText = "Passwords do not match!";
+        return false;
+    }
+
+    return true;
+}
+</script>
+
+</body>
+</html>

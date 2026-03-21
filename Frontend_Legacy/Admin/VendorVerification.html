@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Verification</title>
+    <link rel="stylesheet" href="VendorVerification.css">
+</head>
+
+<body>
+
+<header>
+    <h1>ConEco - Admin Panel</h1>
+    <div class="top-bar">
+        <h2>Vendor Verification</h2>
+        <a href="javascript:void(0)" onclick="logout()" class="logout">Logout</a>
+    </div>
+</header>
+
+<hr>
+
+<div class="container">
+    <aside class="sidebar">
+        <h3>Control Center</h3>
+        <ul>
+            <li><a href="AdminDashboard.html">Dashboard</a></li>
+            <li><a href="VendorVerification.html">Vendor Verification</a></li>
+            <li><a href="CustomerVerification.html">Customer Verification</a></li>
+            <li><a href="AdminOrderSummary.html">Orders</a></li>
+            <li><a href="Payments.html">Payments</a></li>
+        </ul>
+    </aside>
+
+    <main class="verification">
+        <h2>Vendor Requests</h2>
+        <div id="vendor-list" style="display: flex; flex-wrap: wrap; gap: 20px; padding: 20px;"></div>
+
+        <script src="../shared/auth.js"></script>
+        <script>
+            function loadVendors() {
+                authFetch('http://localhost:8000/api/admin/vendors')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        let html = '';
+                        data.vendors.forEach(vendor => {
+                            let statusClass = vendor.verification_status.toLowerCase();
+                            let actionBtn = vendor.verification_status === 'Pending' ? 
+                                `<button onclick="updateStatus(${vendor.vendor_id}, 'Verified')">Approve</button>` : 
+                                `<button onclick="updateStatus(${vendor.vendor_id}, 'Pending')">Revoke</button>`;
+                            
+                            html += `
+                            <div class="vendor-card" style="border: 1px solid #ddd; padding: 15px; width: 250px; background: #fff;">
+                                <h3>${vendor.company_name}</h3>
+                                <p><strong>Owner:</strong> ${vendor.name}</p>
+                                <p><strong>Email:</strong> ${vendor.email}</p>
+                                <p><strong>Status:</strong> <span class="status ${statusClass}">${vendor.verification_status}</span></p>
+                                <div class="actions" style="margin-top: 10px;">
+                                    ${actionBtn}
+                                </div>
+                            </div>`;
+                        });
+                        document.getElementById('vendor-list').innerHTML = html || 'No vendors found.';
+                    }
+                });
+            }
+
+            function updateStatus(id, newStatus) {
+                authFetch('http://localhost:8000/api/admin/vendors/update_status', {
+                    method: 'POST',
+                    body: JSON.stringify({id: id, status: newStatus})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') loadVendors();
+                    else alert("Error: " + data.message);
+                });
+            }
+
+            window.onload = loadVendors;
+        </script>
+    </main>
+</div>
+
+</body>
+</html>

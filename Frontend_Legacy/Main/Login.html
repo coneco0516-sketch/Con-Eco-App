@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="Login.css">
+</head>
+<header>
+    <h1>ConEco - Login</h1>
+    <h3>Welcome back! Please login to your account.</h3>
+</header>
+
+<hr>
+
+<nav>
+    <ol>
+        <li><a href="Main.html">Home</a></li>
+        <li><a href="About.html">About Us</a></li>
+        <li><a href="Contact.html">Contact Us</a></li>
+        <li><a href="Register.html">Register</a></li>
+        <li><a href="Login.html">Login</a></li>
+    </ol>
+</nav>
+
+<hr>
+
+<body>
+    <section>
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="email">Email or Phone:</label>
+            <input type="text" id="email" required><br><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" required><br><br>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <script>
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetch('http://localhost:8000/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        username: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    }),
+                    credentials: 'include'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        // The token is now an HttpOnly cookie sent by the server via Set-Cookie
+                        // We just store flags for frontend auth routing checks
+                        localStorage.setItem('is_logged_in', 'true');
+                        localStorage.setItem('user_role', data.role);
+                        if(data.role === 'Admin') window.location.href = '../Admin/AdminDashboard.html';
+                        else if(data.role === 'Vendor') window.location.href = '../Vendor/VendorDashboard.html';
+                        else window.location.href = '../Customer/CustomerDashboard.html';
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        </script>
+
+        <p>Don't have an account?<a href="Register.html">Register here</a></p>
+        <p><a href="ForgotPassword.html">Forgot Password?</a></p>
+    </section>
+</body>
+
+<hr>
+
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p><a href="FAQ.html">FAQ</a> | <a href="Terms.html">Terms</a> | <a href="Privacy.html">Privacy</a></p>
+</footer>
+
+</html>

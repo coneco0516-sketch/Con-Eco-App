@@ -1,0 +1,72 @@
+Unified E commerce Platform to Construction materials & Services
+
+// Con Eco //
+
+
+1.Main Page.
+
+a. Header
+  - Name with Logo
+
+b. Navigation Menu
+  - Home = Main Page✅
+  - About Us = About Page✅
+  - Contact Us = Contact Page✅
+  - Register = Register Page✅
+    - Submit Button = Login Page
+    - Already have an account = Login Page
+  - Login = Login Page✅
+    - Submit Button =   
+                        - Customer Dashboard✅
+                            - Dashboard = Customer Dashboard
+                            - Products = Products Place
+                                - Compare = Compare Products Feature
+                                - Product Details = Product Description Page
+                                    -  Add to Cart = Cart Page
+                                    - Place Order = Checkout Page
+                            - Services = Services Place
+                                - Service Details = Service Description Page
+                                    - Add to Cart = Cart Page
+                                    - Book Now = Booking Page
+                            - Cart = Cart
+                                    - Products/Service Order
+                                        - Checkout = Checkout Page
+                                            - Place Order = Payment Page
+                                            - Order Success = Order Success Page
+                            - My Orders - Order Placed Page
+                            - My Booked Services - Booked Services Page
+                            - My Account = Customer Profile Page✅
+                            - Logout = Login Page
+                        - Vendor Dashboard✅
+                            - Dashboard = Vendor Dashboard
+                            - Catalogue = As per their category
+                                if Product vendor - Products = Catalogue Product
+                                                    - Add Products =  Adding New Product Page
+                                if Services vendor - Services = Catalogue Services
+                                                    - Add Services = Catalogue Product
+                            - Order Summary = Order Summary Page.
+                            - Analytics = Analysis Page✅
+                            - Payments/Earnings = Recieving paymemt page.
+                            - My Account = Vendor Profile Page
+                            - Logout = Login Page
+                        - Admin Dashboard✅
+                            - Customers Verification
+                            - Vendors Verification + QC Verification
+                            - Order Details
+                            - Payments Page = Paymemt Approvals
+                            - Analytics = Analysis page
+                            - My Account = Admin Profile Page
+                            - Platform Settings = Settings Head
+                            - Logout = Login Page
+    - Don't have an account = Register Page
+
+c. Body
+  - Hero Section with Top Products and vendor Just like a trailer
+  - About us in short Summary
+  - Contact Details
+
+d. Footer
+  - &copy; 2026 ConEco. All rights reserved.
+  - FAQ = FAQ Page
+  - Terms = Terms Conditions Page
+  - Privacy = Privacy Policy Page

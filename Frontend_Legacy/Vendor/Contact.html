@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="Contact.css">
+</head>
+<header>
+    <h1> ConEco - Contact Us</h1>
+    <h3>Get in touch with us for any inquiries or support</h3>
+</header>
+
+<hr>
+
+<nav>
+    <ol>
+        <li><a href="Main.html">Home</a></li>
+        <li><a href="About.html">About Us</a></li>
+        <li><a href="Contact.html">Contact Us</a></li>
+        <li><a href="Register.html">Register</a></li>
+        <li><a href="Login.html">Login</a></li>
+    </ol>
+</nav>
+
+<hr>
+
+<body>
+    <section>
+        <h2> Send Us a Message </h2>
+        <form action="submit_contact_form.php" method="post">
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" required><br><br>
+
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required><br><br>
+
+            <label for="message">Message:</label><br>
+            <textarea id="message" name="message" rows="5" required></textarea><br><br>
+
+            <input type="submit" value="Submit">
+        </form>
+    </section>
+    
+    
+    <section>
+        <h2> Contact Information </h2>
+        <p>Email: <a href="mailto:info@coneco.com">info@coneco.com</a></p>
+        <p>Phone: +1 (123) 456-7890</p>
+    </section>
+    
+</body>
+
+<hr>
+
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p><a href="FAQ.html">FAQ</a> | <a href="Terms.html">Terms</a> | <a href="Privacy.html">Privacy</a></p>
+</footer>
+
+</html>

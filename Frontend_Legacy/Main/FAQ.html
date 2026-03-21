@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ</title>
+    <link rel="stylesheet" href="FAQ.css">
+</head>
+<header>
+    <h1>ConEco - Frequently Asked Questions</h1>
+</header>
+
+<hr>
+
+<nav>
+    <a href="Main.html">← Back to Home</a>
+</nav>
+
+<hr>
+
+<body>
+
+<section class="faq-container">
+
+    <div class="faq-item">
+        <button class="faq-question">What is ConEco?</button>
+        <div class="faq-answer">
+            <p>ConEco is a unified platform that connects customers with construction material vendors and service providers in one place.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-question">How do I register?</button>
+        <div class="faq-answer">
+            <p>You can register by clicking on the Register button and selecting your role (Customer/Vendor).</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-question">Are vendors verified?</button>
+        <div class="faq-answer">
+            <p>Yes, all vendors go through a quality control (QC) verification process before being listed on the platform.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-question">How can I place an order?</button>
+        <div class="faq-answer">
+            <p>Browse products/services, add them to your cart, and proceed to checkout.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-question">Can I track my orders?</button>
+        <div class="faq-answer">
+            <p>Yes, you can track your orders from the "My Orders" section in your dashboard.</p>
+        </div>
+    </div>
+
+</section>
+
+<script>
+    const questions = document.querySelectorAll(".faq-question");
+
+    questions.forEach(q => {
+        q.addEventListener("click", () => {
+            q.classList.toggle("active");
+            const answer = q.nextElementSibling;
+
+            if (answer.style.display === "block") {
+                answer.style.display = "none";
+            } else {
+                answer.style.display = "block";
+            }
+        });
+    });
+</script>
+
+</body>
+
+<hr>
+
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p><a href="FAQ.html">FAQ</a> | <a href="Terms.html">Terms</a> | <a href="Privacy.html">Privacy</a></p>
+</footer>
+
+</html>

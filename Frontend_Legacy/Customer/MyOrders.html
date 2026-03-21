@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <link rel="stylesheet" href="MyOrders.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>My Orders</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="CustomerDashboard.html">Dashboard</a></li>
+        <li><a href="Products.html">Products</a></li>
+        <li><a href="Services.html">Services</a></li>
+        <li><a href="Cart.html">Cart</a></li>
+        <li><a href="MyOrders.html">My Orders</a></li>
+    </ul>
+</nav>
+
+<hr>
+
+<!-- MAIN -->
+<main>
+
+    <!-- ORDER CARD -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch('http://localhost:8000/api/customer/my_orders', {credentials: 'include'})
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'not_logged_in') {
+                document.querySelector('main').innerHTML = '<h2 style="padding:20px; color:red;">Please log in to view your orders.</h2>';
+                return;
+            }
+            
+            let html = '';
+            if(data.orders.length === 0) {
+                html += '<p style="padding:20px;">You have no orders yet.</p>';
+            } else {
+                data.orders.forEach(o => {
+                    let statusClass = o.status.toLowerCase();
+                    html += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3>Order ID: #ORD${o.order_id}</h3>
+                            <span class="status ${statusClass}">${o.status}</span>
+                        </div>
+                        <p><strong>Date:</strong> ${o.date}</p>
+                        <p><strong>Vendor:</strong> ${o.vendor_name}</p>
+                        <p><strong>Type:</strong> ${o.order_type}</p>
+                        <h4>Total: ₹${o.amount}</h4>
+                    </div>
+                    `;
+                });
+            }
+            document.querySelector('main').innerHTML = html;
+        });
+    });
+</script>
+
+</main>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> |
+        <a href="Terms.html">Terms</a> |
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+</body>
+</html>

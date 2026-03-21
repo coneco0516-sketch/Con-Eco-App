@@ -1,0 +1,124 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* BODY */
+body {
+    background-color: #f4f8ff;
+}
+
+/* HEADER */
+header {
+    background-color: #0d6efd;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* NAVBAR */
+nav {
+    background: #222;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+}
+
+nav ul li {
+    display: inline-block;
+    margin: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+}
+
+nav a:hover {
+    color: #5aa9ff;
+}
+
+/* SERVICES GRID */
+.services-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 30px;
+}
+
+/* CARD */
+.service-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+}
+
+/* IMAGE */
+.service-card img {
+    width: 100%;
+    height: 150px;
+    border-radius: 10px;
+}
+
+/* TEXT */
+.service-card h3 {
+    margin: 10px 0;
+    color: #0d6efd;
+}
+
+.service-card p {
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+/* PRICE */
+.price {
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* BUTTON */
+.service-card button {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.service-card button:hover {
+    background-color: #084298;
+}
+
+/* FOOTER */
+footer {
+    background-color: #0d6efd;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}

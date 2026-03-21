@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart</title>
+    <link rel="stylesheet" href="Cart.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>My Cart</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="CustomerDashboard.html">Dashboard</a></li>
+        <li><a href="Products.html">Products</a></li>
+        <li><a href="Services.html">Services</a></li>
+        <li><a href="Cart.html">Cart</a></li>
+        <li><a href="MyOrders.html">My Orders</a></li>
+    </ul>
+</nav>
+
+<hr>
+
+<main>
+
+    <section class="cart-section">
+        <h2>🛍 Your Cart Items</h2>
+        <div id="cart-container">
+            <table border="1" width="100%" style="border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-body">
+                    <!-- Items will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- TOTAL -->
+    <section class="summary" id="summary-container" style="margin-top: 20px;">
+        <p>Subtotal: <span id="cart-subtotal">₹0</span></p>
+        <p><strong>Total: <span id="cart-total">₹0</span></strong></p>
+        <button class="btn" onclick="window.location.href='Checkout.html'" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer;">Proceed to Checkout</button>
+    </section>
+
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', loadCart);
+
+    function loadCart() {
+        console.log("Loading cart...");
+        fetch('http://localhost:8000/api/customer/cart', {credentials: 'include'})
+        .then(res => res.json())
+        .then(data => {
+            console.log("Cart data:", data);
+            if(data.status === 'not_logged_in') {
+                document.getElementById('cart-body').innerHTML = '<tr><td colspan="4">Please log in to view cart.</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(i => {
+                    html += `
+                    <tr>
+                        <td class="product-info" style="padding: 10px;">
+                            <div>
+                                <strong>${i.name}</strong><br>
+                                <small>Vendor: ${i.vendor_name}</small><br>
+                                <button class="btn-remove" onclick="removeItem(${i.cart_id})" style="color: red; cursor: pointer; border: none; background: none; padding: 0;">Remove</button>
+                            </div>
+                        </td>
+                        <td style="padding: 10px;">
+                            <input type="number" value="${i.quantity}" min="1" id="qty-${i.cart_id}" style="width: 50px;">
+                            <button onclick="updateCart(${i.cart_id}, '${i.item_type}', ${i.item_id})" style="color: blue; cursor: pointer; border: none; background: none;">Update</button>
+                        </td>
+                        <td style="padding: 10px;">₹${i.price}</td>
+                        <td style="padding: 10px; font-weight:bold;">₹${i.price * i.quantity}</td>
+                    </tr>
+                    `;
+                });
+            }
+            
+            document.getElementById('cart-body').innerHTML = html || '<tr><td colspan="4" style="padding: 20px; text-align: center;">Your cart is empty.</td></tr>';
+            document.getElementById('cart-subtotal').innerText = '₹' + (data.total || 0);
+            document.getElementById('cart-total').innerText = '₹' + (data.total || 0);
+        })
+        .catch(err => {
+            console.error("Fetch error:", err);
+            document.getElementById('cart-body').innerHTML = '<tr><td colspan="4">Error loading cart.</td></tr>';
+        });
+    }
+
+    function updateCart(cartId, itemType, itemId) {
+        let qty = document.getElementById('qty-'+cartId).value;
+        fetch('http://localhost:8000/api/customer/cart', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({item_type: itemType, item_id: itemId, quantity: parseInt(qty)})
+        }).then(res => res.json()).then(data => loadCart());
+    }
+
+    function removeItem(cartId) {
+        fetch('http://localhost:8000/api/customer/cart', {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({cart_id: cartId})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') loadCart();
+        });
+    }
+</script>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> |
+        <a href="Terms.html">Terms</a> |
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<script src="../shared/auth.js"></script>
+</body>
+</html>

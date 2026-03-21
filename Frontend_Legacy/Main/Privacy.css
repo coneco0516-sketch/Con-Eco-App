@@ -1,0 +1,99 @@
+/* =========================
+   GLOBAL
+========================= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f5;
+}
+
+/* =========================
+   HEADER
+========================= */
+header {
+    background-color: #1f6f43;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+nav {
+    text-align: center;
+    padding: 10px;
+    background-color: #2e8b57;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 2px solid white;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #2e8b57;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+section {
+    background-color: white;
+    margin: 20px auto;
+    padding: 25px;
+    border-radius: 10px;
+    max-width: 800px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+}
+
+/* =========================
+   HEADINGS
+========================= */
+section h2 {
+    color: #1f6f43;
+    margin-bottom: 10px;
+}
+
+/* =========================
+   TEXT
+========================= */
+section p {
+    color: #444;
+    line-height: 1.6;
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+    background-color: #1f6f43;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+footer a {
+    color: #c8f7d1;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   HR
+========================= */
+hr {
+    border: none;
+    height: 1px;
+    background-color: #ccc;
+}

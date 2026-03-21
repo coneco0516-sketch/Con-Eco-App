@@ -1,0 +1,148 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* BODY */
+body {
+    background: #f4f8ff;
+}
+
+/* HEADER */
+header {
+    background: #007bff;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+/* NAVBAR */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0056b3;
+    padding: 10px 20px;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+}
+
+nav ul li {
+    margin-right: 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+nav p a {
+    color: white;
+    text-decoration: none;
+}
+
+/* MAIN CONTAINER */
+.container {
+    display: flex;
+    gap: 20px;
+    padding: 30px;
+}
+
+/* LEFT FORM */
+.checkout-form {
+    flex: 2;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.checkout-form h2 {
+    margin-bottom: 15px;
+    color: #007bff;
+}
+
+.checkout-form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.checkout-form input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.payment-options {
+    margin-top: 10px;
+}
+
+.payment-options label {
+    display: block;
+    margin: 5px 0;
+}
+
+/* RIGHT SUMMARY */
+.order-summary {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.order-summary h2 {
+    margin-bottom: 15px;
+    color: #007bff;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    color: #007bff;
+}
+
+/* BUTTON */
+.place-order {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.place-order:hover {
+    background: #0056b3;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    margin-top: 20px;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+}

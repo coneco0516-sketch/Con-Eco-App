@@ -1,0 +1,157 @@
+/* =========================
+   GLOBAL
+========================= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f5;
+}
+
+/* =========================
+   HEADER
+========================= */
+header {
+    background-color: #1f6f43;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+header h1 {
+    margin-bottom: 5px;
+}
+
+header h3 {
+    font-weight: normal;
+    font-size: 14px;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+nav {
+    background-color: #2e8b57;
+    padding: 10px 0;
+}
+
+nav ol {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0;
+}
+
+nav li {
+    display: inline;
+}
+
+nav a {
+    text-decoration: none;
+    color: white;
+    padding: 8px 16px;
+    border: 2px solid white;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #2e8b57;
+}
+
+/* =========================
+   HERO SECTION
+========================= */
+hero {
+    display: block; /* IMPORTANT because hero is not standard */
+    background: linear-gradient(to right, #dff5e3, #eaf7ee);
+    padding: 40px;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+hero h1 {
+    color: #1f6f43;
+}
+
+hero p {
+    color: #444;
+}
+
+hero ul {
+    margin-top: 15px;
+}
+
+hero li {
+    margin-bottom: 8px;
+}
+
+/* BUTTON */
+.btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #1f6f43;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.btn:hover {
+    background-color: #155c35;
+}
+
+/* =========================
+   SECTIONS (About & Contact)
+========================= */
+section {
+    background-color: white;
+    margin: 20px;
+    padding: 25px;
+    border-radius: 10px;
+}
+
+section h2 {
+    color: #1f6f43;
+}
+
+/* =========================
+   LINKS
+========================= */
+a {
+    color: #2e8b57;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+    background-color: #1f6f43;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+footer a {
+    color: #c8f7d1;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   HR STYLE
+========================= */
+hr {
+    border: none;
+    height: 1px;
+    background-color: #ccc;
+}

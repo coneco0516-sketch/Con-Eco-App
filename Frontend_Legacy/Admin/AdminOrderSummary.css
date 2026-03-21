@@ -1,0 +1,157 @@
+/* RESET */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f1f5f9;
+}
+
+/* HEADER */
+header {
+    background-color: #1e293b;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* NAVBAR */
+nav {
+    background-color: #334155;
+    padding: 10px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #e2e8f0;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    color: white;
+}
+
+nav p {
+    text-align: center;
+    margin-top: 10px;
+}
+
+nav p a {
+    color: #94a3b8;
+    text-decoration: none;
+}
+
+/* MAIN */
+main {
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: #1e293b;
+}
+
+/* FILTERS */
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.filters input,
+.filters select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.btn {
+    background-color: #1e293b;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* TABLE */
+.table-section {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th {
+    background-color: #1e293b;
+    color: white;
+    padding: 12px;
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* STATUS COLORS */
+.status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+}
+
+.pending {
+    background-color: #facc15;
+}
+
+.completed {
+    background-color: #22c55e;
+    color: white;
+}
+
+.processing {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* BUTTON */
+.view-btn {
+    background-color: #334155;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.view-btn:hover {
+    background-color: #1e293b;
+}
+
+/* FOOTER */
+footer {
+    background-color: #1e293b;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+footer a {
+    color: #cbd5f5;
+    text-decoration: none;
+}

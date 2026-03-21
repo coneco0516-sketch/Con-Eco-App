@@ -1,0 +1,175 @@
+/* RESET */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f1f5f9;
+}
+
+/* HEADER */
+header {
+    background-color: #1e293b;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* NAVBAR */
+nav {
+    background-color: #334155;
+    padding: 10px;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #e2e8f0;
+    text-decoration: none;
+}
+
+nav p {
+    text-align: center;
+    margin-top: 10px;
+}
+
+nav p a {
+    color: #94a3b8;
+    text-decoration: none;
+}
+
+/* MAIN */
+main {
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: #1e293b;
+}
+
+/* CARDS */
+.cards {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: white;
+    width: 230px;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+}
+
+.card h3 {
+    color: #334155;
+}
+
+.card p {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* FILTER */
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.filters input,
+.filters select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.btn {
+    background-color: #1e293b;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+/* TABLE */
+.table-section {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th {
+    background-color: #1e293b;
+    color: white;
+    padding: 12px;
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* STATUS */
+.status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+}
+
+.completed {
+    background-color: #22c55e;
+    color: white;
+}
+
+.pending {
+    background-color: #facc15;
+}
+
+.failed {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* BUTTON */
+.view-btn {
+    background-color: #334155;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+}
+
+.view-btn:hover {
+    background-color: #1e293b;
+}
+
+/* FOOTER */
+footer {
+    background-color: #1e293b;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+footer a {
+    color: #cbd5f5;
+    text-decoration: none;
+}

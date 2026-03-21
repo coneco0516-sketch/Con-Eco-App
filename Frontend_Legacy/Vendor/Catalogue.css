@@ -1,0 +1,186 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* BODY */
+body {
+    font-family: Arial, sans-serif;
+    background: #fff7f0;
+}
+
+/* HEADER */
+header {
+    background: linear-gradient(90deg, #ff6a00, #ff9f43);
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* NAVBAR */
+nav {
+    background: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+}
+
+nav ul li {
+    display: inline-block;
+    margin: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #ff9f43;
+}
+
+/* MAIN */
+main {
+    padding: 30px;
+}
+
+/* FORM SECTION */
+.form-section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 400px;
+    margin: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.form-section h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ff6a00;
+}
+
+form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* BUTTON */
+.add-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    background: #ff6a00;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-btn:hover {
+    background: #e55b00;
+}
+
+/* LIST SECTION */
+.list-section {
+    margin-top: 40px;
+}
+
+.list-section h2 {
+    text-align: center;
+    color: #ff6a00;
+    margin-bottom: 20px;
+}
+
+/* CARDS */
+.card-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    background: white;
+    width: 220px;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.card h3 {
+    margin-bottom: 10px;
+}
+
+.card p {
+    margin: 5px 0;
+}
+
+/* TYPE TAG */
+.type {
+    font-weight: bold;
+}
+
+.product {
+    color: green;
+}
+
+.service {
+    color: blue;
+}
+
+/* ACTION BUTTONS */
+.actions {
+    margin-top: 10px;
+}
+
+.actions button {
+    padding: 6px 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.edit {
+    background: #ff9f43;
+    color: white;
+}
+
+.delete {
+    background: red;
+    color: white;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    background: #222;
+    color: white;
+    padding: 15px;
+    margin-top: 30px;
+}
+
+footer a {
+    color: #ff9f43;
+    text-decoration: none;
+}

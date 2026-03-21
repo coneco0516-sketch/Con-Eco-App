@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UPI Payment</title>
+<link rel="stylesheet" href="UPIPayment.css">
+</head>
+
+<body>
+
+<header>
+    <h1>UPI Payment</h1>
+</header>
+
+<main class="container">
+
+    <h2>Scan & Pay</h2>
+
+    <div class="qr-box">
+        <img src="qr.png" alt="QR Code">
+        <p>Scan using any UPI App</p>
+    </div>
+
+    <p class="or">OR</p>
+
+    <input type="text" placeholder="Enter UPI ID (example@upi)">
+
+    <button onclick="payNow()">Pay Now</button>
+
+</main>
+
+<script>
+function payNow() {
+    alert("Payment Successful!");
+    window.location.href = "OrderSuccess.html";
+}
+</script>
+
+</body>
+</html>

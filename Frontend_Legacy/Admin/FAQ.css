@@ -1,0 +1,118 @@
+/* =========================
+   GLOBAL
+========================= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f5;
+}
+
+/* =========================
+   HEADER
+========================= */
+header {
+    background-color: #1f6f43;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* =========================
+   NAV
+========================= */
+nav {
+    text-align: center;
+    background-color: #2e8b57;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 2px solid white;
+    border-radius: 20px;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #2e8b57;
+}
+
+/* =========================
+   FAQ CONTAINER
+========================= */
+.faq-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+/* =========================
+   FAQ ITEMS
+========================= */
+.faq-item {
+    margin-bottom: 15px;
+}
+
+/* Questions */
+.faq-question {
+    width: 100%;
+    padding: 15px;
+    background-color: #1f6f43;
+    color: white;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.faq-question:hover {
+    background-color: #155c35;
+}
+
+/* Answers */
+.faq-answer {
+    display: none;
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 5px;
+    border-left: 4px solid #2e8b57;
+}
+
+.faq-answer p {
+    margin: 0;
+    color: #444;
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+    background-color: #1f6f43;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+footer a {
+    color: #c8f7d1;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   HR
+========================= */
+hr {
+    border: none;
+    height: 1px;
+    background-color: #ccc;
+}

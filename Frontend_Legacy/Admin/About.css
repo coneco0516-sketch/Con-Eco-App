@@ -1,0 +1,172 @@
+/* =========================
+   GLOBAL
+========================= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f5;
+}
+
+/* =========================
+   HEADER
+========================= */
+header {
+    background-color: #1f6f43;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+header h1 {
+    margin-bottom: 5px;
+}
+
+header h3 {
+    font-weight: normal;
+    font-size: 14px;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+nav {
+    background-color: #2e8b57;
+    padding: 10px 0;
+}
+
+nav ol {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0;
+}
+
+nav li {
+    display: inline;
+}
+
+nav a {
+    text-decoration: none;
+    color: white;
+    padding: 8px 16px;
+    border: 2px solid white;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #2e8b57;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+section {
+    background-color: white;
+    margin: 20px;
+    padding: 25px;
+    border-radius: 10px;
+}
+
+/* Section Headings */
+section h2 {
+    color: #1f6f43;
+    margin-bottom: 15px;
+}
+
+/* =========================
+   VIDEO SECTION
+========================= */
+video {
+    width: 100%;
+    max-width: 800px;
+    display: block;
+    margin: auto;
+    border-radius: 10px;
+}
+
+/* =========================
+   TEAM SECTION
+========================= */
+.team-member {
+    display: inline-block;
+    width: 220px;
+    text-align: center;
+    margin: 15px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.team-member:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+}
+
+.team-member img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.team-member h3 {
+    margin: 5px 0;
+    color: #1f6f43;
+}
+
+.team-member p {
+    color: #555;
+}
+
+/* =========================
+   TEXT STYLING
+========================= */
+section p {
+    color: #444;
+    line-height: 1.6;
+}
+
+/* =========================
+   LINKS
+========================= */
+a {
+    color: #2e8b57;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+    background-color: #1f6f43;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+footer a {
+    color: #c8f7d1;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   HR LINE
+========================= */
+hr {
+    border: none;
+    height: 1px;
+    background-color: #ccc;
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard</title>
+    <link rel="stylesheet" href="VendorDashboard.css">
+</head>
+<header>
+        <h1>ConEco - Vendor Dashboard</h1>
+</header>
+
+<hr>
+
+<nav>
+        <ul>
+            <li><a href="VendorDashboard.html">Dashboard</a></li>
+            <li><a href="Catalogue.html">Catalogue</a></li>
+            <li><a href="VendorOrderSummary.html">Orders Summary</a></li>
+            <li><a href="VendorAnalytics.html">Analytics</a></li>
+            <li><a href="Earnings.html">Earnings</a></li>
+            <li><a href="VendorProfile.html">My Profile</a></li>
+            <li><a href="javascript:void(0)" onclick="logout()">Logout</a></li>
+        </ul>
+</nav>
+
+<hr>
+
+<body>
+    <main>
+        <h2>Vendor Dashboard</h2>
+        <p>Welcome to your vendor dashboard!</p>
+        <div id="vendor-stats" style="display:flex; gap:20px; flex-wrap:wrap; margin-top:20px;">
+        </div>
+    </main>
+    <script src="../shared/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fetch real stats using the auth helper (handles Bearer token for cross-origin)
+            authFetch('http://localhost:8000/api/vendor/dashboard')
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'not_logged_in') {
+                    document.getElementById('vendor-stats').innerHTML = '<p style="color:red; font-weight:bold;">Please log in to view your dashboard.</p>';
+                } else {
+                    let s = data.stats;
+                    document.getElementById('vendor-stats').innerHTML = `
+                        <div style="background:#f4f4f4; padding:20px; border-radius:8px; flex:1; min-width:200px; text-align:center;">
+                            <h3>Platform Status</h3>
+                            <p style="font-size:1.5rem; font-weight:bold; color:${s.verification_status==='Verified'?'green':'orange'}">${s.verification_status}</p>
+                        </div>
+                        <div style="background:#f4f4f4; padding:20px; border-radius:8px; flex:1; min-width:200px; text-align:center;">
+                            <h3>Catalogue</h3>
+                            <p style="font-size:1.5rem; font-weight:bold;">${s.catalogue_size} Items</p>
+                        </div>
+                        <div style="background:#f4f4f4; padding:20px; border-radius:8px; flex:1; min-width:200px; text-align:center;">
+                            <h3>Pending Orders</h3>
+                            <p style="font-size:1.5rem; font-weight:bold; color:#0056b3;">${s.pending_orders}</p>
+                        </div>
+                        <div style="background:#f4f4f4; padding:20px; border-radius:8px; flex:1; min-width:200px; text-align:center;">
+                            <h3>Total Earnings</h3>
+                            <p style="font-size:1.5rem; font-weight:bold; color:green;">₹${s.total_earnings}</p>
+                        </div>
+                    `;
+                }
+            });
+        });
+    </script>
+
+</body>
+
+<hr>
+
+<footer>
+        <p>&copy; 2026 ConEco. All rights reserved.</p>
+        <p><a href="FAQ.html">FAQ</a> | <a href="Terms.html">Terms</a> | <a href="Privacy.html">Privacy</a></p>
+</footer>
+
+</html>

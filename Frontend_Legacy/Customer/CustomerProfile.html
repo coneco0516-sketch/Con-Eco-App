@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Profile</title>
+    <link rel="stylesheet" href="CustomerProfile.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>Customer Profile</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="CustomerDashboard.html">Dashboard</a></li>
+        <li><a href="Products.html">Products</a></li>
+        <li><a href="Services.html">Services</a></li>
+        <li><a href="Cart.html">Cart</a></li>
+        <li><a href="MyOrders.html">My Orders</a></li>
+        <li><a href="MyBookedServices.html">My Services</a></li>
+    </ul>
+
+    <p>
+        <a href="CustomerProfile.html">My Profile</a> | 
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </p>
+</nav>
+
+<hr>
+
+<!-- MAIN -->
+<main>
+
+    <section class="profile-card">
+
+        <h2>My Profile</h2>
+
+        <form>
+
+            <!-- BASIC DETAILS -->
+            <label>Full Name:</label>
+            <input type="text" value="Hriday Demashetti">
+
+            <label>Email:</label>
+            <input type="email" value="demashettihriday@gmail.com" readonly>
+
+            <label>Phone:</label>
+            <input type="tel" value="9876543210">
+
+            <!-- LOCATION -->
+            <label>City:</label>
+            <input type="text" value="Belgaum">
+
+            <label>State:</label>
+            <input type="text" value="Karnataka">
+
+            <!-- PASSWORD -->
+            <label>New Password:</label>
+            <input type="password" placeholder="Enter new password">
+
+            <label>Confirm Password:</label>
+            <input type="password" placeholder="Confirm password">
+
+            <!-- BUTTONS -->
+            <div class="btn-group">
+                <button type="submit" class="save-btn">Save Changes</button>
+                <button type="reset" class="cancel-btn">Cancel</button>
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> | 
+        <a href="Terms.html">Terms</a> | 
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<script src="../shared/auth.js"></script>
+</body>
+</html>
+

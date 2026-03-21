@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard</title>
+    <link rel="stylesheet" href="CustomerDashboard.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>Customer Dashboard</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="CustomerDashboard.html">Home</a></li>
+        <li><a href="Products.html">Products</a></li>
+        <li><a href="Services.html">Services</a></li>
+        <li><a href="Cart.html">Cart</a></li>
+        <li><a href="MyOrders.html">My Orders</a></li>
+        <li><a href="MyBookedServices.html">My Booked Services</a></li>
+    </ul>
+
+    <p>
+        <a href="CustomerProfile.html">My Profile</a> | 
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </p>
+</nav>
+
+<hr>
+
+<!-- MAIN CONTENT -->
+<main>
+
+    <!-- WELCOME -->
+    <section>
+        <h2>Welcome, Customer!</h2>
+        <p>This is your dashboard where you can manage orders, services, and profile.</p>
+    </section>
+    
+    <!-- PRODUCTS SLIDER -->
+    <section>
+        <h2>Top Products</h2>
+
+        <div class="slideshow-container">
+
+            <div class="slide productSlide">
+                <img src="img1.jpg" alt="Product 1">
+                <div class="text">Cement - ₹350</div>
+            </div>
+
+            <div class="slide productSlide">
+                <img src="img2.jpg" alt="Product 2">
+                <div class="text">Steel - ₹600</div>
+            </div>
+
+            <a class="prev" onclick="changeSlide(-1, 'product')">&#10094;</a>
+            <a class="next" onclick="changeSlide(1, 'product')">&#10095;</a>
+
+        </div>
+    </section>
+
+    <!-- SERVICES SLIDER -->
+    <section>
+        <h2>Top Services</h2>
+
+        <div class="slideshow-container">
+
+            <div class="slide serviceSlide">
+                <img src="img1.jpg" alt="Service 1">
+                <div class="text">Plumbing Service</div>
+            </div>
+
+            <div class="slide serviceSlide">
+                <img src="img2.jpg" alt="Service 2">
+                <div class="text">Electrical Work</div>
+            </div>
+
+            <a class="prev" onclick="changeSlide(-1, 'service')">&#10094;</a>
+            <a class="next" onclick="changeSlide(1, 'service')">&#10095;</a>
+
+        </div>
+    </section>
+
+</main>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> | 
+        <a href="Terms.html">Terms</a> | 
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<!-- JAVASCRIPT -->
+<script src="../shared/auth.js"></script>
+<script>
+let productIndex = 0;
+let serviceIndex = 0;
+
+function showSlides(type) {
+    let slides = document.getElementsByClassName(type === 'product' ? 'productSlide' : 'serviceSlide');
+    let index = type === 'product' ? productIndex : serviceIndex;
+
+    for (let i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+    }
+
+    slides[index].style.display = "block";
+}
+
+function changeSlide(n, type) {
+    if (type === 'product') {
+        let slides = document.getElementsByClassName('productSlide');
+        productIndex = (productIndex + n + slides.length) % slides.length;
+        showSlides('product');
+    } else {
+        let slides = document.getElementsByClassName('serviceSlide');
+        serviceIndex = (serviceIndex + n + slides.length) % slides.length;
+        showSlides('service');
+    }
+}
+
+/* Initialize */
+showSlides('product');
+showSlides('service');
+</script>
+
+</body>
+</html>

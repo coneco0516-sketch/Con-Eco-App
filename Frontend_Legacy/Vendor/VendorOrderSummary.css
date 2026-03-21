@@ -1,0 +1,163 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* BODY */
+body {
+    font-family: Arial, sans-serif;
+    background: #fff7f0;
+}
+
+/* HEADER */
+header {
+    background: linear-gradient(90deg, #ff6a00, #ff9f43);
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* NAVBAR */
+nav {
+    background: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+}
+
+nav ul li {
+    display: inline-block;
+    margin: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #ff9f43;
+}
+
+/* MAIN */
+main {
+    padding: 30px;
+}
+
+/* SUMMARY CARDS */
+.summary {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    width: 200px;
+    padding: 20px;
+    margin: 10px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+    color: #ff6a00;
+}
+
+.card p {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* ORDER TABLE */
+.orders {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.orders h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ff6a00;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background: #ff6a00;
+    color: white;
+    padding: 10px;
+}
+
+table td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+/* STATUS */
+.pending {
+    color: orange;
+    font-weight: bold;
+}
+
+.success {
+    color: green;
+    font-weight: bold;
+}
+
+.cancel {
+    color: red;
+    font-weight: bold;
+}
+
+/* BUTTONS */
+button {
+    padding: 6px 10px;
+    margin: 3px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.accept {
+    background: green;
+    color: white;
+}
+
+.reject {
+    background: red;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    background: #222;
+    color: white;
+    padding: 15px;
+    margin-top: 30px;
+}
+
+footer a {
+    color: #ff9f43;
+    text-decoration: none;
+}

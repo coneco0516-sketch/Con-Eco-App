@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services</title>
+    <link rel="stylesheet" href="Services.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>Available Services</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="CustomerDashboard.html">Dashboard</a></li>
+        <li><a href="Products.html">Products</a></li>
+        <li><a href="Services.html">Services</a></li>
+        <li><a href="Cart.html">Cart</a></li>
+        <li><a href="MyBookedServices.html">My Booked Services</a></li>
+    </ul>
+
+    <p>
+        <a href="CustomerProfile.html">My Profile</a> |
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </p>
+</nav>
+
+<hr>
+
+<!-- MAIN -->
+<main>
+
+    <section class="services-container" id="services-grid">
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadServices();
+        });
+
+        function loadServices() {
+            fetch('http://localhost:8000/api/customer/services', {credentials: 'include'})
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'not_logged_in') {
+                    document.getElementById('services-grid').innerHTML = '<p>Please log in to view services.</p>';
+                    return;
+                }
+                let html = '';
+                data.items.forEach(svc => {
+                    html += `
+                    <div class="service-card">
+                        <img src="../../assets/mechanic.jpg" alt="${svc.name}">
+                        <div class="card-content">
+                            <h3>${svc.name}</h3>
+                            <p>${svc.description}</p>
+                            <p class="vendor">Consultant: ${svc.vendor_name}</p>
+                            <p class="price">₹${svc.price}</p>
+                            <button class="btn" onclick="addToCart(${svc.item_id})">Book Service</button>
+                        </div>
+                    </div>
+                    `;
+                });
+                document.getElementById('services-grid').innerHTML = html;
+            });
+        }
+
+        function addToCart(serviceId) {
+            fetch('http://localhost:8000/api/customer/cart', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({item_type: 'Service', item_id: serviceId, quantity: 1})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert("Service successfully added to your cart!");
+                } else if (data.status === 'not_logged_in') {
+                    alert("Please log in first to book services.");
+                    window.location.href = '../Main/Login.html';
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => alert("You need to log in to perform this action."));
+        }
+    </script>
+
+</main>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> |
+        <a href="Terms.html">Terms</a> |
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<script src="../shared/auth.js"></script>
+</body>
+</html>
+

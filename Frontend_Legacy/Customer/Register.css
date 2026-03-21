@@ -1,0 +1,181 @@
+/* =========================
+   GLOBAL
+========================= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0fdf4;
+}
+
+/* =========================
+   HEADER
+========================= */
+header {
+    background-color: #166534;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+header h1 {
+    margin: 5px;
+}
+
+header h3 {
+    margin: 5px;
+    font-weight: normal;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+nav {
+    background-color: #2e8b57;
+    padding: 10px 0;
+}
+
+nav ol {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0;
+}
+
+nav a {
+    text-decoration: none;
+    color: white;
+    padding: 8px 16px;
+    border: 2px solid white;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #2e8b57;
+}
+
+/* =========================
+   FORM SECTION
+========================= */
+section {
+    max-width: 500px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+}
+
+section h2 {
+    text-align: center;
+    color: #166534;
+}
+
+/* =========================
+   FORM INPUTS
+========================= */
+form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+form input,
+form select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+/* Focus Effect */
+form input:focus,
+form select:focus {
+    border-color: #22c55e;
+    outline: none;
+}
+
+/* =========================
+   ROLE SECTIONS
+========================= */
+.hidden {
+    display: none;
+}
+
+#vendorSection,
+#customerSection {
+    background-color: #ecfdf5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+/* =========================
+   BUTTON
+========================= */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #15803d;
+}
+
+/* =========================
+   LOGIN LINK
+========================= */
+section p {
+    text-align: center;
+    margin-top: 15px;
+}
+
+section a {
+    color: #16a34a;
+    text-decoration: none;
+}
+
+section a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+    background-color: #166534;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+footer a {
+    color: #bbf7d0;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   HR LINE
+========================= */
+hr {
+    border: none;
+    height: 1px;
+    background-color: #ddd;
+}

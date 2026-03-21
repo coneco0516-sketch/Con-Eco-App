@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Profile</title>
+    <link rel="stylesheet" href="VendorProfile.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>ConEco - Vendor Profile</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="VendorDashboard.html">Dashboard</a></li>
+        <li><a href="Catalogue.html">Catalogue</a></li>
+        <li><a href="VendorOrderSummary.html">Orders</a></li>
+        <li><a href="VendorAnalytics.html">Analytics</a></li>
+        <li><a href="Earnings.html">Earnings</a></li>
+    </ul>
+
+    <p>
+        <a href="VendorProfile.html">My Profile</a> | 
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </p>
+</nav>
+
+<hr>
+
+<!-- MAIN -->
+<main>
+
+    <section class="profile-card">
+
+        <h2>Business Profile</h2>
+
+        <form>
+
+            <!-- BASIC DETAILS -->
+            <h3>Basic Information</h3>
+
+            <label for="name">Owner Name:</label>
+            <input type="text" id="name" name="name" value="Vendor Name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="vendor@email.com" readonly>
+
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" value="9876543210" required>
+
+            <!-- COMPANY DETAILS -->
+            <h3>Company Details</h3>
+
+            <p class="qc-status verified">✔ Verified Vendor</p>
+
+            <label for="company">Company Name:</label>
+            <input type="text" id="company" name="company" value="ABC Constructions" required>
+
+            <label for="gst">GST Number:</label>
+            <input type="text" id="gst" name="gst" value="29ABCDE1234F1Z5" required>
+
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address" value="123 Main Road" required>
+
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" value="Belgaum" required>
+
+            <label for="state">State:</label>
+            <input type="text" id="state" name="state" value="Karnataka" required>
+
+            <!-- PASSWORD -->
+            <h3>Security</h3>
+
+            <label for="password">New Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter new password">
+
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password">
+
+            <p id="error"></p>
+
+            <!-- BUTTONS -->
+            <div class="btn-group">
+                <button type="submit" class="save-btn">Save Changes</button>
+                <button type="reset" class="cancel-btn">Cancel</button>
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> | 
+        <a href="Terms.html">Terms</a> | 
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<script src="../shared/auth.js"></script>
+</body>
+</html>
+

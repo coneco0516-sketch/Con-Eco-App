@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Orders</title>
+    <link rel="stylesheet" href="VendorOrderSummary.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>Vendor Order Summary</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="VendorDashboard.html">Dashboard</a></li>
+        <li><a href="Catalogue.html">Catalogue</a></li>
+        <li><a href="VendorOrderSummary.html">Orders</a></li>
+        <li><a href="VendorAnalytics.html">Analytics</a></li>
+        <li><a href="Earnings.html">Earnings</a></li>
+    </ul>
+
+    <p>
+        <a href="VendorProfile.html">My Profile</a> | 
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </p>
+</nav>
+
+<hr>
+
+<!-- MAIN -->
+<main>
+
+    <!-- ORDER SUMMARY CARDS -->
+    <section class="summary" id="orders-summary">
+    </section>
+
+    <!-- ORDER TABLE -->
+    <section class="orders">
+
+        <h2>Order Details</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Type</th>
+                    <th>Amount (₹)</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="orders-body">
+            </tbody>
+
+        </table>
+
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders();
+        });
+
+        function loadOrders() {
+            fetch('http://localhost:8000/api/vendor/orders', {credentials: 'include'})
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'not_logged_in') {
+                    document.getElementById('orders-summary').innerHTML = '<p>Please log in.</p>';
+                    return;
+                }
+                
+                let s = data.stats;
+                document.getElementById('orders-summary').innerHTML = `
+                    <div class="card">
+                        <h3>Total Orders</h3>
+                        <p>${s.total}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Pending Orders</h3>
+                        <p>${s.pending}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Completed Orders</h3>
+                        <p>${s.completed}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Cancelled Orders</h3>
+                        <p>${s.cancelled}</p>
+                    </div>
+                `;
+                
+                let html = '';
+                data.orders.forEach(o => {
+                    let cls = '';
+                    if(o.status === 'Pending') cls = 'pending';
+                    else if(o.status === 'Completed') cls = 'success';
+                    else if(o.status === 'Cancelled') cls = 'cancel';
+                    
+                    let actions = '-';
+                    if(o.status === 'Pending') {
+                        actions = `
+                            <button class="accept" onclick="updateStatus(${o.order_id}, 'Completed')">Complete</button>
+                            <button class="reject" onclick="updateStatus(${o.order_id}, 'Cancelled')">Cancel</button>
+                        `;
+                    }
+
+                    html += `
+                    <tr>
+                        <td>#ORD${o.order_id}</td>
+                        <td>${o.customer_name}</td>
+                        <td>${o.order_type}</td>
+                        <td>${o.amount}</td>
+                        <td class="${cls}">${o.status}</td>
+                        <td>${actions}</td>
+                    </tr>
+                    `;
+                });
+                document.getElementById('orders-body').innerHTML = html;
+            });
+        }
+
+        function updateStatus(id, status) {
+            fetch('http://localhost:8000/api/vendor/orders/update_status', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({order_id: id, status: status})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') loadOrders();
+            });
+        }
+    </script>
+
+</main>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> | 
+        <a href="Terms.html">Terms</a> | 
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<script src="../shared/auth.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,185 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* BODY */
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(to right, #fff7f0, #fffaf5);
+    color: #333;
+}
+
+/* HEADER */
+header {
+    padding: 15px 0;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* BACK BUTTON */
+.back {
+    position: absolute;
+    left: 30px;
+    font-size: 16px;
+    color: #ff6a00;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.back:hover {
+    color: #ff9f43;
+}
+
+/* TITLE */
+.title h1 {
+    font-size: 26px;
+    color: #ff6a00;
+    letter-spacing: 1px;
+}
+
+.title p {
+    font-size: 14px;
+    color: #777;
+}
+
+/* MAIN CONTAINER */
+.container {
+    display: flex;
+    gap: 25px;
+    padding: 30px;
+}
+
+/* SECTIONS */
+.left, .center, .right {
+    flex: 1;
+}
+
+/* CARD */
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 20px;
+    text-align: center;
+    border: 2px solid transparent;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+/* HOVER EFFECT */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* BOX (Chart Placeholder) */
+.box {
+    height: 140px;
+    margin-top: 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* FILTER */
+.filter {
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: none;
+    background: #ff6a00;
+    color: white;
+    cursor: pointer;
+}
+
+/* ===== COLOR THEMES ===== */
+
+/* RED - ORDERS */
+.orders {
+    border-color: #ff4d4d;
+}
+.orders h3 {
+    color: #ff4d4d;
+}
+.orders .box {
+    border: 2px solid #ff4d4d;
+    background: #ffe6e6;
+}
+
+/* PURPLE - FORECAST */
+.forecast {
+    border-color: #9b59b6;
+}
+.forecast h4 {
+    color: #9b59b6;
+}
+.forecast .box {
+    border: 2px solid #9b59b6;
+    background: #f3e6ff;
+}
+
+/* BLUE - RATING */
+.rating {
+    border-color: #3498db;
+}
+.rating h3 {
+    color: #3498db;
+}
+.rating-box {
+    border: 2px solid #3498db;
+    padding: 30px;
+    margin-top: 20px;
+    border-radius: 10px;
+    background: #eaf6ff;
+    font-size: 18px;
+}
+
+/* GREEN - PERFORMANCE */
+.performance {
+    border-color: #2ecc71;
+}
+.performance h3 {
+    color: #2ecc71;
+}
+.performance .box {
+    border: 2px solid #2ecc71;
+    background: #eafff2;
+    height: 180px;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #222;
+    color: white;
+    margin-top: 20px;
+}
+
+footer a {
+    color: #ff9f43;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+    }
+}

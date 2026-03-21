@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <link rel="stylesheet" href="Products.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>Available Products</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="CustomerDashboard.html">Dashboard</a></li>
+        <li><a href="Products.html">Products</a></li>
+        <li><a href="Services.html">Services</a></li>
+        <li><a href="Cart.html">Cart</a></li>
+        <li><a href="MyOrders.html">My Orders</a></li>
+    </ul>
+
+    <p>
+        <a href="CustomerProfile.html">My Profile</a> |
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </p>
+</nav>
+
+<hr>
+
+<!-- SEARCH & FILTER -->
+<section class="filters">
+    <input type="text" placeholder="Search products...">
+
+    <select>
+        <option>All Categories</option>
+        <option>Cement</option>
+        <option>Steel</option>
+        <option>Bricks</option>
+        <option>Sand</option>
+    </select>
+
+    <select>
+        <option>Sort By</option>
+        <option>Price Low to High</option>
+        <option>Price High to Low</option>
+    </select>
+</section>
+
+<!-- PRODUCT GRID -->
+<main class="product-container" id="products-grid">
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', loadProducts);
+
+    function loadProducts() {
+        fetch('http://localhost:8000/api/customer/products', {credentials: 'include'})
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'not_logged_in') {
+                document.getElementById('products-grid').innerHTML = '<p>Please log in to view products.</p>';
+                return;
+            }
+            let html = '';
+            data.items.forEach(prod => {
+                html += `
+                <div class="product-card">
+                    <img src="../../assets/img1.jpg" alt="${prod.name}">
+                    <div class="card-content">
+                        <h3>${prod.name}</h3>
+                        <p>${prod.description}</p>
+                        <p class="vendor">Vendor: ${prod.vendor_name}</p>
+                        <p class="price">₹${prod.price}</p>
+                        <button class="btn" onclick="addToCart(${prod.item_id})">Add to Cart</button>
+                    </div>
+                </div>
+                `;
+            });
+            document.getElementById('products-grid').innerHTML = html;
+        });
+    }
+
+    function addToCart(productId) {
+        fetch('http://localhost:8000/api/customer/cart', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({item_type: 'Product', item_id: productId, quantity: 1})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                alert("Successfully added to cart!");
+            } else if (data.status === 'not_logged_in') {
+                alert("Please log in first to add items to your cart.");
+                window.location.href = '../Main/Login.html';
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(err => alert("You need to log in to perform this action."));
+    }
+</script>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> |
+        <a href="Terms.html">Terms</a> |
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<script src="../shared/auth.js"></script>
+</body>
+</html>
+

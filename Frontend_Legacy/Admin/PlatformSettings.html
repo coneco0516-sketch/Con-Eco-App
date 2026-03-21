@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Settings</title>
+    <link rel="stylesheet" href="PlatformSettings.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>ConEco - Platform Settings</h1>
+</header>
+
+<hr>
+
+<!-- NAVBAR -->
+<nav>
+    <ul>
+        <li><a href="AdminDashboard.html">Dashboard</a></li>
+        <li><a href="VendorVerification.html">Vendor Verification</a></li>
+        <li><a href="CustomerVerification.html">Customer Verification</a></li>
+        <li><a href="AdminOrderSummary.html">Orders</a></li>
+        <li><a href="AdminAnalytics.html">Analytics</a></li>
+        <li><a href="Payments.html">Payments</a></li>
+    </ul>
+
+    <p>
+        <a href="AdminProfile.html">My Profile</a> | 
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </p>
+</nav>
+
+<hr>
+
+<!-- MAIN -->
+<main>
+
+    <h2>Platform Control Center</h2>
+
+    <!-- SECTION 1 -->
+    <section class="settings-card">
+        <h3>🔐 User & Vendor Control</h3>
+
+        <label>Enable Vendor Registration</label>
+        <input type="checkbox" checked>
+
+        <label>Enable Customer Registration</label>
+        <input type="checkbox" checked>
+
+        <label>Auto Vendor Approval</label>
+        <input type="checkbox">
+    </section>
+
+    <!-- SECTION 2 -->
+    <section class="settings-card">
+        <h3>💰 Commission Settings</h3>
+
+        <label>Service Commission (%)</label>
+        <input type="number" value="10">
+
+        <label>Product Commission (%)</label>
+        <input type="number" value="5">
+    </section>
+
+    <!-- SECTION 3 -->
+    <section class="settings-card">
+        <h3>📦 Order Settings</h3>
+
+        <label>Allow COD (Cash on Delivery)</label>
+        <input type="checkbox" checked>
+
+        <label>Enable Order Cancellation</label>
+        <input type="checkbox" checked>
+
+        <label>Auto Order Confirmation</label>
+        <input type="checkbox">
+    </section>
+
+    <!-- SECTION 4 -->
+    <section class="settings-card">
+        <h3>🔔 Notifications</h3>
+
+        <label>Email Notifications</label>
+        <input type="checkbox" checked>
+
+        <label>SMS Notifications</label>
+        <input type="checkbox">
+
+        <label>Push Notifications</label>
+        <input type="checkbox" checked>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section class="settings-card">
+        <h3>🛡️ Security Settings</h3>
+
+        <label>Enable OTP Login</label>
+        <input type="checkbox" checked>
+
+        <label>Enable 2FA (Two-Factor Auth)</label>
+        <input type="checkbox">
+
+        <label>Session Timeout (minutes)</label>
+        <input type="number" value="30">
+    </section>
+
+    <!-- SAVE BUTTON -->
+    <div class="save-section">
+        <button class="save-btn">Save Changes</button>
+    </div>
+
+</main>
+
+<hr>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 ConEco. All rights reserved.</p>
+    <p>
+        <a href="FAQ.html">FAQ</a> |
+        <a href="Terms.html">Terms</a> |
+        <a href="Privacy.html">Privacy</a>
+    </p>
+</footer>
+
+<script src="../shared/auth.js"></script>
+</body>
+</html>
+
