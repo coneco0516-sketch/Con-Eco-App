@@ -26,8 +26,8 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      {!isLoggedIn && <Link to="/" className="nav-brand">ConEco System</Link>}
-      {isLoggedIn && <span className="nav-brand">ConEco System</span>}
+      {!isLoggedIn && <Link to="/" className="nav-brand">ConEco</Link>}
+      {isLoggedIn && <span className="nav-brand">ConEco</span>}
       <div className="nav-links">
         {!isLoggedIn && (
           <>
