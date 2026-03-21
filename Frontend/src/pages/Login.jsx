@@ -30,6 +30,10 @@ function Login() {
         if (data.role === 'Admin') navigate('/admin');
         else if (data.role === 'Vendor') navigate('/vendor');
         else navigate('/customer');
+      } else if (data.pending_verification) {
+        // Email verification required
+        localStorage.setItem('pending_email', data.email);
+        navigate('/verify-email-sent', { state: { email: data.email } });
       } else {
         setError(data.message || 'Login failed.');
         setLoading(false);

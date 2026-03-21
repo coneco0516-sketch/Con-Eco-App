@@ -50,8 +50,10 @@ function Register() {
       const data = await resp.json();
       
       if (data.status === 'success') {
-        alert('Registration successful! Please login.');
-        navigate('/login');
+        // Store registration info for verification page
+        localStorage.setItem('pending_email', formData.email);
+        localStorage.setItem('pending_email_verification', 'true');
+        navigate('/verify-email-sent', { state: { email: formData.email } });
       } else {
         setError(data.message);
       }

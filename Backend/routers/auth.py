@@ -79,6 +79,19 @@ def login(request: LoginRequest, response: Response, http_request: Request):
         # Verify the raw login password string against the stored bcrypt hash:
         if not user or not verify_password(request.password, user['password_hash']):
             return {"status": "error", "message": "Invalid credentials or User not found."}
+        
+        # Check if email is verified (if email_verified column exists)
+        try:
+            if hasattr(user, 'email_verified') or 'email_verified' in user:
+                if user.get('email_verified') == False:
+                    return {
+                        "status": "error", 
+                        "message": "Please verify your email before logging in.",
+                        "pending_verification": True,
+                        "email": user['email']
+                    }
+        except:
+            pass  # If column doesn't exist, skip check
             
         token = create_access_token({"user_id": user['user_id'], "role": user['role']})
         response.set_cookie(key="session_token", value=token, httponly=True, samesite="Lax")
