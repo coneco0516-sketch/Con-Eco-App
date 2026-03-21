@@ -30,7 +30,7 @@ Value: SG.xxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #### Variable 2: FROM_EMAIL
 ```
 Key: FROM_EMAIL
-Value: noreply@coneco.com
+Value: noreply@coneco.sendgrid.net
 ```
 
 #### Variable 3: APP_URL
@@ -58,7 +58,7 @@ Value: https://con-eco-app-production.up.railway.app
 - [ ] Select con-eco-app-production project
 - [ ] Click Variables tab
 - [ ] Add: SENDGRID_API_KEY = SG.xxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-- [ ] Add: FROM_EMAIL = noreply@coneco.com
+- [ ] Add: FROM_EMAIL = noreply@coneco.sendgrid.net
 - [ ] Add: APP_URL = https://con-eco-app-production.up.railway.app
 - [ ] Wait for deployment (2-3 min)
 - [ ] Test registration at production URL

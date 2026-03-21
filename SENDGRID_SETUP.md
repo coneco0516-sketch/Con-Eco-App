@@ -45,7 +45,7 @@ In SendGrid Dashboard:
 1. Click "Sender Authentication" (left sidebar)
 2. Click "Verify a Single Sender"
 3. Fill in:
-   - From Email: noreply@coneco.com
+   - From Email: noreply@coneco.sendgrid.net
    - From Name: ConEco
    - Reply-to Email: support@coneco.com
 4. Click "Create"
@@ -81,7 +81,7 @@ SENDGRID_API_KEY="SG.xxxx..."
 **Check 2: Is sender email verified?**
 ```
 SendGrid Dashboard → Sender Authentication
-Should show: ✓ Verified (noreply@coneco.com)
+Should show: ✓ Verified (noreply@coneco.sendgrid.net)
 If not → follow Step 4 above
 ```
 
@@ -146,7 +146,7 @@ When user registers with email `test@gmail.com`:
 
 ### FROM_EMAIL
 - **What**: The email address shown as sender
-- **Default**: noreply@coneco.com
+- **Default**: noreply@coneco.sendgrid.net
 - **Must be**: Verified in SendGrid (Step 4 above)
 - **Change if needed**: Backend/.env line with `FROM_EMAIL=`
 

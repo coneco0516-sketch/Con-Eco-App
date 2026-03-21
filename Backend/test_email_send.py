@@ -23,7 +23,7 @@ print("=" * 70)
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 
 if not SENDGRID_API_KEY or SENDGRID_API_KEY == "SG.test-key-placeholder":
-    print("\n✗ ERROR: SENDGRID_API_KEY not configured!")
+    print("\nX ERROR: SENDGRID_API_KEY not configured!")
     print("\nFIX:")
     print("  1. Edit Backend/.env")
     print("  2. Find: SENDGRID_API_KEY=\"SG.test-key-placeholder\"")
@@ -36,27 +36,27 @@ print("\nWARNING: This will send a real email!")
 test_email = input("\nEnter test email address: ").strip()
 
 if not test_email or "@" not in test_email:
-    print("✗ Invalid email address")
+    print("X Invalid email address")
     sys.exit(1)
 
-print(f"\n📧 Sending test email to: {test_email}")
+print(f"\nSending test email to: {test_email}")
 
 # Create test email
 html_content = """
 <html>
     <body style="font-family: Arial, sans-serif; padding: 20px;">
-        <h2 style="color: #2ecc71;">🎉 Test Email Success!</h2>
+        <h2 style="color: #2ecc71;">Test Email Success!</h2>
         <p>Hello,</p>
-        <p>If you're reading this, SendGrid email sending is working! ✓</p>
+        <p>If you're reading this, SendGrid email sending is working!</p>
         <div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 5px;">
             <p><strong>Test Details:</strong></p>
-            <p>✓ API key is valid</p>
-            <p>✓ Sender email is verified</p>
-            <p>✓ SendGrid is responding</p>
+            <p>[OK] API key is valid</p>
+            <p>[OK] Sender email is verified</p>
+            <p>[OK] SendGrid is responding</p>
         </div>
         <p>You can now proceed with the full email verification setup!</p>
         <p>
-            Go to <code>http://localhost:8000/register</code> and create a test account.
+            Go to http://localhost:8000/register and create a test account.
         </p>
     </body>
 </html>
@@ -70,14 +70,14 @@ success = send_email(
 )
 
 if success:
-    print(f"\n✓ SUCCESS! Test email sent to {test_email}")
+    print(f"\nSUCCESS! Test email sent to {test_email}")
     print("\nNext steps:")
     print("  1. Check your email inbox (and spam folder)")
     print("  2. If you received it, SendGrid is working!")
     print("  3. Go to http://localhost:8000/register")
     print("  4. Create a test account to verify full flow")
 else:
-    print(f"\n✗ FAILED! Could not send email to {test_email}")
+    print(f"\nFAILED! Could not send email to {test_email}")
     print("\nTroubleshooting:")
     print("  1. Check Backend/.env for SENDGRID_API_KEY")
     print("  2. Verify API key format: SG.xxxxxxxxxxxxx")
