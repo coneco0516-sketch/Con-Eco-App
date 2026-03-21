@@ -52,6 +52,16 @@ app.include_router(customer.router,prefix="/api/customer",tags=["customer"])
 app.include_router(vendor.router,  prefix="/api/vendor",  tags=["vendor"])
 app.include_router(payment.router, prefix="/api/payment", tags=["payment"])
 
+@app.get("/api/health")
+def api_health():
+    try:
+        from database import get_db_connection
+        conn = get_db_connection()
+        conn.close()
+        return {"db": "connected"}
+    except Exception as e:
+        return {"db": "failed", "error": str(e)}
+
 frontend_dir = Path(__file__).resolve().parent.parent / "Frontend" / "dist"
 
 # Mount specifically the assets folder from Vite's build

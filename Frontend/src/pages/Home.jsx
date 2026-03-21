@@ -11,7 +11,7 @@ function Home() {
         Connects Customers to get their required Construction Materials & Services with the Vendors and Service Providers
       </p>
       <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-        <Link to="/login" className="btn" style={{ fontSize: '1.2rem', padding: '0.8rem 2rem' }}>Get Started</Link>
+        <Link to="/register" className="btn" style={{ fontSize: '1.2rem', padding: '0.8rem 2rem' }}>Get Started</Link>
       </div>
     </div>
   );
