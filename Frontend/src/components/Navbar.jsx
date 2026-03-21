@@ -21,31 +21,19 @@ function Navbar() {
     <nav className="navbar">
       <Link to="/" className="nav-brand">ConEco System</Link>
       <div className="nav-links">
-        <Link to="/" className="nav-item">Home</Link>
-        <Link to="/about" className="nav-item">About Us</Link>
-        <Link to="/faq" className="nav-item">FAQ</Link>
-        <Link to="/contact" className="nav-item">Contact</Link>
-        <Link to="/privacy" className="nav-item">Privacy Policy</Link>
-        <Link to="/terms" className="nav-item">Terms of Service</Link>
-
         {!isLoggedIn && (
           <>
+            <Link to="/" className="nav-item">Home</Link>
+            <Link to="/about" className="nav-item">About Us</Link>
+            <Link to="/faq" className="nav-item">FAQ</Link>
+            <Link to="/contact" className="nav-item">Contact</Link>
+            <Link to="/privacy" className="nav-item">Privacy Policy</Link>
+            <Link to="/terms" className="nav-item">Terms of Service</Link>
             <Link to="/register" className="nav-item">Register</Link>
             <Link to="/login" className="nav-item">Login</Link>
           </>
         )}
 
-        {isLoggedIn && (
-          <Link 
-            to={
-              localStorage.getItem('user_role') === 'Admin' ? '/admin' :
-              localStorage.getItem('user_role') === 'Vendor' ? '/vendor' : '/customer'
-            } 
-            className="nav-item"
-          >
-            Dashboard
-          </Link>
-        )}
         {isLoggedIn && <button onClick={handleLogout} className="btn danger">Logout</button>}
       </div>
     </nav>
