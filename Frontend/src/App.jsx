@@ -16,6 +16,8 @@ import FAQ from './pages/FAQ';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import ForgotPassword from './pages/ForgotPassword';
+import VerifyEmail from './pages/VerifyEmail';
+import NotificationSettings from './pages/NotificationSettings';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import CustomerDashboard from './pages/CustomerDashboard';
@@ -61,6 +63,8 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/notifications" element={<NotificationSettings />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />

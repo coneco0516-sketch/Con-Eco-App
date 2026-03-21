@@ -3,6 +3,7 @@ from database import get_db_connection
 from routers.auth import get_current_user_from_cookie
 from pydantic import BaseModel
 from typing import Optional
+from email_service import send_qc_status_notification, get_notification_preferences
 
 router = APIRouter()
 
@@ -113,14 +114,42 @@ def update_vendor_qc(data: VendorQCUpdate, user = Depends(check_admin)):
     """Update vendor QC verification status and score"""
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
         # Validate QC score is between 0-100
         qc_score = max(0, min(100, data.qc_score))
+        
+        # Get vendor details before updating
+        cursor.execute("""
+            SELECT u.email, v.company_name, u.user_id 
+            FROM Vendors v 
+            JOIN Users u ON v.vendor_id = u.user_id 
+            WHERE v.vendor_id = %s
+        """, (data.vendor_id,))
+        
+        vendor = cursor.fetchone()
+        
+        # Update QC status
         cursor.execute(
             "UPDATE Vendors SET verification_status=%s, qc_score=%s WHERE vendor_id=%s", 
             (data.verification_status, qc_score, data.vendor_id)
         )
         conn.commit()
+        
+        # Send notification email to vendor
+        if vendor:
+            try:
+                prefs = get_notification_preferences(vendor['user_id'])
+                if prefs.get('qc_status_alerts', True):
+                    send_qc_status_notification(
+                        vendor['email'],
+                        vendor['company_name'],
+                        data.verification_status,
+                        qc_score=qc_score,
+                        feedback=getattr(data, 'feedback', None)
+                    )
+            except Exception as e:
+                print(f"Error sending QC notification: {str(e)}")
+        
         cursor.close()
         return {"status": "success", "message": f"Vendor QC updated. Status: {data.verification_status}, QC Score: {qc_score}"}
     except Exception as e:

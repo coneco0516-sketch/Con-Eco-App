@@ -1,0 +1,165 @@
+.verify-email-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.verify-email-card {
+  background: white;
+  border-radius: 12px;
+  padding: 50px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.verify-email-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.checkmark {
+  color: #2ecc71;
+  font-size: 80px;
+  font-weight: bold;
+  animation: scaleIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.error-mark {
+  color: #e74c3c;
+  font-size: 80px;
+  font-weight: bold;
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+.verify-email-title {
+  color: #333;
+  margin: 20px 0 10px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.verify-email-message {
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 20px 0;
+}
+
+.verify-email-redirect {
+  color: #999;
+  font-size: 14px;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+.verify-email-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.verify-email-actions .btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.verify-email-actions .btn.primary {
+  background-color: #667eea;
+  color: white;
+}
+
+.verify-email-actions .btn.primary:hover {
+  background-color: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.verify-email-actions .btn.secondary {
+  background-color: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.verify-email-actions .btn.secondary:hover {
+  background-color: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.verify-email-card.error {
+  border-left: 5px solid #e74c3c;
+}
+
+.verify-email-card.success {
+  border-left: 5px solid #2ecc71;
+}
+
+.verify-email-card.loading {
+  border-left: 5px solid #667eea;
+}
