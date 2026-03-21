@@ -19,12 +19,12 @@ function About() {
         <h3 style={{ color: 'var(--primary-color)', marginTop: 0 }}>Meet Our Team</h3>
         <div style={{ display: 'flex', gap: '2rem', marginTop: '1.5rem' }}>
           <div style={{ flex: 1, textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px' }}>
-             <img src="/Project Head.jpg" alt="Team Member 1" style={{ width:'100px', height:'100px', borderRadius:'50%', objectFit:'cover', marginBottom:'1rem' }} />
+             <img src="/Project_Head.jpg" alt="Project Head" style={{ width:'100px', height:'100px', borderRadius:'50%', objectFit:'cover', marginBottom:'1rem' }} />
              <h4 style={{ color: 'white', margin: 0 }}>Hriday Demashetti - 2AG22CV006 - Civil Engineering Student</h4>
              <p style={{ color: 'var(--text-secondary)', margin: '5px 0 0' }}>Project Head</p>
           </div>
           <div style={{ flex: 1, textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px' }}>
-             <img src="/team_member_2.jpg" alt="Team Member 01" style={{ width:'100px', height:'100px', borderRadius:'50%', objectFit:'cover', marginBottom:'1rem' }} />
+             <img src="/team_member_1.jpg" alt="Team Member 01" style={{ width:'100px', height:'100px', borderRadius:'50%', objectFit:'cover', marginBottom:'1rem' }} />
              <h4 style={{ color: 'white', margin: 0 }}>Tulasi M Marennavar - 2AG22CS145 - Computer Science Engineering Student</h4>
              <p style={{ color: 'var(--text-secondary)', margin: '5px 0 0' }}>Team Member 01</p>
           </div>
