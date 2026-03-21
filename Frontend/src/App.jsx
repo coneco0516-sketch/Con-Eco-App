@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
@@ -39,7 +39,13 @@ import './index.css';
 
 function AppContent() {
   const location = useLocation();
-  const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('is_logged_in'));
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('is_logged_in'));
+  }, [location]);
+
+  console.log("AppContent: isLoggedIn =", isLoggedIn);
 
   return (
     <div className="app-container">
@@ -55,6 +61,8 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/register" element={<Register />} />
+          
+          {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/vendors" element={<VendorVerification />} />
           <Route path="/admin/customers" element={<CustomerVerification />} />
@@ -64,6 +72,7 @@ function AppContent() {
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/settings" element={<PlatformSettings />} />
           
+          {/* Customer Routes */}
           <Route path="/customer" element={<CustomerDashboard />} />
           <Route path="/customer/products" element={<Products />} />
           <Route path="/customer/services" element={<Services />} />
@@ -76,6 +85,7 @@ function AppContent() {
           <Route path="/customer/booked-services" element={<MyBookedServices />} />
           <Route path="/customer/profile" element={<CustomerProfile />} />
 
+          {/* Vendor Routes */}
           <Route path="/vendor" element={<VendorDashboard />} />
           <Route path="/vendor/catalogue" element={<Catalogue />} />
           <Route path="/vendor/orders" element={<VendorOrders />} />
@@ -83,12 +93,13 @@ function AppContent() {
           <Route path="/vendor/analytics" element={<VendorAnalytics />} />
           <Route path="/vendor/profile" element={<VendorProfile />} />
 
+          {/* Catch all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       
       {!isLoggedIn && (
-        <footer style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid var(--surface-border)', textAlign: 'center' }}>
+        <footer>
           <p style={{ color: 'var(--text-secondary)' }}>&copy; 2026 ConEco Marketplace Platform. All rights reserved.</p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '0.5rem' }}>
             <Link to="/faq" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>FAQ</Link>

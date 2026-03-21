@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('is_logged_in'));
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('is_logged_in'));
+  }, [location]);
+
+  console.log("Navbar: isLoggedIn =", isLoggedIn);
 
   const handleLogout = () => {
     localStorage.removeItem('is_logged_in');
