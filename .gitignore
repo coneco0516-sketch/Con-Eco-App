@@ -7,7 +7,6 @@ Backend/*.pyc
 
 # React Frontend
 Frontend/node_modules/
-Frontend/dist/
 Frontend/.env
 
 # OS
