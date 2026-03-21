@@ -6,6 +6,11 @@ function VendorOrders() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = () => {
+    setLoading(true);
     fetch('/api/vendor/orders', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
@@ -13,7 +18,27 @@ function VendorOrders() {
         setLoading(false);
       })
       .catch(err => setLoading(false));
-  }, []);
+  };
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const resp = await fetch('/api/vendor/orders/update_status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, status: newStatus }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert("Order status updated to " + newStatus);
+        fetchOrders();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
+      alert("Network error updating status.");
+    }
+  };
 
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
@@ -37,6 +62,7 @@ function VendorOrders() {
                   <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0 }}>₹{o.total_amount}</p>
                   <select 
                     defaultValue={o.status}
+                    onChange={(e) => handleStatusChange(o.id, e.target.value)}
                     style={{ background: 'var(--surface-bg)', color: 'white', border: '1px solid var(--surface-border)', padding: '4px' }}
                   >
                     <option value="Pending">Pending</option>

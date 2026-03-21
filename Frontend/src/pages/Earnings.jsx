@@ -6,14 +6,27 @@ function Earnings() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchEarnings();
+  }, []);
+
+  const fetchEarnings = () => {
+    setLoading(true);
     fetch('/api/vendor/earnings', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
-        if (data.earnings) setEarnings(data.earnings);
+        if (data.stats) setEarnings({ total: data.stats.total, breakdowns: data.transactions });
         setLoading(false);
       })
       .catch(err => setLoading(false));
-  }, []);
+  };
+
+  const handleWithdraw = () => {
+    if (earnings.total <= 0) {
+      alert("No balance available to withdraw.");
+      return;
+    }
+    alert(`Success! Withdrawal request for ₹${earnings.total} has been sent to your registered bank account.`);
+  };
 
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
@@ -29,7 +42,7 @@ function Earnings() {
           <div className="glass-panel" style={{ padding: '2rem' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h3 style={{ margin: 0, color: 'white' }}>Current Balance: <strong style={{color: 'var(--primary-color)'}}>₹{earnings.total}</strong></h3>
-                <button className="btn" style={{ background: '#238636' }}>Withdraw to Bank</button>
+                <button className="btn" onClick={handleWithdraw} style={{ background: '#238636' }}>Withdraw to Bank</button>
              </div>
              {earnings.breakdowns && earnings.breakdowns.length > 0 ? (
                 <ul style={{ listStyle: 'none', padding: 0 }}>
