@@ -19,22 +19,31 @@ def create_notification_tables():
             cursor.execute("""ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT FALSE""")
             conn.commit()
             print("  ✓ Added email_verified column")
-        except:
-            print("  - email_verified column already exists")
+        except Exception as e:
+            if "Duplicate column name" in str(e) or "already exists" in str(e):
+                print("  - email_verified column already exists")
+            else:
+                print(f"  Warning adding email_verified: {str(e)}")
         
         try:
             cursor.execute("""ALTER TABLE users ADD COLUMN email_verification_token VARCHAR(255) UNIQUE""")
             conn.commit()
             print("  ✓ Added email_verification_token column")
-        except:
-            print("  - email_verification_token column already exists")
+        except Exception as e:
+            if "Duplicate column name" in str(e) or "already exists" in str(e):
+                print("  - email_verification_token column already exists")
+            else:
+                print(f"  Warning adding email_verification_token: {str(e)}")
         
         try:
             cursor.execute("""ALTER TABLE users ADD COLUMN email_verification_sent_at TIMESTAMP""")
             conn.commit()
             print("  ✓ Added email_verification_sent_at column")
-        except:
-            print("  - email_verification_sent_at column already exists")
+        except Exception as e:
+            if "Duplicate column name" in str(e) or "already exists" in str(e):
+                print("  - email_verification_sent_at column already exists")
+            else:
+                print(f"  Warning adding email_verification_sent_at: {str(e)}")
         
         # Table for notification preferences
         print("Creating notification_preferences table...")

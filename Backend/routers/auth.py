@@ -145,11 +145,11 @@ def register(request: RegisterRequest):
         try:
             # Securely hash the password before saving it to the database:
             hashed_password = hash_password(request.password)
-            verification_token = secrets.token_urlsafe(32)
             
-            cursor.execute("""INSERT INTO Users (name, email, phone, password_hash, role, email_verification_token, email_verification_sent_at, email_verified) 
-                           VALUES (%s, %s, %s, %s, %s, %s, NOW(), FALSE)""", 
-                           (request.full_name, request.email, request.phone_number, hashed_password, request.role, verification_token))
+            # Insert user without email verification fields initially
+            cursor.execute("""INSERT INTO Users (name, email, phone, password_hash, role) 
+                           VALUES (%s, %s, %s, %s, %s)""", 
+                           (request.full_name, request.email, request.phone_number, hashed_password, request.role))
             user_id = cursor.lastrowid
             
             if request.role == 'Customer':
@@ -159,22 +159,38 @@ def register(request: RegisterRequest):
                 cursor.execute("INSERT INTO Vendors (vendor_id, company_name, gst_number, address, city, state) VALUES (%s, %s, %s, %s, %s, %s)", 
                                (user_id, request.company_name or request.full_name, request.gst_number, request.address, request.city, request.state))
             
-            # Initialize notification preferences
-            cursor.execute("""
-                INSERT INTO notification_preferences (user_id, user_type, login_alerts, password_change_alerts, 
-                                                     profile_update_alerts, product_update_alerts, order_alerts, qc_status_alerts)
-                VALUES (%s, %s, TRUE, TRUE, TRUE, TRUE, TRUE, %s)
-            """, (user_id, request.role.lower(), request.role.lower() == 'vendor'))
+            # Try to initialize notification preferences (if table exists)
+            try:
+                cursor.execute("""
+                    INSERT INTO notification_preferences (user_id, user_type, login_alerts, password_change_alerts, 
+                                                         profile_update_alerts, product_update_alerts, order_alerts, qc_status_alerts)
+                    VALUES (%s, %s, TRUE, TRUE, TRUE, TRUE, TRUE, %s)
+                """, (user_id, request.role.lower(), request.role.lower() == 'vendor'))
+            except Exception as e:
+                print(f"Note: Could not initialize notification preferences: {str(e)}")
                 
             conn.commit()
+            cursor.close()
             
-            # Send email verification
+            # Send email verification (if possible)
             try:
+                verification_token = secrets.token_urlsafe(32)
+                # Try to update email verification fields if they exist
+                try:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        UPDATE Users SET email_verification_token = %s, email_verification_sent_at = NOW(), email_verified = FALSE
+                        WHERE user_id = %s
+                    """, (verification_token, user_id))
+                    conn.commit()
+                except:
+                    # Fields don't exist yet, use the token without storing
+                    verification_token = verification_token
+                
                 send_email_verification(request.email, request.full_name, verification_token)
             except Exception as e:
                 print(f"Error sending verification email: {str(e)}")
             
-            cursor.close()
             return {"status": "success", "message": "Registration successful. Please check your email to verify your account."}
         except Exception as db_err:
             print(f"DATABASE REGISTRATION ERROR: {db_err}")
