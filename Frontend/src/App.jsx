@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import VendorVerification from './pages/VendorVerification';
@@ -37,56 +37,57 @@ import VendorAnalytics from './pages/VendorAnalytics';
 import VendorProfile from './pages/VendorProfile';
 import './index.css';
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+
   return (
-    <Router>
-      <div className="app-container">
-        <Navbar />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/vendors" element={<VendorVerification />} />
-            <Route path="/admin/customers" element={<CustomerVerification />} />
-            <Route path="/admin/orders" element={<AdminOrders />} />
-            <Route path="/admin/payments" element={<AdminPayments />} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/profile" element={<AdminProfile />} />
-            <Route path="/admin/settings" element={<PlatformSettings />} />
-            
-            {/* Customer Routes */}
-            <Route path="/customer" element={<CustomerDashboard />} />
-            <Route path="/customer/products" element={<Products />} />
-            <Route path="/customer/services" element={<Services />} />
-            <Route path="/customer/cart" element={<Cart />} />
-            <Route path="/customer/checkout" element={<Checkout />} />
-            <Route path="/customer/payment/card" element={<CardPayment />} />
-            <Route path="/customer/payment/upi" element={<UPIPayment />} />
-            <Route path="/customer/order-success" element={<OrderSuccess />} />
-            <Route path="/customer/orders" element={<MyOrders />} />
-            <Route path="/customer/booked-services" element={<MyBookedServices />} />
-            <Route path="/customer/profile" element={<CustomerProfile />} />
+    <div className="app-container">
+      <Navbar />
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/vendors" element={<VendorVerification />} />
+          <Route path="/admin/customers" element={<CustomerVerification />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin/settings" element={<PlatformSettings />} />
+          
+          <Route path="/customer" element={<CustomerDashboard />} />
+          <Route path="/customer/products" element={<Products />} />
+          <Route path="/customer/services" element={<Services />} />
+          <Route path="/customer/cart" element={<Cart />} />
+          <Route path="/customer/checkout" element={<Checkout />} />
+          <Route path="/customer/payment/card" element={<CardPayment />} />
+          <Route path="/customer/payment/upi" element={<UPIPayment />} />
+          <Route path="/customer/order-success" element={<OrderSuccess />} />
+          <Route path="/customer/orders" element={<MyOrders />} />
+          <Route path="/customer/booked-services" element={<MyBookedServices />} />
+          <Route path="/customer/profile" element={<CustomerProfile />} />
 
-            {/* Vendor Routes */}
-            <Route path="/vendor" element={<VendorDashboard />} />
-            <Route path="/vendor/catalogue" element={<Catalogue />} />
-            <Route path="/vendor/orders" element={<VendorOrders />} />
-            <Route path="/vendor/earnings" element={<Earnings />} />
-            <Route path="/vendor/analytics" element={<VendorAnalytics />} />
-            <Route path="/vendor/profile" element={<VendorProfile />} />
+          <Route path="/vendor" element={<VendorDashboard />} />
+          <Route path="/vendor/catalogue" element={<Catalogue />} />
+          <Route path="/vendor/orders" element={<VendorOrders />} />
+          <Route path="/vendor/earnings" element={<Earnings />} />
+          <Route path="/vendor/analytics" element={<VendorAnalytics />} />
+          <Route path="/vendor/profile" element={<VendorProfile />} />
 
-            {/* Catch all fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+      
+      {!isLoggedIn && (
         <footer style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid var(--surface-border)', textAlign: 'center' }}>
           <p style={{ color: 'var(--text-secondary)' }}>&copy; 2026 ConEco Marketplace Platform. All rights reserved.</p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '0.5rem' }}>
@@ -96,7 +97,15 @@ function App() {
             <Link to="/terms" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Terms of Service</Link>
           </div>
         </footer>
-      </div>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

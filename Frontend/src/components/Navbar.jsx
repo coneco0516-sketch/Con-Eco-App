@@ -20,7 +20,8 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="nav-brand">ConEco System</Link>
+      {!isLoggedIn && <Link to="/" className="nav-brand">ConEco System</Link>}
+      {isLoggedIn && <span className="nav-brand">ConEco System</span>}
       <div className="nav-links">
         {!isLoggedIn && (
           <>
