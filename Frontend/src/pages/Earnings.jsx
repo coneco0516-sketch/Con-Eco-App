@@ -27,7 +27,10 @@ function Earnings() {
           <p>Loading earnings data...</p>
         ) : (
           <div className="glass-panel" style={{ padding: '2rem' }}>
-             <h3 style={{ marginBottom: '1rem', color: 'white' }}>Current Balance: <strong style={{color: 'var(--primary-color)'}}>₹{earnings.total}</strong></h3>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ margin: 0, color: 'white' }}>Current Balance: <strong style={{color: 'var(--primary-color)'}}>₹{earnings.total}</strong></h3>
+                <button className="btn" style={{ background: '#238636' }}>Withdraw to Bank</button>
+             </div>
              {earnings.breakdowns && earnings.breakdowns.length > 0 ? (
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                   {earnings.breakdowns.map((b, idx) => (

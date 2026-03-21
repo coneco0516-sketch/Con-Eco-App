@@ -19,8 +19,13 @@ function Catalogue() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <VendorSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Catalogue</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>View the products and services you have listed.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Catalogue</h2>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>View and manage the items you have listed.</p>
+          </div>
+          <button className="btn" style={{ background: 'var(--primary-color)', height: 'fit-content' }}>+ Add New Item</button>
+        </div>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
         {loading ? (

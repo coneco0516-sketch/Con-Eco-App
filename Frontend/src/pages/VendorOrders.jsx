@@ -33,9 +33,18 @@ function VendorOrders() {
                   <h4 style={{ color: 'white' }}>Order #{o.id} - {o.customer_name}</h4>
                   <p style={{ color: 'var(--text-secondary)' }}>{new Date(o.created_at).toLocaleDateString()}</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>₹{o.total_amount}</p>
-                  <p style={{ color: o.status === 'Pending' ? '#d26d0e' : '#238636' }}>{o.status}</p>
+                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0 }}>₹{o.total_amount}</p>
+                  <select 
+                    defaultValue={o.status}
+                    style={{ background: 'var(--surface-bg)', color: 'white', border: '1px solid var(--surface-border)', padding: '4px' }}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
                 </div>
               </div>
             ))}
