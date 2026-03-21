@@ -53,16 +53,16 @@ function VendorOrders() {
         ) : orders.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {orders.map(o => (
-              <div key={o.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={o.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <h4 style={{ color: 'white' }}>Order #{o.id} - {o.customer_name}</h4>
+                  <h4 style={{ color: 'white' }}>Order #{o.order_id} - {o.customer_name}</h4>
                   <p style={{ color: 'var(--text-secondary)' }}>{new Date(o.created_at).toLocaleDateString()}</p>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0 }}>₹{o.total_amount}</p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0 }}>₹{o.amount}</p>
                   <select 
                     defaultValue={o.status}
-                    onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                    onChange={(e) => handleStatusChange(o.order_id, e.target.value)}
                     style={{ background: 'var(--surface-bg)', color: 'white', border: '1px solid var(--surface-border)', padding: '4px' }}
                   >
                     <option value="Pending">Pending</option>
