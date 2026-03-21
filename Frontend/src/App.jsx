@@ -65,6 +65,7 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
           <Route path="/notifications" element={<NotificationSettings />} />
           
           {/* Admin Routes */}
