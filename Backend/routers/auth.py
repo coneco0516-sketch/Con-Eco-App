@@ -55,7 +55,7 @@ def get_current_user_from_cookie(request: Request):
         raise HTTPException(status_code=401, detail="invalid_token")
 
 class LoginRequest(BaseModel):
-    username: str
+    email: str
     password: str
 
 @router.post("/login")
@@ -64,7 +64,7 @@ def login(request: LoginRequest, response: Response):
     try:
         cursor = conn.cursor(dictionary=True)
         query = "SELECT * FROM Users WHERE email=%s OR phone=%s"
-        cursor.execute(query, (request.username, request.username))
+        cursor.execute(query, (request.email, request.email))
         user = cursor.fetchone()
         cursor.close()
         

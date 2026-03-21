@@ -77,15 +77,18 @@ def add_catalogue_item(
         vendor_id = user['user_id']
         
         if item_type == 'product':
-            cursor.execute("INSERT INTO Products (vendor_id, name, description, price) VALUES (%s, %s, %s, %s)",
-                           (vendor_id, name, description, price))
+            cursor.execute("INSERT INTO Products (vendor_id, category, name, description, price) VALUES (%s, %s, %s, %s, %s)",
+                           (vendor_id, 'General', name, description, price))
         else:
-            cursor.execute("INSERT INTO Services (vendor_id, name, description, price) VALUES (%s, %s, %s, %s)",
-                           (vendor_id, name, description, price))
+            cursor.execute("INSERT INTO Services (vendor_id, category, name, description, price) VALUES (%s, %s, %s, %s, %s)",
+                           (vendor_id, 'General', name, description, price))
                            
         conn.commit()
         cursor.close()
         return {"status": "success"}
+    except Exception as e:
+        print(f"Error adding to catalogue: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
 

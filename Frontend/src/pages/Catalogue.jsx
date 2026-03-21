@@ -36,16 +36,21 @@ function Catalogue() {
         body: formData,
         credentials: 'include'
       });
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        alert("Error adding item: " + (errData.detail || resp.statusText));
+        return;
+      }
       const data = await resp.json();
       if (data.status === 'success') {
         setShowModal(false);
         setNewItem({ type: 'product', name: '', description: '', price: '' });
         fetchCatalogue();
       } else {
-        alert("Error: " + data.message);
+        alert("Error: " + (data.message || "Unknown error"));
       }
     } catch (err) {
-      alert("Network error occurred.");
+      alert("Network error: " + err.message);
     }
   };
 
@@ -63,21 +68,35 @@ function Catalogue() {
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
         {showModal && (
-          <div className="glass-panel" style={{ position: 'fixed', top: '20%', left: '30%', width: '400px', zIndex: 1000, padding: '2rem', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
-            <h3 style={{ color: 'white', marginBottom: '1rem' }}>Add New Item</h3>
-            <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <select className="input-field" value={newItem.type} onChange={(e) => setNewItem({...newItem, type: e.target.value})}>
-                <option value="product">Product</option>
-                <option value="service">Service</option>
-              </select>
-              <input type="text" placeholder="Name" className="input-field" required value={newItem.name} onChange={(e) => setNewItem({...newItem, name: e.target.value})} />
-              <textarea placeholder="Description" className="input-field" required value={newItem.description} onChange={(e) => setNewItem({...newItem, description: e.target.value})} />
-              <input type="number" placeholder="Price" className="input-field" required value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} />
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button type="submit" className="btn">Add to Catalogue</button>
-                <button type="button" className="btn danger" onClick={() => setShowModal(false)}>Cancel</button>
-              </div>
-            </form>
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div className="glass-panel" style={{ width: '400px', padding: '2rem', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
+              <h3 style={{ color: 'white', marginBottom: '1.5rem' }}>Add New Item</h3>
+              <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                <div>
+                  <label className="input-label">Item Type</label>
+                  <select className="input-field" value={newItem.type} onChange={(e) => setNewItem({...newItem, type: e.target.value})}>
+                    <option value="product">Product</option>
+                    <option value="service">Service</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="input-label">Item Name</label>
+                  <input type="text" placeholder="e.g. Quality Cement" className="input-field" required value={newItem.name} onChange={(e) => setNewItem({...newItem, name: e.target.value})} />
+                </div>
+                <div>
+                  <label className="input-label">Description</label>
+                  <textarea placeholder="Provide details..." className="input-field" required value={newItem.description} onChange={(e) => setNewItem({...newItem, description: e.target.value})} />
+                </div>
+                <div>
+                  <label className="input-label">Price (₹)</label>
+                  <input type="number" placeholder="0.00" className="input-field" required value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} />
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button type="submit" className="btn" style={{ flex: 1 }}>Add Item</button>
+                  <button type="button" className="btn danger" onClick={() => setShowModal(false)} style={{ flex: 1 }}>Cancel</button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
         
