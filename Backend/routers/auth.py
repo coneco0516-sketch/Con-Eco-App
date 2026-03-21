@@ -128,6 +128,95 @@ def register(request: RegisterRequest):
     finally:
         conn.close()
 
+@router.get("/profile")
+def get_profile(request: Request):
+    user_info = get_current_user_from_cookie(request)
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # Fetch base user info
+        cursor.execute("SELECT user_id, name, email, phone, role FROM Users WHERE user_id=%s", (user_info['user_id'],))
+        user = cursor.fetchone()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+            
+        # Fetch role-specific info
+        if user['role'] == 'Customer':
+            cursor.execute("SELECT city, state FROM Customers WHERE customer_id=%s", (user['user_id'],))
+            extra = cursor.fetchone()
+            if extra: user.update(extra)
+        elif user['role'] == 'Vendor':
+            cursor.execute("SELECT company_name, gst_number, address, city, state FROM Vendors WHERE vendor_id=%s", (user['user_id'],))
+            extra = cursor.fetchone()
+            if extra: user.update(extra)
+            
+        return {"status": "success", "profile": user}
+    finally:
+        conn.close()
+
+class UpdateProfileRequest(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    company_name: Optional[str] = None
+    gst_number: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+
+@router.put("/profile")
+def update_profile(request: Request, data: UpdateProfileRequest):
+    user_info = get_current_user_from_cookie(request)
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        
+        # Update Users table
+        if data.name or data.phone:
+            updates = []
+            params = []
+            if data.name:
+                updates.append("name=%s")
+                params.append(data.name)
+            if data.phone:
+                updates.append("phone=%s")
+                params.append(data.phone)
+            params.append(user_info['user_id'])
+            cursor.execute(f"UPDATE Users SET {', '.join(updates)} WHERE user_id=%s", tuple(params))
+            
+        # Update Customer/Vendor tables
+        if user_info['role'] == 'Customer':
+            if data.city or data.state:
+                updates = []
+                params = []
+                if data.city:
+                    updates.append("city=%s")
+                    params.append(data.city)
+                if data.state:
+                    updates.append("state=%s")
+                    params.append(data.state)
+                params.append(user_info['user_id'])
+                cursor.execute(f"UPDATE Customers SET {', '.join(updates)} WHERE customer_id=%s", tuple(params))
+        elif user_info['role'] == 'Vendor':
+            if data.company_name or data.gst_number or data.address or data.city or data.state:
+                updates = []
+                params = []
+                if data.company_name: updates.append("company_name=%s"); params.append(data.company_name)
+                if data.gst_number: updates.append("gst_number=%s"); params.append(data.gst_number)
+                if data.address: updates.append("address=%s"); params.append(data.address)
+                if data.city: updates.append("city=%s"); params.append(data.city)
+                if data.state: updates.append("state=%s"); params.append(data.state)
+                params.append(user_info['user_id'])
+                cursor.execute(f"UPDATE Vendors SET {', '.join(updates)} WHERE vendor_id=%s", tuple(params))
+                
+        conn.commit()
+        return {"status": "success", "message": "Profile updated successfully"}
+    except Exception as e:
+        conn.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
 @router.post("/logout")
 def logout(response: Response):
     response.delete_cookie("session_token")
