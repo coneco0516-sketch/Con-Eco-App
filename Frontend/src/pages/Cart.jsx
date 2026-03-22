@@ -87,7 +87,7 @@ function Cart() {
                   </div>
                 </li>
               );
-              })
+              })}
             </ul>
              <a href="/customer/checkout" className="btn" style={{ background: '#238636', display: 'inline-block', marginTop: '1.5rem' }}>Proceed to Checkout</a>
           </div>
