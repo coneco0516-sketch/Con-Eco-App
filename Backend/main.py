@@ -68,9 +68,16 @@ frontend_dir = Path(__file__).resolve().parent.parent / "Frontend" / "dist"
 if (frontend_dir / "assets").exists():
     app.mount("/assets", StaticFiles(directory=frontend_dir / "assets"), name="assets")
 
-# Wildcard Catch-All to bounce all non-API paths back to React's index.html
+# Wildcard Catch-All to serve static files from root OR bounce to index.html
 @app.get("/{catchall:path}")
 async def serve_react_app(catchall: str):
+    # Check if the requested file exists in the root of dist folder
+    # e.g. /project_overview.mp4
+    if catchall:
+        potential_file = frontend_dir / catchall
+        if potential_file.is_file():
+            return FileResponse(potential_file)
+            
     index_file = frontend_dir / "index.html"
     if index_file.exists():
         return FileResponse(index_file)
