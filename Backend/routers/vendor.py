@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, Form, File, UploadFile
 from pydantic import BaseModel
 from database import get_db_connection
 from routers.auth import get_current_user_from_cookie
 import datetime
+import os
+import uuid
+from pathlib import Path
 
 router = APIRouter()
 
@@ -62,6 +65,28 @@ def catalogue(user = Depends(check_vendor)):
         return {"status": "success", "items": items}
     finally:
         conn.close()
+
+UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+@router.post("/upload_image")
+async def upload_image(file: UploadFile = File(...), user = Depends(check_vendor)):
+    try:
+        # Create unique filename
+        file_extension = os.path.splitext(file.filename)[1]
+        new_filename = f"{uuid.uuid4()}{file_extension}"
+        file_path = UPLOAD_DIR / new_filename
+        
+        # Save file
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+            
+        # Return the public URL
+        return {"status": "success", "image_url": f"/uploads/{new_filename}"}
+    except Exception as e:
+        print(f"Error uploading image: {e}")
+        raise HTTPException(status_code=500, detail="Failed to upload image")
 
 @router.post("/catalogue")
 def add_catalogue_item(

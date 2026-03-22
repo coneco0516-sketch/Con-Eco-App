@@ -6,6 +6,8 @@ function Catalogue() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [newItem, setNewItem] = useState({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
+  const [imageFile, setImageFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchCatalogue();
@@ -24,12 +26,40 @@ function Catalogue() {
 
   const handleAddItem = async (e) => {
     e.preventDefault();
+    setUploading(true);
+    let finalImageUrl = newItem.image_url;
+
+    // If a file is selected, upload it first
+    if (imageFile) {
+      const uploadData = new FormData();
+      uploadData.append('file', imageFile);
+      try {
+        const upResp = await fetch('/api/vendor/upload_image', {
+          method: 'POST',
+          body: uploadData,
+          credentials: 'include'
+        });
+        const upResult = await upResp.json();
+        if (upResult.status === 'success') {
+          finalImageUrl = upResult.image_url;
+        } else {
+          alert("Image upload failed: " + (upResult.detail || "Unknown error"));
+          setUploading(false);
+          return;
+        }
+      } catch (err) {
+        alert("Upload error: " + err.message);
+        setUploading(false);
+        return;
+      }
+    }
+
     const formData = new FormData();
     formData.append('item_type', newItem.type);
     formData.append('name', newItem.name);
     formData.append('description', newItem.description);
     formData.append('price', newItem.price);
-    formData.append('image_url', newItem.image_url || '');
+    formData.append('image_url', finalImageUrl || '');
     formData.append('unit', newItem.unit || '');
 
     try {
@@ -47,12 +77,15 @@ function Catalogue() {
       if (data.status === 'success') {
         setShowModal(false);
         setNewItem({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
+        setImageFile(null);
         fetchCatalogue();
       } else {
         alert("Error: " + (data.message || "Unknown error"));
       }
     } catch (err) {
       alert("Network error: " + err.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -98,12 +131,18 @@ function Catalogue() {
                   <input type="text" placeholder="e.g. per bag, per ton, per sq.ft" className="input-field" required value={newItem.unit} onChange={(e) => setNewItem({...newItem, unit: e.target.value})} />
                 </div>
                 <div>
-                  <label className="input-label">Image URL</label>
-                  <input type="url" placeholder="https://example.com/image.jpg" className="input-field" value={newItem.image_url} onChange={(e) => setNewItem({...newItem, image_url: e.target.value})} />
+                  <label className="input-label">Image URL (Optional)</label>
+                  <input type="url" placeholder="https://example.com/image.jpg" className="input-field" value={newItem.image_url} onChange={(e) => setNewItem({...newItem, image_url: e.target.value})} disabled={!!imageFile} />
+                </div>
+                <div>
+                  <label className="input-label">Or Upload Photo</label>
+                  <input type="file" accept="image/*" className="input-field" onChange={(e) => setImageFile(e.target.files[0])} style={{ padding: '0.4rem' }} />
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button type="submit" className="btn" style={{ flex: 1 }}>Add Item</button>
-                  <button type="button" className="btn danger" onClick={() => setShowModal(false)} style={{ flex: 1 }}>Cancel</button>
+                  <button type="submit" className="btn" style={{ flex: 1 }} disabled={uploading}>
+                    {uploading ? 'Processing...' : 'Add Item'}
+                  </button>
+                  <button type="button" className="btn danger" onClick={() => { setShowModal(false); setImageFile(null); }} style={{ flex: 1 }}>Cancel</button>
                 </div>
               </form>
             </div>

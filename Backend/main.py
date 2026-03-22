@@ -64,6 +64,11 @@ def api_health():
 
 frontend_dir = Path(__file__).resolve().parent.parent / "Frontend" / "dist"
 
+# Mount uploads folder (created in Backend)
+upload_dir = Path(__file__).resolve().parent / "uploads"
+upload_dir.mkdir(exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
+
 # Mount specifically the assets folder from Vite's build
 if (frontend_dir / "assets").exists():
     app.mount("/assets", StaticFiles(directory=frontend_dir / "assets"), name="assets")
