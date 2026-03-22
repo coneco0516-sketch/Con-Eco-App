@@ -206,3 +206,51 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer))
         return {"status": "success", "message": message}
     else:
         raise HTTPException(status_code=500, detail=message)
+
+
+# ── 4. Verify Settlement (Paying for Credit Orders) ──────────────────────────
+class VerifySettlementRequest(BaseModel):
+    order_id:            int
+    razorpay_order_id:   str
+    razorpay_payment_id: str
+    razorpay_signature:  str
+
+@router.post("/verify_settlement")
+def verify_settlement(data: VerifySettlementRequest, user=Depends(check_customer)):
+    """
+    Called after settling an unpaid order (Pay Later) via Razorpay.
+    """
+    body        = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
+    expected_sig= hmac.new(
+        RAZORPAY_KEY_SECRET.encode("utf-8"),
+        body.encode("utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+
+    if expected_sig != data.razorpay_signature:
+        raise HTTPException(status_code=400, detail="Signature failed.")
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        # Ensure the order belongs to this customer
+        cursor.execute("SELECT order_id FROM Orders WHERE order_id=%s AND customer_id=%s", (data.order_id, user["user_id"]))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        # Update Payments table
+        cursor.execute(
+            "UPDATE Payments SET status='Completed', txn_id=%s WHERE order_id=%s",
+            (data.razorpay_payment_id, data.order_id)
+        )
+        # Also update commissions to match
+        cursor.execute("UPDATE commissions SET status='Paid' WHERE order_id=%s", (data.order_id,))
+        
+        conn.commit()
+        cursor.close()
+        return {"status": "success", "message": "Payment settled successfully"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()

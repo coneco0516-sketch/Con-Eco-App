@@ -5,7 +5,8 @@ function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchOrders = () => {
+    setLoading(true);
     fetch('/api/customer/my_orders', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
@@ -13,7 +14,71 @@ function MyOrders() {
         setLoading(false);
       })
       .catch(err => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchOrders();
+    
+    // Load Razorpay script
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
   }, []);
+
+  const handlePayNow = async (order) => {
+    try {
+      // 1. Create Razorpay order
+      const resp = await fetch('/api/payment/create_order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount_paise: Math.round(order.amount * 100) }),
+        credentials: 'include'
+      });
+      const orderData = await resp.json();
+      
+      if (!window.Razorpay) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        return;
+      }
+
+      // 2. Open Razorpay Widget
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount_paise,
+        currency: "INR",
+        name: "ConEco Settlement",
+        description: `Stettle Payment for Order #${order.order_id}`,
+        order_id: orderData.order_id,
+        handler: async (response) => {
+          // 3. Verify on backend
+          const verifyResp = await fetch('/api/payment/verify_settlement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              order_id: order.order_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            }),
+            credentials: 'include'
+          });
+          const verifyData = await verifyResp.json();
+          if (verifyData.status === 'success') {
+            alert("Payment successful! Order settled.");
+            fetchOrders();
+          } else {
+            alert("Payment verification failed. Please contact support.");
+          }
+        },
+        theme: { color: "#3fb950" }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert("Error initiating payment.");
+    }
+  };
 
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
@@ -48,8 +113,8 @@ function MyOrders() {
                     </span>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>₹{o.amount}</p>
+                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.2rem', margin: 0 }}>₹{o.amount}</p>
                   <span style={{ 
                     padding: '4px 12px', 
                     borderRadius: '4px', 
@@ -61,6 +126,16 @@ function MyOrders() {
                   }}>
                     {o.status}
                   </span>
+                  
+                  {o.payment_method === 'Pay Later' && o.payment_status !== 'Completed' && o.status === 'Delivered' && (
+                    <button 
+                      onClick={() => handlePayNow(o)}
+                      className="primary-button"
+                      style={{ padding: '6px 15px', fontSize: '0.85rem' }}
+                    >
+                      Pay Now (Card/UPI)
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

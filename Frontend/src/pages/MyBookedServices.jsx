@@ -5,7 +5,8 @@ function MyBookedServices() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchServices = () => {
+    setLoading(true);
     fetch('/api/customer/my_services', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
@@ -13,7 +14,68 @@ function MyBookedServices() {
         setLoading(false);
       })
       .catch(err => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchServices();
+
+    // Load Razorpay script
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
   }, []);
+
+  const handlePayNow = async (service) => {
+    try {
+      const resp = await fetch('/api/payment/create_order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount_paise: Math.round(service.amount * 100) }),
+        credentials: 'include'
+      });
+      const orderData = await resp.json();
+      
+      if (!window.Razorpay) {
+        alert("Razorpay SDK failed to load.");
+        return;
+      }
+
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount_paise,
+        currency: "INR",
+        name: "ConEco Settlement",
+        description: `Settle Payment for Booking #${service.order_id}`,
+        order_id: orderData.order_id,
+        handler: async (response) => {
+          const verifyResp = await fetch('/api/payment/verify_settlement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              order_id: service.order_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            }),
+            credentials: 'include'
+          });
+          const verifyData = await verifyResp.json();
+          if (verifyData.status === 'success') {
+            alert("Payment successful! Booking settled.");
+            fetchServices();
+          } else {
+            alert("Payment verification failed.");
+          }
+        },
+        theme: { color: "#3fb950" }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert("Error initiating payment.");
+    }
+  };
 
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
@@ -48,8 +110,8 @@ function MyBookedServices() {
                     </span>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>₹{s.amount}</p>
+                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.2rem', margin: 0 }}>₹{s.amount}</p>
                   <span style={{ 
                     padding: '4px 12px', 
                     borderRadius: '4px', 
@@ -61,6 +123,16 @@ function MyBookedServices() {
                   }}>
                     {s.status}
                   </span>
+
+                  {s.payment_method === 'Pay Later' && s.payment_status !== 'Completed' && s.status === 'Delivered' && (
+                    <button 
+                      onClick={() => handlePayNow(s)}
+                      className="primary-button"
+                      style={{ padding: '6px 15px', fontSize: '0.85rem' }}
+                    >
+                      Pay Now (Card/UPI)
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
