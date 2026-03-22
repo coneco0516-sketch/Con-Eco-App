@@ -190,10 +190,12 @@ def get_my_orders(user = Depends(check_customer)):
         cust_id = cursor.fetchone()['customer_id']
         
         sql = """
-        SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, DATE_FORMAT(o.created_at, '%d %b %Y') as date, p.name as item_name, v.company_name as vendor_name, o.delivery_address
+        SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, o.payment_method, pvt.status as payment_status, 
+               DATE_FORMAT(o.created_at, '%d %b %Y') as date, p.name as item_name, v.company_name as vendor_name, o.delivery_address
         FROM Orders o
         JOIN Products p ON o.item_id = p.product_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
+        JOIN Payments pvt ON o.order_id = pvt.order_id
         WHERE o.customer_id=%s AND o.order_type='Product'
         ORDER BY o.created_at DESC
         """
@@ -213,10 +215,12 @@ def get_my_services(user = Depends(check_customer)):
         cust_id = cursor.fetchone()['customer_id']
         
         sql = """
-        SELECT o.order_id, o.order_type, o.amount, o.status, DATE_FORMAT(o.created_at, '%d %b %Y') as date, s.name as item_name, v.company_name as vendor_name, o.delivery_address
+        SELECT o.order_id, o.order_type, o.amount, o.status, o.payment_method, pvt.status as payment_status,
+               DATE_FORMAT(o.created_at, '%d %b %Y') as date, s.name as item_name, v.company_name as vendor_name, o.delivery_address
         FROM Orders o
         JOIN Services s ON o.item_id = s.service_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
+        JOIN Payments pvt ON o.order_id = pvt.order_id
         WHERE o.customer_id=%s AND o.order_type='Service'
         ORDER BY o.created_at DESC
         """
