@@ -131,7 +131,15 @@ function Checkout() {
               ))}
             </ul>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 'bold' }}>
-              <span style={{ color: 'white' }}>Total</span>
+              <span style={{ color: 'white' }}>Subtotal (Base Prices)</span>
+              <span style={{ color: 'var(--text-secondary)' }}>₹{(total / 1.05).toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1rem' }}>
+              <span style={{ color: '#ffd700' }}>Platform Commission (5%)</span>
+              <span style={{ color: '#ffd700' }}>₹{(total - (total / 1.05)).toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 'bold', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
+              <span style={{ color: 'white' }}>Total Amount</span>
               <span style={{ color: 'var(--primary-color)' }}>₹{total.toFixed(2)}</span>
             </div>
             {error && <p style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</p>}

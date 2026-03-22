@@ -96,16 +96,33 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
         cart_items = cursor.fetchall()
 
         for item in cart_items:
-            amount = float(item["price"]) * item["quantity"]
+            # Calculate pricing with 5% platform commission
+            base_amount = float(item["price"]) * item["quantity"]
+            commission_rate = 5.0  # 5% platform commission
+            commission_amount = round(base_amount * commission_rate / 100, 2)
+            total_amount = round(base_amount + commission_amount, 2)
+            
+            # Insert order with commission breakdown
             cursor.execute(
-                "INSERT INTO Orders (customer_id, vendor_id, order_type, item_id, quantity, amount, status) "
-                "VALUES (%s,%s,%s,%s,%s,%s,'Paid')",
-                (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"], amount)
+                """INSERT INTO Orders 
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, commission_amount, total_amount, status) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'Paid')""",
+                (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"], 
+                 total_amount, base_amount, commission_amount, total_amount)
             )
             order_db_id = cursor.lastrowid
+            
+            # Record payment with total amount
             cursor.execute(
                 "INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,'Success')",
-                (data.razorpay_payment_id, order_db_id, amount)
+                (data.razorpay_payment_id, order_db_id, total_amount)
+            )
+            
+            # Track commission for financial reporting
+            cursor.execute(
+                """INSERT INTO commissions (order_id, vendor_id, commission_amount, commission_rate, status) 
+                   VALUES (%s,%s,%s,%s,'Pending')""",
+                (order_db_id, item["vendor_id"], commission_amount, commission_rate)
             )
 
         # Clear the cart

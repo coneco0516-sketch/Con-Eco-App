@@ -61,14 +61,22 @@ function Cart() {
         ) : cartItems.length > 0 ? (
           <div className="glass-panel" style={{ padding: '2rem' }}>
             <ul style={{ listStyle: 'none', padding: 0 }}>
-              {cartItems.map((item) => (
+              {cartItems.map((item) => {
+                const baseSubtotal = item.price * item.quantity;
+                const commissionSubtotal = baseSubtotal * 0.05;
+                const totalSubtotal = baseSubtotal + commissionSubtotal;
+                return (
                 <li key={item.cart_id} style={{ padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <p style={{ margin: 0, color: 'white' }}>{item.name} (x{item.quantity})</p>
                     <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Type: {item.item_type}</p>
+                    <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                      <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0' }}>Base: ₹{baseSubtotal.toFixed(2)}</p>
+                      <p style={{ color: '#ffd700', margin: '0.25rem 0' }}>+ Commission (5%): ₹{commissionSubtotal.toFixed(2)}</p>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' }}>₹{item.price * item.quantity}</span>
+                    <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', minWidth: '100px', textAlign: 'right' }}>₹{totalSubtotal.toFixed(2)}</span>
                     <button 
                       onClick={() => removeFromCart(item.cart_id)}
                       className="btn danger"
@@ -78,7 +86,8 @@ function Cart() {
                     </button>
                   </div>
                 </li>
-              ))}
+              );
+              })
             </ul>
              <a href="/customer/checkout" className="btn" style={{ background: '#238636', display: 'inline-block', marginTop: '1.5rem' }}>Proceed to Checkout</a>
           </div>

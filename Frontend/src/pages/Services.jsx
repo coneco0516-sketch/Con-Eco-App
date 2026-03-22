@@ -57,7 +57,11 @@ function Services() {
             {services.map(s => (
               <div key={s.item_id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
                 <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{s.name}</h3>
-                <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '1rem' }}>₹{s.price}</p>
+                <div style={{ marginBottom: '1rem' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0' }}>Base: ₹{s.price}</p>
+                  <p style={{ color: '#ffd700', fontSize: '0.85rem', margin: '0.25rem 0' }}>Commission (5%): ₹{(s.price * 0.05).toFixed(2)}</p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0.5rem 0 0 0' }}>Total: ₹{(parseFloat(s.price) + parseFloat(s.price) * 0.05).toFixed(2)}</p>
+                </div>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'auto' }}>Provider: {s.vendor_name}</p>
                 <button 
                   onClick={() => bookService(s.item_id, 'Service', 1)}

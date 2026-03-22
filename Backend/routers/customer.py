@@ -75,10 +75,21 @@ def get_cart(user = Depends(check_customer)):
         cursor.execute(sql, (cust_id,))
         items = cursor.fetchall()
         
-        total = sum([(float(i['price']) * i['quantity']) for i in items])
+        # Calculate totals with 5% platform commission
+        base_total = sum([(float(i['price']) * i['quantity']) for i in items])
+        commission_rate = 5.0  # 5% platform commission
+        commission_total = round(base_total * commission_rate / 100, 2)
+        total = round(base_total + commission_total, 2)
         
         cursor.close()
-        return {"status": "success", "items": items, "total": total}
+        return {
+            "status": "success", 
+            "items": items, 
+            "base_total": round(base_total, 2),
+            "commission_total": commission_total,
+            "total": total,
+            "commission_rate": commission_rate
+        }
     finally:
         conn.close()
 

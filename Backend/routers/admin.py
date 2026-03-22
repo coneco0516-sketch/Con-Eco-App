@@ -22,7 +22,9 @@ def dashboard_stats(user = Depends(check_admin)):
             'pending_vendors': 0,
             'pending_customers': 0,
             'total_orders': 0,
-            'total_revenue': 0
+            'total_revenue': 0,
+            'total_commission': 0,
+            'pending_settlement': 0
         }
         
         cursor.execute("SELECT COUNT(*) as c FROM Vendors WHERE verification_status='Pending'")
@@ -40,6 +42,17 @@ def dashboard_stats(user = Depends(check_admin)):
         cursor.execute("SELECT SUM(amount) as s FROM Payments WHERE status='Completed'")
         res = cursor.fetchone()
         if res: stats['total_revenue'] = res['s'] or 0
+        
+        # Add commission stats
+        cursor.execute("SELECT SUM(commission_amount) as s FROM commissions WHERE status='Settled'")
+        res = cursor.fetchone()
+        if res and res.get('s'): 
+            stats['total_commission'] = float(res.get('s', 0)) or 0
+        
+        cursor.execute("SELECT SUM(commission_amount) as s FROM commissions WHERE status='Pending'")
+        res = cursor.fetchone()
+        if res and res.get('s'): 
+            stats['pending_settlement'] = float(res.get('s', 0)) or 0
         
         cursor.close()
         return {"status": "success", "stats": stats}
@@ -216,5 +229,76 @@ def get_payments(user = Depends(check_admin)):
         
         cursor.close()
         return {"status": "success", "stats": stats, "transactions": transactions}
+    finally:
+        conn.close()
+
+@router.get("/commissions")
+def get_commission_report(user = Depends(check_admin)):
+    """
+    Get commission earnings report for platform.
+    Shows total commissions earned, pending settlements, and breakdown by vendor.
+    """
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        # Overall commission stats
+        stats = {
+            'total_commission': 0,
+            'pending_commission': 0,
+            'settled_commission': 0,
+            'total_orders_with_commission': 0
+        }
+        
+        # Total commission from orders
+        cursor.execute("SELECT SUM(commission_amount) as total FROM commissions WHERE status='Settled'")
+        res = cursor.fetchone()
+        if res and res.get('total'): 
+            stats['settled_commission'] = float(res['total']) or 0
+        
+        cursor.execute("SELECT SUM(commission_amount) as total FROM commissions WHERE status='Pending'")
+        res = cursor.fetchone()
+        if res and res.get('total'): 
+            stats['pending_commission'] = float(res['total']) or 0
+        
+        stats['total_commission'] = stats['settled_commission'] + stats['pending_commission']
+        
+        cursor.execute("SELECT COUNT(*) as count FROM commissions")
+        res = cursor.fetchone()
+        if res: 
+            stats['total_orders_with_commission'] = res['count'] or 0
+        
+        # Commission breakdown by vendor
+        cursor.execute("""
+            SELECT v.vendor_id, v.company_name, 
+                   SUM(CASE WHEN c.status='Settled' THEN c.commission_amount ELSE 0 END) as settled,
+                   SUM(CASE WHEN c.status='Pending' THEN c.commission_amount ELSE 0 END) as pending,
+                   COUNT(c.commission_id) as orders
+            FROM commissions c
+            JOIN Vendors v ON c.vendor_id = v.vendor_id
+            GROUP BY v.vendor_id, v.company_name
+            ORDER BY settled DESC
+        """)
+        vendor_breakdown = cursor.fetchall()
+        
+        # Recent commissions
+        cursor.execute("""
+            SELECT c.commission_id, c.commission_amount, c.commission_rate, c.status,
+                   v.company_name, o.order_id, c.created_at
+            FROM commissions c
+            JOIN Vendors v ON c.vendor_id = v.vendor_id
+            JOIN Orders o ON c.order_id = o.order_id
+            ORDER BY c.created_at DESC
+            LIMIT 20
+        """)
+        recent_commissions = cursor.fetchall()
+        
+        cursor.close()
+        return {
+            "status": "success", 
+            "stats": stats,
+            "vendor_breakdown": vendor_breakdown,
+            "recent_commissions": recent_commissions
+        }
     finally:
         conn.close()
