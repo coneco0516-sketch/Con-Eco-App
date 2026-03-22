@@ -10,7 +10,7 @@ function About() {
         <h3 style={{ color: 'var(--primary-color)', marginTop: 0 }}>Project Overview through:</h3>
         {/* Using exact local absolute path as specified in original HTML, though browsers may block it for security */}
         <video style={{ width: '100%', borderRadius: '8px', marginTop: '1rem', border: '1px solid var(--surface-border)' }} controls>
-          <source src="C:\Users\demas\Desktop\8th Sem\Internship\Vrishank Soft\Internship Project\Social Media Marketing\Screen Recording 2026-03-16 221146.mp4" type="video/mp4" />
+          <source src="/project_overview.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </section>
