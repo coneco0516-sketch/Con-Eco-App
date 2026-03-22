@@ -7,12 +7,18 @@ This adds commission columns to Orders and creates a Commissions table for finan
 import mysql.connector
 from mysql.connector import Error
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Database connection config
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
-    'database': 'conecoapp'
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'user': os.environ.get('DB_USER', 'root'),
+    'password': os.environ.get('DB_PASS', ''),
+    'database': os.environ.get('DB_NAME', 'conecoapp'),
+    'port': int(os.environ.get('DB_PORT', 3306))
 }
 
 def add_commission_columns():
@@ -26,7 +32,7 @@ def add_commission_columns():
         # Check if columns exist
         cursor.execute("""
             SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_NAME='orders' AND COLUMN_NAME IN ('base_amount', 'commission_amount', 'total_amount')
+            WHERE TABLE_NAME='Orders' AND COLUMN_NAME IN ('base_amount', 'commission_amount', 'total_amount')
         """)
         
         existing_cols = [row[0] for row in cursor.fetchall()]
@@ -34,7 +40,7 @@ def add_commission_columns():
         # Add base_amount column
         if 'base_amount' not in existing_cols:
             cursor.execute("""
-                ALTER TABLE orders 
+                ALTER TABLE Orders 
                 ADD COLUMN base_amount DECIMAL(10,2) DEFAULT 0 AFTER amount
             """)
             print("✅ Added base_amount column")
@@ -42,7 +48,7 @@ def add_commission_columns():
         # Add commission_amount column
         if 'commission_amount' not in existing_cols:
             cursor.execute("""
-                ALTER TABLE orders 
+                ALTER TABLE Orders 
                 ADD COLUMN commission_amount DECIMAL(10,2) DEFAULT 0 AFTER base_amount
             """)
             print("✅ Added commission_amount column")
@@ -50,7 +56,7 @@ def add_commission_columns():
         # Add total_amount column
         if 'total_amount' not in existing_cols:
             cursor.execute("""
-                ALTER TABLE orders 
+                ALTER TABLE Orders 
                 ADD COLUMN total_amount DECIMAL(10,2) DEFAULT 0 AFTER commission_amount
             """)
             print("✅ Added total_amount column")
@@ -79,7 +85,7 @@ def create_commissions_table():
             CREATE TABLE IF NOT EXISTS commissions (
                 commission_id INT NOT NULL AUTO_INCREMENT,
                 order_id INT NOT NULL,
-                vendor_id INT NOT NULL,
+                vendor_id INT NULL,
                 commission_amount DECIMAL(10,2) NOT NULL,
                 commission_rate DECIMAL(5,2) DEFAULT 5.00,
                 status ENUM('Pending', 'Settled', 'Paid') DEFAULT 'Pending',
@@ -88,8 +94,8 @@ def create_commissions_table():
                 PRIMARY KEY (commission_id),
                 KEY order_id (order_id),
                 KEY vendor_id (vendor_id),
-                FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
-                FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id) ON DELETE SET NULL
+                FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
+                FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
         """)
         
@@ -116,7 +122,7 @@ def migrate_existing_orders():
         # For existing orders, assume 'amount' is the total (base + commission)
         # Calculate splitting as: base = amount / 1.05, commission = amount * 5/105
         cursor.execute("""
-            UPDATE orders 
+            UPDATE Orders 
             SET 
                 base_amount = ROUND(amount / 1.05, 2),
                 commission_amount = ROUND(amount - (amount / 1.05), 2),
