@@ -87,7 +87,15 @@ function Services() {
               .map(s => (
               <div key={s.item_id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
                 {s.image_url ? (
-                  <img src={s.image_url} alt={s.name} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '4px', marginBottom: '1rem' }} />
+                  <img 
+                    src={s.image_url} 
+                    alt={s.name} 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/600x400?text=" + encodeURIComponent(s.name);
+                    }}
+                    style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '4px', marginBottom: '1rem' }} 
+                  />
                 ) : (
                   <div style={{ width: '100%', height: '180px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>No Image</div>
                 )}

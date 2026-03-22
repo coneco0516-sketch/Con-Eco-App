@@ -89,7 +89,15 @@ function Products() {
               .map(p => (
               <div key={p.item_id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '4px', marginBottom: '1rem' }} />
+                  <img 
+                    src={p.image_url} 
+                    alt={p.name} 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/600x400?text=" + encodeURIComponent(p.name);
+                    }}
+                    style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '4px', marginBottom: '1rem' }} 
+                  />
                 ) : (
                   <div style={{ width: '100%', height: '180px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>No Image</div>
                 )}
