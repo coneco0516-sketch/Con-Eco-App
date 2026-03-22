@@ -28,14 +28,28 @@ function MyOrders() {
         ) : orders.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {orders.map(o => (
-              <div key={o.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h4 style={{ color: 'white' }}>Order #{o.id}</h4>
-                  <p style={{ color: 'var(--text-secondary)' }}>{new Date(o.created_at).toLocaleDateString()}</p>
+              <div key={o.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>{o.item_name} (Order #{o.order_id})</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.25rem 0' }}>Vendor: {o.vendor_name}</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Ordered on: {o.date}</p>
+                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.5rem 0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}><strong>Deliver to:</strong> {o.delivery_address || 'Not specified'}</p>
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>₹{o.total_amount}</p>
-                  <p style={{ color: o.status === 'Pending' ? '#d26d0e' : '#238636' }}>{o.status}</p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.1rem', margin: '0 0 0.5rem 0' }}>₹{o.amount}</p>
+                  <span style={{ 
+                    padding: '4px 8px', 
+                    borderRadius: '4px', 
+                    fontSize: '0.8rem', 
+                    fontWeight: 'bold',
+                    background: o.status === 'Pending' ? 'rgba(210, 109, 14, 0.2)' : o.status === 'Paid' ? 'rgba(35, 134, 54, 0.2)' : 'rgba(35, 134, 54, 0.5)', 
+                    color: o.status === 'Pending' ? '#d26d0e' : '#238636',
+                    border: `1px solid ${o.status === 'Pending' ? '#d26d0e' : '#238636'}`
+                  }}>
+                    {o.status}
+                  </span>
                 </div>
               </div>
             ))}

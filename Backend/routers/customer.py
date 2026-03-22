@@ -18,7 +18,7 @@ def get_products(user = Depends(check_customer)):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT p.product_id as item_id, p.name, p.description, p.price, 'Product' as type, v.company_name as vendor_name "
+        "SELECT p.product_id as item_id, p.name, p.description, p.price, p.image_url, p.unit, p.category, 'Product' as type, v.company_name as vendor_name "
         "FROM Products p JOIN Vendors v ON p.vendor_id = v.vendor_id "
         "WHERE v.verification_status='Verified'"
     )
@@ -32,7 +32,7 @@ def get_services(user = Depends(check_customer)):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT s.service_id as item_id, s.name, s.description, s.price, 'Service' as type, v.company_name as vendor_name "
+        "SELECT s.service_id as item_id, s.name, s.description, s.price, s.image_url, s.unit, s.category, 'Service' as type, v.company_name as vendor_name "
         "FROM Services s JOIN Vendors v ON s.vendor_id = v.vendor_id "
         "WHERE v.verification_status='Verified'"
     )
@@ -160,14 +160,19 @@ def checkout(data: CheckoutData, user = Depends(check_customer)):
             return {"status": "error", "message": "Cart is empty"}
             
         for item in cart_items:
-            amount = float(item['price']) * item['quantity']
-            cursor.execute("INSERT INTO Orders (customer_id, vendor_id, order_type, item_id, quantity, amount, status) VALUES (%s, %s, %s, %s, %s, %s, 'Pending')", 
-                           (cust_id, item['vendor_id'], item['item_type'], item['item_id'], item['quantity'], amount))
+            base_amount = float(item['price']) * item['quantity']
+            commission_amount = round(base_amount * 0.05, 2)
+            total_amount = round(base_amount + commission_amount, 2)
+            
+            cursor.execute("""
+                INSERT INTO Orders (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, commission_amount, total_amount, status, delivery_address) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending', %s)
+            """, (cust_id, item['vendor_id'], item['item_type'], item['item_id'], item['quantity'], total_amount, base_amount, commission_amount, total_amount, f"{data.address}, {data.city}, {data.state}"))
             order_id = cursor.lastrowid
             
             txn_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
             cursor.execute("INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s, %s, %s, 'Pending')",
-                           (txn_id, order_id, amount))
+                           (txn_id, order_id, total_amount))
         
         cursor.execute("DELETE FROM Cart WHERE customer_id=%s", (cust_id,))
         conn.commit()
@@ -185,7 +190,7 @@ def get_my_orders(user = Depends(check_customer)):
         cust_id = cursor.fetchone()['customer_id']
         
         sql = """
-        SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, DATE_FORMAT(o.created_at, '%d %b %Y') as date, p.name as item_name, v.company_name as vendor_name
+        SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, DATE_FORMAT(o.created_at, '%d %b %Y') as date, p.name as item_name, v.company_name as vendor_name, o.delivery_address
         FROM Orders o
         JOIN Products p ON o.item_id = p.product_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
@@ -208,7 +213,7 @@ def get_my_services(user = Depends(check_customer)):
         cust_id = cursor.fetchone()['customer_id']
         
         sql = """
-        SELECT o.order_id, o.order_type, o.amount, o.status, DATE_FORMAT(o.created_at, '%d %b %Y') as date, s.name as item_name, v.company_name as vendor_name
+        SELECT o.order_id, o.order_type, o.amount, o.status, DATE_FORMAT(o.created_at, '%d %b %Y') as date, s.name as item_name, v.company_name as vendor_name, o.delivery_address
         FROM Orders o
         JOIN Services s ON o.item_id = s.service_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id

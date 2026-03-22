@@ -54,9 +54,13 @@ function VendorOrders() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {orders.map(o => (
               <div key={o.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h4 style={{ color: 'white' }}>Order #{o.order_id} - {o.customer_name}</h4>
-                  <p style={{ color: 'var(--text-secondary)' }}>{new Date(o.created_at).toLocaleDateString()}</p>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>Order #{o.order_id} - {o.customer_name}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Ordered on: {o.date}</p>
+                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)' }}>
+                    <p style={{ color: 'white', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Delivery Address:</p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{o.delivery_address || 'No address provided'}</p>
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0 }}>₹{o.amount}</p>

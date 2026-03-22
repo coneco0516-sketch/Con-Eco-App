@@ -50,11 +50,11 @@ def catalogue(user = Depends(check_vendor)):
         
         items = []
         
-        cursor.execute("SELECT product_id as id, 'product' as type, name, description, price FROM Products WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT product_id as id, 'product' as type, name, description, price, image_url, unit FROM Products WHERE vendor_id=%s", (vendor_id,))
         for row in cursor.fetchall():
             items.append(row)
             
-        cursor.execute("SELECT service_id as id, 'service' as type, name, description, price FROM Services WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT service_id as id, 'service' as type, name, description, price, image_url, unit FROM Services WHERE vendor_id=%s", (vendor_id,))
         for row in cursor.fetchall():
             items.append(row)
             
@@ -69,6 +69,8 @@ def add_catalogue_item(
     name: str = Form(...),
     description: str = Form(...),
     price: float = Form(...),
+    image_url: str = Form(""),
+    unit: str = Form(""),
     user = Depends(check_vendor)
 ):
     conn = get_db_connection()
@@ -77,11 +79,11 @@ def add_catalogue_item(
         vendor_id = user['user_id']
         
         if item_type == 'product':
-            cursor.execute("INSERT INTO Products (vendor_id, category, name, description, price) VALUES (%s, %s, %s, %s, %s)",
-                           (vendor_id, 'General', name, description, price))
+            cursor.execute("INSERT INTO Products (vendor_id, category, name, description, price, image_url, unit) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                           (vendor_id, 'General', name, description, price, image_url, unit))
         else:
-            cursor.execute("INSERT INTO Services (vendor_id, category, name, description, price) VALUES (%s, %s, %s, %s, %s)",
-                           (vendor_id, 'General', name, description, price))
+            cursor.execute("INSERT INTO Services (vendor_id, category, name, description, price, image_url, unit) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                           (vendor_id, 'General', name, description, price, image_url, unit))
                            
         conn.commit()
         cursor.close()
@@ -126,7 +128,7 @@ def vendor_orders(user = Depends(check_vendor)):
             if st in stats: stats[st] = row['c']
             
         sql = """
-            SELECT o.order_id, u.name as customer_name, o.order_type, o.amount, o.status 
+            SELECT o.order_id, u.name as customer_name, o.order_type, o.amount, o.status, o.delivery_address, DATE_FORMAT(o.created_at, '%d %b %Y') as date 
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
             JOIN Users u ON c.customer_id = u.user_id

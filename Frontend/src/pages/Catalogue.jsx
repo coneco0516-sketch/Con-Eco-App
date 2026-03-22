@@ -5,7 +5,7 @@ function Catalogue() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [newItem, setNewItem] = useState({ type: 'product', name: '', description: '', price: '' });
+  const [newItem, setNewItem] = useState({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
 
   useEffect(() => {
     fetchCatalogue();
@@ -29,6 +29,8 @@ function Catalogue() {
     formData.append('name', newItem.name);
     formData.append('description', newItem.description);
     formData.append('price', newItem.price);
+    formData.append('image_url', newItem.image_url || '');
+    formData.append('unit', newItem.unit || '');
 
     try {
       const resp = await fetch('/api/vendor/catalogue', {
@@ -44,7 +46,7 @@ function Catalogue() {
       const data = await resp.json();
       if (data.status === 'success') {
         setShowModal(false);
-        setNewItem({ type: 'product', name: '', description: '', price: '' });
+        setNewItem({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
         fetchCatalogue();
       } else {
         alert("Error: " + (data.message || "Unknown error"));
@@ -91,6 +93,14 @@ function Catalogue() {
                   <label className="input-label">Price (₹)</label>
                   <input type="number" placeholder="0.00" className="input-field" required value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} />
                 </div>
+                <div>
+                  <label className="input-label">Unit</label>
+                  <input type="text" placeholder="e.g. per bag, per ton, per sq.ft" className="input-field" required value={newItem.unit} onChange={(e) => setNewItem({...newItem, unit: e.target.value})} />
+                </div>
+                <div>
+                  <label className="input-label">Image URL</label>
+                  <input type="url" placeholder="https://example.com/image.jpg" className="input-field" value={newItem.image_url} onChange={(e) => setNewItem({...newItem, image_url: e.target.value})} />
+                </div>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                   <button type="submit" className="btn" style={{ flex: 1 }}>Add Item</button>
                   <button type="button" className="btn danger" onClick={() => setShowModal(false)} style={{ flex: 1 }}>Cancel</button>
@@ -105,10 +115,16 @@ function Catalogue() {
         ) : items.length > 0 ? (
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
             {items.map(i => (
-              <div key={i.id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px' }}>
+              <div key={i.id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
+                {i.image_url ? (
+                  <img src={i.image_url} alt={i.name} style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '4px', marginBottom: '1rem' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '150px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>No Image</div>
+                )}
                 <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{i.name}</h3>
-                <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '1rem' }}>₹{i.price}</p>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Type: {i.type}</p>
+                <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '0.5rem' }}>₹{i.price} <span style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>{i.unit ? `/ ${i.unit}` : ''}</span></p>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', flex: 1 }}>{i.description}</p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Type: <span style={{textTransform: 'capitalize'}}>{i.type}</span></p>
               </div>
             ))}
           </div>

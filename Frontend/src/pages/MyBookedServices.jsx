@@ -28,15 +28,28 @@ function MyBookedServices() {
         ) : services.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {services.map(s => (
-              <div key={s.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h4 style={{ color: 'white' }}>Service Booking #{s.id}</h4>
-                  <p style={{ color: 'var(--text-secondary)' }}>Vendor: {s.vendor_name}</p>
-                  <p style={{ color: 'var(--text-secondary)' }}>{new Date(s.scheduled_date).toLocaleDateString()}</p>
+              <div key={s.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>{s.item_name} (Booking #{s.order_id})</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.25rem 0' }}>Vendor: {s.vendor_name}</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Booked on: {s.date}</p>
+                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.5rem 0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}><strong>Service Address:</strong> {s.delivery_address || 'Not specified'}</p>
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>₹{s.price}</p>
-                  <p style={{ color: '#238636' }}>{s.status}</p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.1rem', margin: '0 0 0.5rem 0' }}>₹{s.amount}</p>
+                  <span style={{ 
+                    padding: '4px 8px', 
+                    borderRadius: '4px', 
+                    fontSize: '0.8rem', 
+                    fontWeight: 'bold',
+                    background: s.status === 'Pending' ? 'rgba(210, 109, 14, 0.2)' : s.status === 'Paid' ? 'rgba(35, 134, 54, 0.2)' : 'rgba(35, 134, 54, 0.5)', 
+                    color: s.status === 'Pending' ? '#d26d0e' : '#238636',
+                    border: `1px solid ${s.status === 'Pending' ? '#d26d0e' : '#238636'}`
+                  }}>
+                    {s.status}
+                  </span>
                 </div>
               </div>
             ))}

@@ -21,6 +21,7 @@ function Checkout() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState('');
+  const [address, setAddress] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,6 +37,10 @@ function Checkout() {
 
   const handlePayment = async () => {
     if (cart.length === 0) return;
+    if (!address.trim()) {
+      setError('Please enter a delivery address.');
+      return;
+    }
     setPaying(true);
     setError('');
 
@@ -81,6 +86,7 @@ function Checkout() {
             razorpay_order_id:   response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature:  response.razorpay_signature,
+            delivery_address:    address,
           })
         });
         const verifyData = await verifyRes.json();
@@ -142,6 +148,27 @@ function Checkout() {
               <span style={{ color: 'white' }}>Total Amount</span>
               <span style={{ color: 'var(--primary-color)' }}>₹{total.toFixed(2)}</span>
             </div>
+            
+            <div style={{ marginBottom: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
+              <label style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Delivery Address (Site Location) <span style={{color: 'var(--danger-color)'}}>*</span></label>
+              <textarea 
+                value={address} 
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Enter complete delivery address, pin code, and contact person..."
+                rows="3"
+                style={{
+                  width: '95%',
+                  padding: '0.75rem',
+                  borderRadius: '6px',
+                  border: '1px solid var(--surface-border)',
+                  background: 'rgba(0, 0, 0, 0.2)',
+                  color: 'white',
+                  fontFamily: 'inherit',
+                  resize: 'vertical'
+                }}
+              ></textarea>
+            </div>
+
             {error && <p style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</p>}
             <button onClick={handlePayment} disabled={paying} className="btn" style={{ width: '100%', fontSize: '1.1rem', padding: '0.9rem' }}>
               {paying ? 'Opening Payment Gateway...' : `Pay ₹${total.toFixed(2)} via Razorpay`}

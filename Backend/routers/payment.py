@@ -53,6 +53,7 @@ class VerifyPaymentRequest(BaseModel):
     razorpay_order_id:   str
     razorpay_payment_id: str
     razorpay_signature:  str
+    delivery_address:    str = ""
 
 @router.post("/verify")
 def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_customer)):
@@ -102,13 +103,13 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
             commission_amount = round(base_amount * commission_rate / 100, 2)
             total_amount = round(base_amount + commission_amount, 2)
             
-            # Insert order with commission breakdown
+            # Insert order with commission breakdown and delivery address
             cursor.execute(
                 """INSERT INTO Orders 
-                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, commission_amount, total_amount, status) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'Paid')""",
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, commission_amount, total_amount, status, delivery_address) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'Paid',%s)""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"], 
-                 total_amount, base_amount, commission_amount, total_amount)
+                 total_amount, base_amount, commission_amount, total_amount, data.delivery_address)
             )
             order_db_id = cursor.lastrowid
             

@@ -3,6 +3,8 @@ import CustomerSidebar from '../components/CustomerSidebar';
 
 function Services() {
   const [services, setServices] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -49,16 +51,49 @@ function Services() {
             {message.text}
           </div>
         )}
+
+        {/* --- Search & Filter Bar --- */}
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          <input 
+            type="text" 
+            placeholder="Search services..." 
+            className="input-field" 
+            style={{ flex: 1, minWidth: '200px' }}
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+          <select 
+            className="input-field" 
+            style={{ width: '200px' }} 
+            value={category} 
+            onChange={e => setCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            <option value="Labor">General Labor</option>
+            <option value="Plumbing">Plumbing Services</option>
+            <option value="Electrical">Electrical Work</option>
+            <option value="Architecture">Architecture & Design</option>
+            <option value="Other">Other Services</option>
+          </select>
+        </div>
         
         {loading ? (
           <p>Loading services...</p>
         ) : services.length > 0 ? (
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-            {services.map(s => (
+            {services
+              .filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.description?.toLowerCase().includes(searchTerm.toLowerCase()))
+              .filter(s => category === "" || s.category === category)
+              .map(s => (
               <div key={s.item_id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
+                {s.image_url ? (
+                  <img src={s.image_url} alt={s.name} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '4px', marginBottom: '1rem' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '180px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>No Image</div>
+                )}
                 <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{s.name}</h3>
                 <div style={{ marginBottom: '1rem' }}>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0' }}>Base: ₹{s.price}</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0' }}>Base: ₹{s.price} {s.unit ? `/ ${s.unit}` : ''}</p>
                   <p style={{ color: '#ffd700', fontSize: '0.85rem', margin: '0.25rem 0' }}>Commission (5%): ₹{(s.price * 0.05).toFixed(2)}</p>
                   <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0.5rem 0 0 0' }}>Total: ₹{(parseFloat(s.price) + parseFloat(s.price) * 0.05).toFixed(2)}</p>
                 </div>
