@@ -4,25 +4,22 @@
 
 ---
 
-## 1. Delivery Address Capture during Checkout (🚨 CRITICAL)
-- **The Problem:** Right now on `Checkout.jsx`, the user reviews their cart and clicks "Pay via Razorpay". The system never asks them where to deliver the materials.
-- **Why it's needed:** Construction materials are heavy. Vendors need the exact site location, city, and pincode to calculate freight and actually deliver the goods.
-- **The Fix (v0.2):** Add an "Enter Delivery Address" form right before the Razorpay payment button in the checkout flow.
+## ✅ 1. Delivery Address Capture during Checkout (COMPLETED)
+- **Status:** Fully Implemented.
+- **Details:** Added a "Delivery Address" input field to `Checkout.jsx`. The address is now captured and stored in the `Orders` table. Vendors can view this in their order dashboard, and customers can see it in their order history.
 
-## 2. Product Images and Unit Specifications
-- **The Problem:** In `Products.jsx`, items are currently just text boxes showing `Name`, `Price`, and `Vendor`.
-- **Why it's needed:** A real contractor will not buy "Cement" without seeing a photo of the bag, knowing the brand, or knowing if the price is *per bag* or *per ton*.
-- **The Fix (v0.2):** Add support for item images, a description field, and a "Unit" field (e.g., `₹400 / bag`, `₹7500 / ton`).
+## ✅ 2. Product Images and Unit Specifications (COMPLETED)
+- **Status:** Fully Implemented.
+- **Details:** Added `image_url` and `unit` fields to the `Products` and `Services` database tables. Updated the Vendor Catalogue to allow these fields to be entered. Products and services now display their images and unit pricing (e.g., ₹400 / bag) on the marketplace.
 
-## 3. Search and Category Filters
-- **The Problem:** Customers currently see a massive, unorganized list of everything.
-- **Why it's needed:** If there are 5 vendors who each upload 20 items, a customer has to scroll through 100 random items to find TMT Steel, leading to immediate drop-off.
-- **The Fix (v0.2):** Add a simple Search Bar and category dropdowns (e.g., Cement, Steel, Bricks, Electrical) to `Products.jsx`.
+## ✅ 3. Search and Category Filters (COMPLETED)
+- **Status:** Fully Implemented.
+- **Details:** Added a Search bar and Category filter to both `Products.jsx` and `Services.jsx`. Customers can now quickly find items by name, description, or category.
 
-## 4. Basic Order Status Tracking
-- **The Problem:** Once a payment is successful, there is no granular way to track what happens next.
-- **Why it's needed:** Buyers spend lakhs on materials. They need real-time status updates from the vendor to coordinate site activities and avoid costly construction delays.
-- **The Fix (v0.2):** Modify `VendorOrders` so vendors can update an order's status (`Pending` -> `Shipped` -> `Delivered`), and ensure `MyOrders` shows this status to the customer.
+## ✅ 4. Basic Order Status Tracking (COMPLETED)
+- **Status:** Fully Implemented.
+- **Details:** Vendors can now update order status through several stages: `Paid` -> `Shipped` -> `Out for Delivery` -> `Delivered`. These updates are reflected in real-time on the customer's `My Orders` and `My Booked Services` screens.
 
 ---
-*End of v0.2 Planned Features.*
+*v0.2 Release - Complete*
+
