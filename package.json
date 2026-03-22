@@ -1,9 +1,0 @@
-{
-  "name": "con-eco-mono",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Monorepo root to trigger Nixpacks Node installation",
-  "scripts": {
-    "build": "cd Frontend && npm install && npm run build"
-  }
-}
