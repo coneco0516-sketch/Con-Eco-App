@@ -188,6 +188,9 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
         conn.commit()
         cursor.close()
         return {"status": "success"}
+    except Exception as e:
+        conn.rollback()
+        return {"status": "error", "message": str(e)}
     finally:
         conn.close()
 

@@ -28,14 +28,23 @@ function VendorOrders() {
         body: JSON.stringify({ order_id: orderId, status: newStatus }),
         credentials: 'include'
       });
-      const data = await resp.json();
-      if (data.status === 'success') {
-        alert("Order status updated to " + newStatus);
-        fetchOrders();
+      
+      const contentType = resp.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await resp.json();
+        if (data.status === 'success') {
+          alert("Order status updated to " + (newStatus === 'Processing' ? 'Accepted' : newStatus));
+          fetchOrders();
+        } else {
+          alert("Error: " + data.message);
+        }
       } else {
-        alert("Error: " + data.message);
+        const text = await resp.text();
+        console.error("Server returned non-JSON response:", text);
+        alert(`Server error (${resp.status}). See console for details.`);
       }
     } catch (err) {
+      console.error("Status update failed:", err);
       alert("Network error updating status.");
     }
   };
