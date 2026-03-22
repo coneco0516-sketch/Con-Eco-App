@@ -35,6 +35,8 @@ function Checkout() {
       .catch(() => setLoading(false));
   }, []);
 
+  const [paymentMethod, setPaymentMethod] = useState('UPI');
+
   const handlePayment = async () => {
     if (cart.length === 0) return;
     if (!address.trim()) {
@@ -44,6 +46,32 @@ function Checkout() {
     setPaying(true);
     setError('');
 
+    if (paymentMethod === 'COD' || paymentMethod === 'Pay Later') {
+      try {
+        const res = await fetch('/api/payment/place_order_offline', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            delivery_address: address,
+            payment_method: paymentMethod
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          navigate('/customer/order-success');
+        } else {
+          setError(data.detail || 'Failed to place order.');
+          setPaying(false);
+        }
+      } catch (err) {
+        setError('Connection error. Please try again.');
+        setPaying(false);
+      }
+      return;
+    }
+
+    // Razorpay Flow for Card and UPI
     // 1. Ensure Razorpay JS SDK is loaded
     const loaded = await loadRazorpayScript();
     if (!loaded) {
@@ -87,6 +115,7 @@ function Checkout() {
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature:  response.razorpay_signature,
             delivery_address:    address,
+            payment_method:      paymentMethod
           })
         });
         const verifyData = await verifyRes.json();
@@ -103,6 +132,13 @@ function Checkout() {
       }
     };
 
+    // If we want to hint Razorpay to prefer a certain method:
+    if (paymentMethod === 'UPI') {
+      options.config = { display: { blocks: { utp: { name: 'Pay via UPI', methods: ['upi'] } }, sequence: ['block.utp'], preferences: { show_default_blocks: true } } };
+    } else if (paymentMethod === 'Card') {
+      options.config = { display: { blocks: { cards: { name: 'Pay via Card', methods: ['card'] } }, sequence: ['block.cards'], preferences: { show_default_blocks: true } } };
+    }
+
     const rzp = new window.Razorpay(options);
     rzp.on('payment.failed', (response) => {
       setError(`Payment failed: ${response.error.description}`);
@@ -111,12 +147,19 @@ function Checkout() {
     rzp.open();
   };
 
+  const paymentOptions = [
+    { id: 'UPI', label: 'UPI (PhonePe, GPay)', icon: '📱' },
+    { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
+    { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
+    { id: 'Pay Later', label: 'Pay Later (Request Credit)', icon: '📅' },
+  ];
+
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Checkout</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Review your order and pay securely via Razorpay.</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Review your order and select a payment method.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
         {loading ? (
@@ -164,17 +207,59 @@ function Checkout() {
                   background: 'rgba(0, 0, 0, 0.2)',
                   color: 'white',
                   fontFamily: 'inherit',
-                  resize: 'vertical'
+                  resize: 'vertical',
+                  marginBottom: '1rem'
                 }}
               ></textarea>
             </div>
 
+            <div style={{ marginBottom: '2rem' }}>
+              <label style={{ color: 'white', display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>Select Payment Method</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {paymentOptions.map((opt) => (
+                  <div 
+                    key={opt.id}
+                    onClick={() => setPaymentMethod(opt.id)}
+                    style={{
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      border: `2px solid ${paymentMethod === opt.id ? 'var(--primary-color)' : 'var(--surface-border)'}`,
+                      background: paymentMethod === opt.id ? 'rgba(46, 160, 67, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.5rem' }}>{opt.icon}</span>
+                    <span style={{ color: paymentMethod === opt.id ? 'white' : 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>{opt.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {error && <p style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</p>}
-            <button onClick={handlePayment} disabled={paying} className="btn" style={{ width: '100%', fontSize: '1.1rem', padding: '0.9rem' }}>
-              {paying ? 'Opening Payment Gateway...' : `Pay ₹${total.toFixed(2)} via Razorpay`}
+            
+            <button 
+              onClick={handlePayment} 
+              disabled={paying} 
+              className="btn" 
+              style={{ width: '100%', fontSize: '1.1rem', padding: '0.9rem' }}
+            >
+              {paying ? 'Processing...' : (
+                paymentMethod === 'COD' ? 'Place Order (COD)' : 
+                paymentMethod === 'Pay Later' ? 'Request Credit' : 
+                `Pay ₹${total.toFixed(2)} via Razorpay`
+              )}
             </button>
+
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '1rem', textAlign: 'center' }}>
-              🔒 Secured by Razorpay. Supports UPI, Cards, Net Banking & Wallets.
+              {paymentMethod === 'COD' ? '💵 You will pay when the items are delivered.' : 
+               paymentMethod === 'Pay Later' ? '📅 Subject to vendor credit approval.' :
+               '🔒 Secured by Razorpay. Supports UPI, Cards, Net Banking & Wallets.'}
             </p>
           </div>
         )}

@@ -48,40 +48,13 @@ def create_razorpay_order(data: CreateOrderRequest, user=Depends(check_customer)
     return {"status": "success", "order_id": order["id"], "key_id": RAZORPAY_KEY_ID}
 
 
-# ── 2. Verify Payment Signature & Finalize DB Records ────────────────────────
-class VerifyPaymentRequest(BaseModel):
-    razorpay_order_id:   str
-    razorpay_payment_id: str
-    razorpay_signature:  str
-    delivery_address:    str = ""
-
-@router.post("/verify")
-def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_customer)):
+def finalize_order(cust_id, delivery_address, payment_method, payment_status, txn_id):
     """
-    Called by the React app after the Razorpay popup completes.
-    Verifies the HMAC-SHA256 signature from Razorpay before clearing the cart.
+    Common logic to move items from cart to orders and record payments.
     """
-    # Signature verification ─ DO NOT skip this step in production!
-    body        = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
-    expected_sig= hmac.new(
-        RAZORPAY_KEY_SECRET.encode("utf-8"),
-        body.encode("utf-8"),
-        hashlib.sha256
-    ).hexdigest()
-
-    if expected_sig != data.razorpay_signature:
-        raise HTTPException(status_code=400, detail="Payment signature verification failed.")
-
-    # Mark all cart items as orders in the database
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user["user_id"],))
-        row = cursor.fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Customer not found")
-        cust_id = row["customer_id"]
-
         # Pull the cart
         cursor.execute(
             """
@@ -96,6 +69,9 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
         )
         cart_items = cursor.fetchall()
 
+        if not cart_items:
+            return False, "Cart is empty"
+
         for item in cart_items:
             # Calculate pricing with 5% platform commission
             base_amount = float(item["price"]) * item["quantity"]
@@ -103,20 +79,24 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
             commission_amount = round(base_amount * commission_rate / 100, 2)
             total_amount = round(base_amount + commission_amount, 2)
             
-            # Insert order with commission breakdown and delivery address
+            # Insert order with commission breakdown, delivery address and payment method
+            order_status = 'Pending' if payment_method in ['COD', 'Pay Later'] else 'Processing'
+            if payment_method == 'Pay Later':
+                order_status = 'Pending' # Credit request needs approval usually
+
             cursor.execute(
                 """INSERT INTO Orders 
-                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, commission_amount, total_amount, status, delivery_address) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'Paid',%s)""",
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"], 
-                 total_amount, base_amount, commission_amount, total_amount, data.delivery_address)
+                 total_amount, base_amount, commission_amount, total_amount, order_status, delivery_address, payment_method)
             )
             order_db_id = cursor.lastrowid
             
             # Record payment with total amount
             cursor.execute(
-                "INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,'Success')",
-                (data.razorpay_payment_id, order_db_id, total_amount)
+                "INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,%s)",
+                (txn_id, order_db_id, total_amount, payment_status)
             )
             
             # Track commission for financial reporting
@@ -130,6 +110,99 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
         cursor.execute("DELETE FROM Cart WHERE customer_id=%s", (cust_id,))
         conn.commit()
         cursor.close()
-        return {"status": "success", "message": "Payment verified and orders placed."}
+        return True, "Orders placed successfully"
+    except Exception as e:
+        conn.rollback()
+        return False, str(e)
     finally:
         conn.close()
+
+
+# ── 2. Verify Razorpay Payment Signature & Finalize ──────────────────────────
+class VerifyPaymentRequest(BaseModel):
+    razorpay_order_id:   str
+    razorpay_payment_id: str
+    razorpay_signature:  str
+    delivery_address:    str = ""
+    payment_method:      str = "Card"
+
+@router.post("/verify")
+def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_customer)):
+    """
+    Called after Razorpay popup completes.
+    """
+    # Signature verification
+    body        = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
+    expected_sig= hmac.new(
+        RAZORPAY_KEY_SECRET.encode("utf-8"),
+        body.encode("utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+
+    if expected_sig != data.razorpay_signature:
+        raise HTTPException(status_code=400, detail="Payment signature verification failed.")
+
+    # Get customer_id
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user["user_id"],))
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    if not row:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    success, message = finalize_order(
+        row["customer_id"], 
+        data.delivery_address, 
+        data.payment_method, 
+        'Completed', 
+        data.razorpay_payment_id
+    )
+    
+    if success:
+        return {"status": "success", "message": message}
+    else:
+        raise HTTPException(status_code=500, detail=message)
+
+
+# ── 3. Place Order Offline (COD / Pay Later) ─────────────────────────────────
+class OfflineOrderRequest(BaseModel):
+    delivery_address: str
+    payment_method:   str # 'COD' or 'Pay Later'
+
+@router.post("/place_order_offline")
+def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer)):
+    """
+    Handles COD and Pay Later (Request Credit) orders.
+    """
+    if data.payment_method not in ['COD', 'Pay Later']:
+        raise HTTPException(status_code=400, detail="Invalid offline payment method.")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user["user_id"],))
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    if not row:
+        raise HTTPException(status_code=404, detail="Customer not found")
+
+    import random
+    import string
+    txn_id = f"{data.payment_method.upper().replace(' ', '_')}-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    
+    success, message = finalize_order(
+        row["customer_id"], 
+        data.delivery_address, 
+        data.payment_method, 
+        'Pending', 
+        txn_id
+    )
+    
+    if success:
+        return {"status": "success", "message": message}
+    else:
+        raise HTTPException(status_code=500, detail=message)
