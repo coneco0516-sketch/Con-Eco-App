@@ -2,9 +2,9 @@
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app/Frontend
 
-# Copy lockfile and package.json to use 'npm ci'
+# Copy lockfile and package.json
 COPY Frontend/package*.json ./
-RUN npm ci --no-audit --no-fund
+RUN npm install --no-audit --no-fund
 
 # Copy all frontend source files
 COPY Frontend/ ./
