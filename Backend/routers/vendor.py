@@ -153,7 +153,7 @@ def vendor_orders(user = Depends(check_vendor)):
             if st in stats: stats[st] = row['c']
             
         sql = """
-            SELECT o.order_id, u.name as customer_name, o.order_type, o.amount, o.status, o.delivery_address, DATE_FORMAT(o.created_at, '%d %b %Y') as date 
+            SELECT o.order_id, u.name as customer_name, o.order_type, o.amount, o.status, o.delivery_address, o.payment_method, DATE_FORMAT(o.created_at, '%d %b %Y') as date 
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
             JOIN Users u ON c.customer_id = u.user_id

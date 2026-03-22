@@ -57,24 +57,56 @@ function VendorOrders() {
                 <div style={{ flex: 1 }}>
                   <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>Order #{o.order_id} - {o.customer_name}</h4>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Ordered on: {o.date}</p>
-                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)', marginBottom: '0.5rem' }}>
                     <p style={{ color: 'white', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Delivery Address:</p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{o.delivery_address || 'No address provided'}</p>
                   </div>
+                  <p style={{ color: 'white', fontSize: '0.9rem', marginBottom: 0 }}>
+                    Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method}</span>
+                  </p>
                 </div>
-                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0 }}>₹{o.amount}</p>
-                  <select 
-                    defaultValue={o.status}
-                    onChange={(e) => handleStatusChange(o.order_id, e.target.value)}
-                    style={{ background: 'var(--surface-bg)', color: 'white', border: '1px solid var(--surface-border)', padding: '4px' }}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Out for Delivery">Out for Delivery</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
+                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '180px' }}>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0, fontSize: '1.2rem' }}>₹{o.amount}</p>
+                  
+                  {o.payment_method === 'Pay Later' && o.status === 'Pending' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <p style={{ color: '#ffd700', fontSize: '0.8rem', margin: 0, fontWeight: 'bold' }}>CREDIT REQUEST</p>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                          onClick={() => handleStatusChange(o.order_id, 'Processing')}
+                          style={{ background: 'var(--primary-color)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', flex: 1 }}
+                        >
+                          Approve Credit
+                        </button>
+                        <button 
+                          onClick={() => handleStatusChange(o.order_id, 'Cancelled')}
+                          style={{ background: 'var(--danger-color)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', flex: 1 }}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <select 
+                      defaultValue={o.status}
+                      onChange={(e) => handleStatusChange(o.order_id, e.target.value)}
+                      style={{ 
+                        background: 'rgba(0,0,0,0.3)', 
+                        color: 'white', 
+                        border: '1px solid var(--surface-border)', 
+                        padding: '8px',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Processing">Processing / Accepted</option>
+                      <option value="Shipped">Shipped</option>
+                      <option value="Out for Delivery">Out for Delivery</option>
+                      <option value="Delivered">Delivered</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                  )}
                 </div>
               </div>
             ))}
