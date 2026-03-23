@@ -26,8 +26,18 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      {!isLoggedIn && <Link to="/" className="nav-brand">ConEco</Link>}
-      {isLoggedIn && <span className="nav-brand">ConEco</span>}
+      {!isLoggedIn && (
+        <Link to="/" className="nav-brand">
+          <img src="/Logo.svg" alt="ConEco Logo" className="nav-logo" />
+          <span>ConEco</span>
+        </Link>
+      )}
+      {isLoggedIn && (
+        <div className="nav-brand">
+          <img src="/Logo.svg" alt="ConEco Logo" className="nav-logo" />
+          <span>ConEco</span>
+        </div>
+      )}
       <div className="nav-links">
         {!isLoggedIn && (
           <>

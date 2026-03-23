@@ -443,3 +443,35 @@ def get_notification_preferences(user_id):
     except Exception as e:
         print(f"Error fetching notification preferences: {str(e)}")
         return {}
+
+def send_contact_form(name, email, message):
+    """
+    Send contact form message to admin
+    """
+    admin_email = "coneco0516@gmail.com"
+    subject = f"New Contact Form Submission from {name}"
+    
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #3498db; margin-top: 0;">New Contact Form Submission</h2>
+                <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+                    <p style="margin: 0 0 10px 0;"><strong>From:</strong> {name}</p>
+                    <p style="margin: 0;"><strong>Email:</strong> {email}</p>
+                </div>
+                <div style="padding: 10px 0;">
+                    <p style="font-weight: bold; margin-bottom: 10px; color: #555;">Message:</p>
+                    <div style="white-space: pre-wrap; line-height: 1.6; color: #333;">{message}</div>
+                </div>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">
+                        Submitted at: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+                    </p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+    
+    return send_email(admin_email, subject, html_content)

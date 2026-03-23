@@ -43,6 +43,21 @@ async def not_authorized_handler(request: Request, exc):
     # to perfectly match our existing frontend JS logic!
     return JSONResponse(status_code=200, content={"status": "not_logged_in", "detail": str(exc.detail)})
 
+from pydantic import BaseModel
+from email_service import send_contact_form
+
+class ContactForm(BaseModel):
+    name: str
+    email: str
+    message: str
+
+@app.post("/api/contact")
+async def contact_us(form: ContactForm):
+    success = send_contact_form(form.name, form.email, form.message)
+    if success:
+        return {"status": "success", "message": "Email sent successfully"}
+    return JSONResponse(status_code=500, content={"status": "error", "message": "Failed to send email"})
+
 from routers import auth, admin, customer, vendor, payment
 
 # Mount routers here

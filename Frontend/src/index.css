@@ -82,6 +82,16 @@ body {
   background: linear-gradient(90deg, #2ea043, #7ee787);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.nav-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px var(--accent-glow));
 }
 
 .nav-links {
