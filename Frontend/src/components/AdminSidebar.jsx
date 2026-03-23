@@ -11,6 +11,7 @@ function AdminSidebar() {
         <li><Link to="/admin/orders" className="nav-item">Orders Details</Link></li>
         <li><Link to="/admin/payments" className="nav-item">Payments</Link></li>
         <li><Link to="/admin/profile" className="nav-item">My Account</Link></li>
+        <li><Link to="/admin/contact-messages" className="nav-item">Contact Messages</Link></li>
         <li><Link to="/admin/settings" className="nav-item">Platform Settings</Link></li>
       </ul>
     </aside>

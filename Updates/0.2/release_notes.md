@@ -42,3 +42,6 @@
 - `Orders`: ADD COLUMN `delivery_address` (TEXT).
 - `Products`/`Services`: ADD COLUMN `image_url` (TEXT), `description` (TEXT), `unit` (VARCHAR(50)).
 - NEW TABLES: `commissions`, `notification_preferences`.
+
+---
+*End of v0.2 Documentation.*

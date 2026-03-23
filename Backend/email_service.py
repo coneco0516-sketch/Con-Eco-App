@@ -475,3 +475,78 @@ def send_contact_form(name, email, message):
     """
     
     return send_email(admin_email, subject, html_content)
+
+
+def send_contact_acknowledgment(name, email):
+    """
+    Send acknowledgment email to the user after contact form submission
+    """
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #2ecc71; margin-top: 0;">Thank You for Contacting Us!</h2>
+                <p>Hello {name},</p>
+                
+                <p>We have received your message and our team is reviewing it. We will get back to you as soon as possible.</p>
+                
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2ecc71;">
+                    <p style="margin: 0;"><strong>What happens next?</strong></p>
+                    <ul style="color: #555; line-height: 1.8;">
+                        <li>Our support team will review your message</li>
+                        <li>You will receive a response via email</li>
+                        <li>Typical response time: 24-48 hours</li>
+                    </ul>
+                </div>
+                
+                <p>If you have any urgent queries, feel free to reach us at <a href="mailto:coneco0516@gmail.com" style="color: #3498db;">coneco0516@gmail.com</a></p>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">
+                        &copy; {datetime.now().year} {APP_NAME}. This is an automated notification. Please don't reply to this email.
+                    </p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+    
+    return send_email(email, f"{APP_NAME} - We Received Your Message", html_content)
+
+
+def send_contact_reply(name, email, original_message, reply_message):
+    """
+    Send admin reply to a contact message as an official branded email
+    """
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #3498db; margin-top: 0;">Response from {APP_NAME} Support</h2>
+                <p>Hello {name},</p>
+                
+                <p>Thank you for reaching out to us. Here is our response to your enquiry:</p>
+                
+                <div style="background-color: #eaf7ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3498db;">
+                    <p style="font-weight: bold; margin-top: 0; color: #333;">Our Response:</p>
+                    <div style="white-space: pre-wrap; line-height: 1.6; color: #333;">{reply_message}</div>
+                </div>
+                
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="font-weight: bold; margin-top: 0; color: #888; font-size: 0.9rem;">Your Original Message:</p>
+                    <div style="white-space: pre-wrap; line-height: 1.5; color: #999; font-size: 0.9rem;">{original_message}</div>
+                </div>
+                
+                <p>If you have further questions, feel free to reply to this email or contact us at <a href="mailto:coneco0516@gmail.com" style="color: #3498db;">coneco0516@gmail.com</a></p>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">
+                        &copy; {datetime.now().year} {APP_NAME}. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+    
+    return send_email(email, f"{APP_NAME} - Response to Your Enquiry", html_content)

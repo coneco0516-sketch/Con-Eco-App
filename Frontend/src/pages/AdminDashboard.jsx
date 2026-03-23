@@ -84,6 +84,12 @@ function AdminDashboard() {
               <p style={{ height: '1.1rem', marginBottom: '15px' }}></p>
               <Link to="/admin/analytics" className="btn" style={{ background: '#c1396a' }}>View Analytics</Link>
             </div>
+
+            <div className="stat-card glass-panel" style={{ flex: 1 }}>
+              <h4 style={{ color: 'white', marginBottom: '10px' }}>Contact Messages</h4>
+              <p style={{ height: '1.1rem', marginBottom: '15px' }}></p>
+              <Link to="/admin/contact-messages" className="btn" style={{ background: '#3498db' }}>View Messages</Link>
+            </div>
           </div>
         </div>
       </main>

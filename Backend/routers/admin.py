@@ -3,7 +3,7 @@ from database import get_db_connection
 from routers.auth import get_current_user_from_cookie
 from pydantic import BaseModel
 from typing import Optional
-from email_service import send_qc_status_notification, get_notification_preferences
+from email_service import send_qc_status_notification, get_notification_preferences, send_contact_reply
 
 router = APIRouter()
 
@@ -300,5 +300,100 @@ def get_commission_report(user = Depends(check_admin)):
             "vendor_breakdown": vendor_breakdown,
             "recent_commissions": recent_commissions
         }
+    finally:
+        conn.close()
+
+# ===== CONTACT MESSAGES =====
+
+@router.get("/contact_messages")
+def get_contact_messages(user = Depends(check_admin)):
+    """Get all contact form messages"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT message_id, name, email, message, status,
+                   DATE_FORMAT(created_at, '%d %b %Y %H:%i') as date
+            FROM contactmessages
+            ORDER BY created_at DESC
+        """)
+        messages = cursor.fetchall()
+        
+        # Get counts
+        cursor.execute("SELECT COUNT(*) as c FROM contactmessages WHERE status='Unread'")
+        res = cursor.fetchone()
+        unread_count = res['c'] if res else 0
+        
+        cursor.execute("SELECT COUNT(*) as c FROM contactmessages")
+        res = cursor.fetchone()
+        total_count = res['c'] if res else 0
+        
+        cursor.close()
+        return {
+            "status": "success",
+            "messages": messages,
+            "unread_count": unread_count,
+            "total_count": total_count
+        }
+    finally:
+        conn.close()
+
+class ContactStatusUpdate(BaseModel):
+    message_id: int
+    status: str
+
+@router.post("/contact_messages/update_status")
+def update_contact_status(data: ContactStatusUpdate, user = Depends(check_admin)):
+    """Update contact message status (Unread, Read, Replied)"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE contactmessages SET status=%s WHERE message_id=%s",
+            (data.status, data.message_id)
+        )
+        conn.commit()
+        cursor.close()
+        return {"status": "success"}
+    finally:
+        conn.close()
+
+class ContactReply(BaseModel):
+    message_id: int
+    reply: str
+
+@router.post("/contact_messages/reply")
+def reply_to_contact(data: ContactReply, user = Depends(check_admin)):
+    """Reply to a contact message - sends branded email to user"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get the original message
+        cursor.execute(
+            "SELECT name, email, message FROM contactmessages WHERE message_id=%s",
+            (data.message_id,)
+        )
+        msg = cursor.fetchone()
+        
+        if not msg:
+            raise HTTPException(status_code=404, detail="Message not found")
+        
+        # Send official reply email
+        send_contact_reply(msg['name'], msg['email'], msg['message'], data.reply)
+        
+        # Update status to Replied
+        cursor.execute(
+            "UPDATE contactmessages SET status='Replied' WHERE message_id=%s",
+            (data.message_id,)
+        )
+        conn.commit()
+        cursor.close()
+        
+        return {"status": "success", "message": f"Reply sent to {msg['email']}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()

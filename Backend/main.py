@@ -44,7 +44,8 @@ async def not_authorized_handler(request: Request, exc):
     return JSONResponse(status_code=200, content={"status": "not_logged_in", "detail": str(exc.detail)})
 
 from pydantic import BaseModel
-from email_service import send_contact_form
+from email_service import send_contact_form, send_contact_acknowledgment
+from database import get_db_connection
 
 class ContactForm(BaseModel):
     name: str
@@ -53,10 +54,27 @@ class ContactForm(BaseModel):
 
 @app.post("/api/contact")
 async def contact_us(form: ContactForm):
-    success = send_contact_form(form.name, form.email, form.message)
-    if success:
-        return {"status": "success", "message": "Email sent successfully"}
-    return JSONResponse(status_code=500, content={"status": "error", "message": "Failed to send email"})
+    # 1. Store in database
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO contactmessages (name, email, message, status) VALUES (%s, %s, %s, 'Unread')",
+            (form.name, form.email, form.message)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error saving contact message to DB: {str(e)}")
+
+    # 2. Send to admin email
+    send_contact_form(form.name, form.email, form.message)
+
+    # 3. Send acknowledgment to user
+    send_contact_acknowledgment(form.name, form.email)
+
+    return {"status": "success", "message": "Your message has been sent. You will receive a confirmation email shortly."}
 
 from routers import auth, admin, customer, vendor, payment
 

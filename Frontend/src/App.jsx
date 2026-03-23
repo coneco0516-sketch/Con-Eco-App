@@ -8,6 +8,7 @@ import AdminOrders from './pages/AdminOrders';
 import AdminPayments from './pages/AdminPayments';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminProfile from './pages/AdminProfile';
+import AdminContactMessages from './pages/AdminContactMessages';
 import PlatformSettings from './pages/PlatformSettings';
 import Register from './pages/Register';
 import About from './pages/About';
@@ -77,6 +78,7 @@ function AppContent() {
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/settings" element={<PlatformSettings />} />
+          <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
           
           {/* Customer Routes */}
           <Route path="/customer" element={<CustomerDashboard />} />
