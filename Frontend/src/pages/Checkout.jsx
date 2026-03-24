@@ -22,6 +22,7 @@ function Checkout() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState('');
   const [address, setAddress] = useState('');
+  const [creditInfo, setCreditInfo] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +34,14 @@ function Checkout() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    // Fetch credit score
+    fetch('/api/payment/credit_score', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') setCreditInfo(data);
+      })
+      .catch(() => {});
   }, []);
 
   const [paymentMethod, setPaymentMethod] = useState('UPI');
@@ -43,6 +52,13 @@ function Checkout() {
       setError('Please enter a delivery address.');
       return;
     }
+    
+    // Block if Pay Later is not eligible
+    if (paymentMethod === 'Pay Later' && creditInfo && !creditInfo.eligible) {
+      setError(creditInfo.reason);
+      return;
+    }
+    
     setPaying(true);
     setError('');
 
@@ -147,11 +163,13 @@ function Checkout() {
     rzp.open();
   };
 
+  const isPayLaterBlocked = creditInfo && !creditInfo.eligible;
+
   const paymentOptions = [
     { id: 'UPI', label: 'UPI (PhonePe, GPay)', icon: '📱' },
     { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
-    { id: 'Pay Later', label: 'Pay Later (Request Credit)', icon: '📅' },
+    { id: 'Pay Later', label: 'Pay Later (Request Credit)', icon: '📅', disabled: isPayLaterBlocked },
   ];
 
   return (
@@ -215,27 +233,63 @@ function Checkout() {
 
             <div style={{ marginBottom: '2rem' }}>
               <label style={{ color: 'white', display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>Select Payment Method</label>
+              
+              {/* Credit Score Badge */}
+              {creditInfo && (
+                <div style={{ 
+                  display: 'flex', alignItems: 'center', gap: '0.75rem', 
+                  marginBottom: '1rem', padding: '0.75rem 1rem', 
+                  borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid var(--surface-border)'
+                }}>
+                  <span style={{ fontSize: '1.2rem' }}>📊</span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Credit Score:</span>
+                  <span style={{ 
+                    fontWeight: 'bold', fontSize: '1.1rem',
+                    color: creditInfo.credit_score >= 80 ? '#2ecc71' : creditInfo.credit_score >= 50 ? '#f1c40f' : '#e74c3c'
+                  }}>
+                    {creditInfo.credit_score}/100
+                  </span>
+                  {creditInfo.blocked && (
+                    <span style={{ 
+                      fontSize: '0.75rem', color: '#e74c3c', 
+                      background: 'rgba(231,76,60,0.15)', padding: '2px 8px', 
+                      borderRadius: '4px', marginLeft: 'auto' 
+                    }}>
+                      🚫 Blocked until {creditInfo.blocked_until}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 {paymentOptions.map((opt) => (
                   <div 
                     key={opt.id}
-                    onClick={() => setPaymentMethod(opt.id)}
+                    onClick={() => !opt.disabled && setPaymentMethod(opt.id)}
                     style={{
                       padding: '1rem',
                       borderRadius: '8px',
-                      border: `2px solid ${paymentMethod === opt.id ? 'var(--primary-color)' : 'var(--surface-border)'}`,
-                      background: paymentMethod === opt.id ? 'rgba(46, 160, 67, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                      cursor: 'pointer',
+                      border: `2px solid ${opt.disabled ? 'rgba(231,76,60,0.3)' : paymentMethod === opt.id ? 'var(--primary-color)' : 'var(--surface-border)'}`,
+                      background: opt.disabled ? 'rgba(231,76,60,0.05)' : paymentMethod === opt.id ? 'rgba(46, 160, 67, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                      cursor: opt.disabled ? 'not-allowed' : 'pointer',
+                      opacity: opt.disabled ? 0.5 : 1,
                       transition: 'all 0.2s ease',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       gap: '0.5rem',
-                      textAlign: 'center'
+                      textAlign: 'center',
+                      position: 'relative'
                     }}
                   >
                     <span style={{ fontSize: '1.5rem' }}>{opt.icon}</span>
-                    <span style={{ color: paymentMethod === opt.id ? 'white' : 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>{opt.label}</span>
+                    <span style={{ color: opt.disabled ? '#e74c3c' : paymentMethod === opt.id ? 'white' : 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>{opt.label}</span>
+                    {opt.disabled && (
+                      <span style={{ fontSize: '0.7rem', color: '#e74c3c' }}>
+                        {creditInfo?.reason || 'Not available'}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

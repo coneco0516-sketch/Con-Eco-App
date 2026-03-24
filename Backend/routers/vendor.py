@@ -204,6 +204,8 @@ def vendor_orders(user = Depends(check_vendor)):
     finally:
         conn.close()
 
+from credit_system import set_pay_later_timeline
+
 class OrderStatusUpdate(BaseModel):
     order_id: int
     status: str
@@ -212,14 +214,29 @@ class OrderStatusUpdate(BaseModel):
 def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
+        # Ensure 'Delivered' is in the status enum
+        try:
+            cursor.execute("ALTER TABLE orders MODIFY COLUMN status ENUM('Pending','Processing','Completed','Cancelled','Delivered') DEFAULT 'Pending'")
+            conn.commit()
+        except:
+            pass
+        
         cursor.execute("UPDATE Orders SET status=%s WHERE order_id=%s AND vendor_id=%s", (data.status, data.order_id, vendor_id))
+        
         if data.status == 'Completed':
             cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
         elif data.status == 'Cancelled':
             cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
+        elif data.status == 'Delivered':
+            # Check if this is a Pay Later order → trigger timeline
+            cursor.execute("SELECT payment_method, customer_id FROM Orders WHERE order_id=%s", (data.order_id,))
+            order = cursor.fetchone()
+            if order and order['payment_method'] == 'Pay Later':
+                conn.commit()
+                set_pay_later_timeline(data.order_id)
             
         conn.commit()
         cursor.close()

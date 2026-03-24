@@ -550,3 +550,78 @@ def send_contact_reply(name, email, original_message, reply_message):
     """
     
     return send_email(email, f"{APP_NAME} - Response to Your Enquiry", html_content)
+
+def send_pay_later_warning(email, name, order_id, stage_name, due_date, amount):
+    """
+    Send warning email for Pay Later deadlines
+    """
+    is_final = "Stage 3" in stage_name
+    header_color = "#e74c3c" if is_final else "#f39c12"
+    
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: {header_color};">{stage_name}: Payment Overdue Reminder</h2>
+                <p>Hello {name},</p>
+                
+                <p>This is a reminder regarding your payment for <strong>Order #{order_id}</strong>.</p>
+                
+                <div style="background-color: #fff9f0; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid {header_color};">
+                    <p><strong>Order ID:</strong> #{order_id}</p>
+                    <p><strong>Amount Due:</strong> ₹{amount}</p>
+                    <p><strong>DEADLINE:</strong> <span style="color: {header_color}; font-weight: bold;">{due_date}</span></p>
+                </div>
+                
+                {f'<p style="color: #e74c3c; font-weight: bold;">CRITICAL: This is your final day to pay. Failure to settle this today will result in a 3-month suspension from the Pay Later program and a significant credit score deduction.</p>' if is_final else '<p>Please settle this amount within the grace period to avoid further credit score deductions or account suspension.</p>'}
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{APP_URL}/customer/orders" style="background-color: {header_color}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Pay Now</a>
+                </div>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">
+                        &copy; {datetime.now().year} {APP_NAME}. This is an automated billing notification.
+                    </p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+    
+    return send_email(email, f"URGENT: {stage_name} Payment Reminder - Order #{order_id}", html_content)
+
+
+def send_pay_later_blocked_notification(email, name, order_id, blocked_until):
+    """
+    Notify user that they are blocked from Pay Later
+    """
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #c0392b;">Pay Later Feature Suspended</h2>
+                <p>Hello {name},</p>
+                
+                <p>Because the payment for <strong>Order #{order_id}</strong> was not settled within the 41-day window, your access to the Pay Later feature has been suspended.</p>
+                
+                <div style="background-color: #fceae9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #c0392b;">
+                    <p><strong>Status:</strong> Suspended</p>
+                    <p><strong>Blocked Until:</strong> {blocked_until}</p>
+                </div>
+                
+                <p>Your credit score has also been affected. You can still make purchases using instant payment methods (UPI/Card).</p>
+                
+                <p>Once the suspension period ends, you may become eligible again based on your repayment track record.</p>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">
+                        &copy; {datetime.now().year} {APP_NAME}. Internal Credit Risk Dept.
+                    </p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+    
+    return send_email(email, "Account Update: Pay Later Suspension", html_content)

@@ -7,8 +7,19 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from database import get_db_connection
 from routers.auth import get_current_user_from_cookie
+from credit_system import (
+    ensure_credit_tables, is_pay_later_eligible, 
+    process_pay_later_payment, check_overdue_orders,
+    get_or_create_credit_score
+)
 
 load_dotenv()
+
+# Ensure credit tables exist on startup
+try:
+    ensure_credit_tables()
+except:
+    pass
 
 RAZORPAY_KEY_ID     = os.environ.get("RAZORPAY_KEY_ID", "")
 RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
@@ -190,6 +201,12 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer))
     if not row:
         raise HTTPException(status_code=404, detail="Customer not found")
 
+    # Check Pay Later eligibility
+    if data.payment_method == 'Pay Later':
+        eligible, reason, score = is_pay_later_eligible(row["customer_id"])
+        if not eligible:
+            raise HTTPException(status_code=403, detail=reason)
+
     import random
     import string
     txn_id = f"{data.payment_method.upper().replace(' ', '_')}-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -232,10 +249,11 @@ def verify_settlement(data: VerifySettlementRequest, user=Depends(check_customer
 
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
         # Ensure the order belongs to this customer
-        cursor.execute("SELECT order_id FROM Orders WHERE order_id=%s AND customer_id=%s", (data.order_id, user["user_id"]))
-        if not cursor.fetchone():
+        cursor.execute("SELECT order_id, payment_method, customer_id FROM Orders WHERE order_id=%s AND customer_id=%s", (data.order_id, user["user_id"]))
+        order = cursor.fetchone()
+        if not order:
             raise HTTPException(status_code=404, detail="Order not found")
 
         # Update Payments table
@@ -248,9 +266,46 @@ def verify_settlement(data: VerifySettlementRequest, user=Depends(check_customer
         
         conn.commit()
         cursor.close()
+        
+        # Process credit score for Pay Later orders
+        if order.get('payment_method') == 'Pay Later':
+            credit_result = process_pay_later_payment(data.order_id, order['customer_id'])
+        
         return {"status": "success", "message": "Payment settled successfully"}
+    except HTTPException:
+        raise
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
+
+
+# ── 5. Credit Score & Pay Later Info ──────────────────────────────────────────
+@router.get("/credit_score")
+def get_credit_score(user=Depends(check_customer)):
+    """Get customer's credit score and pay later eligibility."""
+    score_data = get_or_create_credit_score(user["user_id"])
+    eligible, reason, score = is_pay_later_eligible(user["user_id"])
+    
+    return {
+        "status": "success",
+        "credit_score": score_data['credit_score'],
+        "eligible": eligible,
+        "reason": reason,
+        "blocked": score_data['pay_later_blocked'],
+        "blocked_until": score_data['blocked_until'].strftime('%d %b %Y') if score_data.get('blocked_until') else None,
+        "last_deduction": score_data['last_deduction'],
+        "total_pay_later_orders": score_data['total_pay_later_orders']
+    }
+
+
+# ── 6. Check Overdue Orders (Admin/Cron endpoint) ────────────────────────────
+@router.post("/check_overdue")
+def check_overdue(user=Depends(get_current_user_from_cookie)):
+    """Check and process overdue Pay Later orders. Can be called by admin or cron."""
+    if user['role'] != 'Admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    actions = check_overdue_orders()
+    return {"status": "success", "actions_taken": len(actions), "details": actions}
