@@ -119,6 +119,42 @@ def add_catalogue_item(
     finally:
         conn.close()
 
+@router.put("/catalogue")
+def update_catalogue_item(
+    item_id: int = Form(...),
+    item_type: str = Form(...),
+    name: str = Form(...),
+    description: str = Form(...),
+    price: float = Form(...),
+    image_url: str = Form(""),
+    unit: str = Form(""),
+    user = Depends(check_vendor)
+):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        vendor_id = user['user_id']
+        
+        if item_type == 'product':
+            cursor.execute(
+                "UPDATE Products SET name=%s, description=%s, price=%s, image_url=%s, unit=%s WHERE product_id=%s AND vendor_id=%s",
+                (name, description, price, image_url, unit, item_id, vendor_id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE Services SET name=%s, description=%s, price=%s, image_url=%s, unit=%s WHERE service_id=%s AND vendor_id=%s",
+                (name, description, price, image_url, unit, item_id, vendor_id)
+            )
+                           
+        conn.commit()
+        cursor.close()
+        return {"status": "success"}
+    except Exception as e:
+        print(f"Error updating catalogue item: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
 @router.delete("/catalogue")
 def delete_catalogue_item(id: int, type: str, user = Depends(check_vendor)):
     conn = get_db_connection()

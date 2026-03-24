@@ -5,9 +5,11 @@ function Catalogue() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [newItem, setNewItem] = useState({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   useEffect(() => {
     fetchCatalogue();
@@ -24,7 +26,28 @@ function Catalogue() {
       .catch(err => setLoading(false));
   };
 
-  const handleAddItem = async (e) => {
+  const openAddModal = () => {
+    setEditingItem(null);
+    setNewItem({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
+    setImageFile(null);
+    setShowModal(true);
+  };
+
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setNewItem({
+      type: item.type,
+      name: item.name,
+      description: item.description || '',
+      price: item.price,
+      image_url: item.image_url || '',
+      unit: item.unit || ''
+    });
+    setImageFile(null);
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setUploading(true);
     let finalImageUrl = newItem.image_url;
@@ -62,20 +85,26 @@ function Catalogue() {
     formData.append('image_url', finalImageUrl || '');
     formData.append('unit', newItem.unit || '');
 
+    // If editing, add item_id and use PUT
+    if (editingItem) {
+      formData.append('item_id', editingItem.id);
+    }
+
     try {
       const resp = await fetch('/api/vendor/catalogue', {
-        method: 'POST',
+        method: editingItem ? 'PUT' : 'POST',
         body: formData,
         credentials: 'include'
       });
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
-        alert("Error adding item: " + (errData.detail || resp.statusText));
+        alert("Error: " + (errData.detail || resp.statusText));
         return;
       }
       const data = await resp.json();
       if (data.status === 'success') {
         setShowModal(false);
+        setEditingItem(null);
         setNewItem({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
         setImageFile(null);
         fetchCatalogue();
@@ -89,6 +118,24 @@ function Catalogue() {
     }
   };
 
+  const handleDelete = async (item) => {
+    try {
+      const resp = await fetch(`/api/vendor/catalogue?id=${item.id}&type=${item.type}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        setDeleteConfirm(null);
+        fetchCatalogue();
+      } else {
+        alert("Error deleting item");
+      }
+    } catch {
+      alert("Network error");
+    }
+  };
+
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <VendorSidebar />
@@ -98,21 +145,31 @@ function Catalogue() {
             <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Catalogue</h2>
             <p style={{ color: 'var(--text-secondary)', margin: 0 }}>View and manage the items you have listed.</p>
           </div>
-          <button className="btn" onClick={() => setShowModal(true)} style={{ background: 'var(--primary-color)', height: 'fit-content' }}>+ Add New Item</button>
+          <button className="btn" onClick={openAddModal} style={{ background: 'var(--primary-color)', height: 'fit-content' }}>+ Add New Item</button>
         </div>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
+        {/* Add / Edit Modal */}
         {showModal && (
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="glass-panel" style={{ width: '400px', padding: '2rem', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
-              <h3 style={{ color: 'white', marginBottom: '1.5rem' }}>Add New Item</h3>
-              <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+            <div className="glass-panel" style={{ width: '440px', maxWidth: '90vw', padding: '2rem', boxShadow: '0 0 20px rgba(0,0,0,0.5)', maxHeight: '90vh', overflowY: 'auto' }}>
+              <h3 style={{ color: 'white', marginBottom: '1.5rem', marginTop: 0 }}>
+                {editingItem ? '✏️ Edit Item' : '➕ Add New Item'}
+              </h3>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                 <div>
                   <label className="input-label">Item Type</label>
-                  <select className="input-field" value={newItem.type} onChange={(e) => setNewItem({...newItem, type: e.target.value})}>
+                  <select 
+                    className="input-field" 
+                    value={newItem.type} 
+                    onChange={(e) => setNewItem({...newItem, type: e.target.value})}
+                    disabled={!!editingItem}
+                    style={editingItem ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+                  >
                     <option value="product">Product</option>
                     <option value="service">Service</option>
                   </select>
+                  {editingItem && <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: '4px 0 0' }}>Type cannot be changed after creation</p>}
                 </div>
                 <div>
                   <label className="input-label">Item Name</label>
@@ -137,14 +194,33 @@ function Catalogue() {
                 <div>
                   <label className="input-label">Or Upload Photo</label>
                   <input type="file" accept="image/*" className="input-field" onChange={(e) => setImageFile(e.target.files[0])} style={{ padding: '0.4rem' }} />
+                  {editingItem && newItem.image_url && !imageFile && (
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: '4px 0 0' }}>Current image will be kept unless you upload a new one</p>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                   <button type="submit" className="btn" style={{ flex: 1 }} disabled={uploading}>
-                    {uploading ? 'Processing...' : 'Add Item'}
+                    {uploading ? 'Processing...' : editingItem ? 'Save Changes' : 'Add Item'}
                   </button>
-                  <button type="button" className="btn danger" onClick={() => { setShowModal(false); setImageFile(null); }} style={{ flex: 1 }}>Cancel</button>
+                  <button type="button" className="btn danger" onClick={() => { setShowModal(false); setEditingItem(null); setImageFile(null); }} style={{ flex: 1 }}>Cancel</button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div className="glass-panel" style={{ width: '400px', padding: '2rem', textAlign: 'center' }}>
+              <h3 style={{ color: 'white', marginTop: 0 }}>Delete Item?</h3>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                Are you sure you want to delete <strong style={{ color: 'white' }}>"{deleteConfirm.name}"</strong>? This action cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button className="btn danger" onClick={() => handleDelete(deleteConfirm)} style={{ flex: 1 }}>Yes, Delete</button>
+                <button className="btn" onClick={() => setDeleteConfirm(null)} style={{ flex: 1, background: 'transparent', border: '1px solid var(--surface-border)' }}>Cancel</button>
+              </div>
             </div>
           </div>
         )}
@@ -154,7 +230,7 @@ function Catalogue() {
         ) : items.length > 0 ? (
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
             {items.map(i => (
-              <div key={i.id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
+              <div key={`${i.type}-${i.id}`} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 280px', maxWidth: '350px', display: 'flex', flexDirection: 'column' }}>
                 {i.image_url ? (
                   <img src={i.image_url} alt={i.name} style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '4px', marginBottom: '1rem' }} />
                 ) : (
@@ -163,7 +239,25 @@ function Catalogue() {
                 <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{i.name}</h3>
                 <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '0.5rem' }}>₹{i.price} <span style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>{i.unit ? `/ ${i.unit}` : ''}</span></p>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', flex: 1 }}>{i.description}</p>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Type: <span style={{textTransform: 'capitalize'}}>{i.type}</span></p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Type: <span style={{textTransform: 'capitalize'}}>{i.type}</span></p>
+                
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    className="btn" 
+                    onClick={() => openEditModal(i)} 
+                    style={{ flex: 1, background: '#3498db', fontSize: '0.85rem', padding: '6px 12px' }}
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button 
+                    className="btn danger" 
+                    onClick={() => setDeleteConfirm(i)} 
+                    style={{ flex: 1, fontSize: '0.85rem', padding: '6px 12px' }}
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

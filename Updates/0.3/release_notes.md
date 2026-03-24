@@ -19,7 +19,10 @@
  -> Updated Navbar styles in `index.css` to use modern flex alignment and a subtle brand glow. ✅
  -> Logo is now correctly served from the production assets across both guest and logged-in views. ✅
 
-4. Production Deployment ✅
+4. Catalogue Page
+ -> Add the Feature to edit the product/Services so that it can be edited after adding also if any changes needed.
+
+8. Production Deployment ✅
  -> Compiled the frontend into an optimized production bundle using Vite. ✅
  -> Deployed to Railway via GitHub (Commit: `f3d5e46`). ✅
 
