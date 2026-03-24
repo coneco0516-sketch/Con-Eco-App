@@ -48,5 +48,9 @@
  -> Compiled the frontend into an optimized production bundle using Vite. ✅
  -> Deployed to Railway via GitHub (Latest Build Hash: `bc972a0`). ✅
 
+9. Category Based Filtering ✅
+ -> Added the feature to filter the products/Services based on the category. ✅
+ -> Added the feature to auto-categorize the products/Services based on the category. ✅
+
 ---
 *End of v0.3 Documentation.*
