@@ -19,8 +19,13 @@
  -> Updated Navbar styles in `index.css` to use modern flex alignment and a subtle brand glow. ✅
  -> Logo is now correctly served from the production assets across both guest and logged-in views. ✅
 
-4. Catalogue Page
- -> Add the Feature to edit the product/Services so that it can be edited after adding also if any changes needed.
+4. Catalogue Page ✅
+ -> Add the Feature to edit the product/Services so that it can be edited after adding also if any changes needed. ✅
+ -> Added ✏️ Edit button on each catalogue item card to modify name, description, price, unit, and image. ✅
+ -> Item type (Product/Service) is locked during editing to prevent data inconsistency. ✅
+ -> Added 🗑️ Delete button with a confirmation dialog to prevent accidental deletions. ✅
+ -> Created `PUT /api/vendor/catalogue` backend endpoint for secure item updates. ✅
+ -> Shared modal for both Add and Edit with contextual button labels. ✅
 
 8. Production Deployment ✅
  -> Compiled the frontend into an optimized production bundle using Vite. ✅

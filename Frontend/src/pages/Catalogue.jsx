@@ -189,7 +189,7 @@ function Catalogue() {
                 </div>
                 <div>
                   <label className="input-label">Image URL (Optional)</label>
-                  <input type="url" placeholder="https://example.com/image.jpg" className="input-field" value={newItem.image_url} onChange={(e) => setNewItem({...newItem, image_url: e.target.value})} disabled={!!imageFile} />
+                  <input type="text" placeholder="https://example.com/image.jpg" className="input-field" value={newItem.image_url} onChange={(e) => setNewItem({...newItem, image_url: e.target.value})} disabled={!!imageFile} />
                 </div>
                 <div>
                   <label className="input-label">Or Upload Photo</label>
