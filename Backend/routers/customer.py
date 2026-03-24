@@ -191,13 +191,15 @@ def get_my_orders(user = Depends(check_customer)):
         
         sql = """
         SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, o.payment_method, pvt.status as payment_status, 
-               DATE_FORMAT(o.created_at, '%d %b %Y') as date, p.name as item_name, v.company_name as vendor_name, o.delivery_address,
+               DATE_FORMAT(o.created_at, '%d %b %Y') as date, p.name as item_name, v.company_name as vendor_name, 
+               u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
                o.pay_later_stage, DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due,
                DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due,
                DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due
         FROM Orders o
         JOIN Products p ON o.item_id = p.product_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
+        JOIN Users u ON v.vendor_id = u.user_id
         JOIN Payments pvt ON o.order_id = pvt.order_id
         WHERE o.customer_id=%s AND o.order_type='Product'
         ORDER BY o.created_at DESC
@@ -219,13 +221,15 @@ def get_my_services(user = Depends(check_customer)):
         
         sql = """
         SELECT o.order_id, o.order_type, o.amount, o.status, o.payment_method, pvt.status as payment_status,
-               DATE_FORMAT(o.created_at, '%d %b %Y') as date, s.name as item_name, v.company_name as vendor_name, o.delivery_address,
+               DATE_FORMAT(o.created_at, '%d %b %Y') as date, s.name as item_name, v.company_name as vendor_name, 
+               u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
                o.pay_later_stage, DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due,
                DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due,
                DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due
         FROM Orders o
         JOIN Services s ON o.item_id = s.service_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
+        JOIN Users u ON v.vendor_id = u.user_id
         JOIN Payments pvt ON o.order_id = pvt.order_id
         WHERE o.customer_id=%s AND o.order_type='Service'
         ORDER BY o.created_at DESC

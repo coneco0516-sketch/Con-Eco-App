@@ -28,7 +28,7 @@ function VendorOrders() {
         body: JSON.stringify({ order_id: orderId, status: newStatus }),
         credentials: 'include'
       });
-      
+
       const contentType = resp.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         const data = await resp.json();
@@ -56,7 +56,7 @@ function VendorOrders() {
         <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Incoming Orders</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Track requests, update shipping statuses, and process deliveries.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
-        
+
         {loading ? (
           <p>Loading orders...</p>
         ) : orders.length > 0 ? (
@@ -73,12 +73,12 @@ function VendorOrders() {
                   <p style={{ color: 'white', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                     Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method}</span>
                   </p>
-                  
+
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-                    <span style={{ 
-                      fontSize: '0.75rem', 
-                      padding: '3px 10px', 
-                      borderRadius: '20px', 
+                    <span style={{
+                      fontSize: '0.75rem',
+                      padding: '3px 10px',
+                      borderRadius: '20px',
                       background: o.customer_credit_score < 50 ? 'rgba(239, 68, 68, 0.1)' : o.customer_credit_score < 80 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(34, 197, 94, 0.1)',
                       color: o.customer_credit_score < 50 ? '#ef4444' : o.customer_credit_score < 80 ? '#f59e0b' : '#22c55e',
                       border: `1px solid ${o.customer_credit_score < 50 ? '#ef4444' : o.customer_credit_score < 80 ? '#f59e0b' : '#22c55e'}`,
@@ -89,20 +89,20 @@ function VendorOrders() {
 
                     {o.payment_method === 'Pay Later' && o.pay_later_stage && (
                       <>
-                        <span style={{ 
-                          fontSize: '0.75rem', 
-                          padding: '3px 10px', 
-                          borderRadius: '20px', 
+                        <span style={{
+                          fontSize: '0.75rem',
+                          padding: '3px 10px',
+                          borderRadius: '20px',
                           background: o.pay_later_stage === 'Stage3' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)',
                           color: o.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6',
                           border: `1px solid ${o.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6'}`,
                           fontWeight: 'bold'
                         }}>
-                          {o.pay_later_stage === 'Stage1' ? 'Stage 1 (30 Days)' : 
-                           o.pay_later_stage === 'Stage2' ? 'Stage 2 (Grace)' : 
-                           o.pay_later_stage === 'Stage3' ? 'Stage 3 (FINAL DAY)' : 'Defaulted'}
+                          {o.pay_later_stage === 'Stage1' ? 'Stage 1 (30 Days)' :
+                            o.pay_later_stage === 'Stage2' ? 'Stage 2 (Grace)' :
+                              o.pay_later_stage === 'Stage3' ? 'Stage 3 (FINAL DAY)' : 'Defaulted'}
                         </span>
-                        
+
                         {o.pay_later_stage === 'Stage1' && o.pay_later_due_date && (
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                             Due: {new Date(o.pay_later_due_date).toLocaleDateString()}
@@ -123,19 +123,19 @@ function VendorOrders() {
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '180px' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0, fontSize: '1.2rem' }}>₹{o.amount}</p>
-                  
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: 0, fontSize: '1.2rem' }}>₹{o.amount}</p>
+
                   {o.payment_method === 'Pay Later' && o.status === 'Pending' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <p style={{ color: '#ffd700', fontSize: '0.8rem', margin: 0, fontWeight: 'bold' }}>CREDIT REQUEST</p>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button 
+                        <button
                           onClick={() => handleStatusChange(o.order_id, 'Processing')}
                           style={{ background: 'var(--primary-color)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', flex: 1 }}
                         >
                           Approve Credit
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleStatusChange(o.order_id, 'Cancelled')}
                           style={{ background: 'var(--danger-color)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', flex: 1 }}
                         >
@@ -144,13 +144,13 @@ function VendorOrders() {
                       </div>
                     </div>
                   ) : (
-                    <select 
+                    <select
                       defaultValue={o.status}
                       onChange={(e) => handleStatusChange(o.order_id, e.target.value)}
-                      style={{ 
-                        background: 'rgba(0,0,0,0.3)', 
-                        color: 'white', 
-                        border: '1px solid var(--surface-border)', 
+                      style={{
+                        background: 'rgba(0,0,0,0.3)',
+                        color: 'white',
+                        border: '1px solid var(--surface-border)',
                         padding: '8px',
                         borderRadius: '4px',
                         cursor: 'pointer'
@@ -170,7 +170,7 @@ function VendorOrders() {
           </div>
         ) : (
           <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-             <h3 style={{ color: 'var(--text-secondary)' }}>No incoming orders at the moment.</h3>
+            <h3 style={{ color: 'var(--text-secondary)' }}>No incoming orders at the moment.</h3>
           </div>
         )}
       </main>

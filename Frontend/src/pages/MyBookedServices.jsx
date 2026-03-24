@@ -136,6 +136,10 @@ function MyBookedServices() {
                 <div style={{ flex: 1 }}>
                   <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>{s.item_name} (Booking #{s.order_id})</h4>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.25rem 0' }}>Vendor: {s.vendor_name}</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0 0 0.5rem 0' }}>
+                    <span style={{ marginRight: '15px' }}>📧 {s.vendor_email}</span>
+                    <span>📞 {s.vendor_phone}</span>
+                  </p>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Booked on: {s.date}</p>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.8rem', color: '#ffd700', border: '1px solid #ffd700', padding: '2px 6px', borderRadius: '4px' }}>
