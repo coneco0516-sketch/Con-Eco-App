@@ -41,25 +41,32 @@ def ensure_credit_tables():
             )
         """)
         
-        # Add pay later columns to orders (safe - only adds if not exists)
+        # Standardize table name for Orders (handling case sensitivity on Linux)
         try:
-            cursor.execute("ALTER TABLE Orders ADD COLUMN delivered_at DATETIME NULL")
+            cursor.execute("DESCRIBE Orders")
+            table_name = "Orders"
         except:
-            pass
+            table_name = "orders"
+            
+        # Add pay later columns (safe - only adds if not exists)
+        columns_to_add = [
+            ("delivered_at", "DATETIME NULL"),
+            ("pay_later_stage", "VARCHAR(20) NULL"),
+            ("pay_later_due_date", "DATETIME NULL"),
+            ("pay_later_stage2_due", "DATETIME NULL"),
+            ("pay_later_stage3_due", "DATETIME NULL")
+        ]
+        
+        for col_name, col_type in columns_to_add:
+            try:
+                cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type}")
+                print(f"Added column {col_name} to {table_name}")
+            except:
+                pass
+        
+        # Ensure 'Delivered', 'Shipped', 'Out for Delivery' are in the status enum
         try:
-            cursor.execute("ALTER TABLE Orders ADD COLUMN pay_later_stage VARCHAR(20) NULL")
-        except:
-            pass
-        try:
-            cursor.execute("ALTER TABLE Orders ADD COLUMN pay_later_due_date DATETIME NULL")
-        except:
-            pass
-        try:
-            cursor.execute("ALTER TABLE Orders ADD COLUMN pay_later_stage2_due DATETIME NULL")
-        except:
-            pass
-        try:
-            cursor.execute("ALTER TABLE Orders ADD COLUMN pay_later_stage3_due DATETIME NULL")
+            cursor.execute(f"ALTER TABLE {table_name} MODIFY COLUMN status ENUM('Pending','Processing','Shipped','Out for Delivery','Completed','Cancelled','Delivered') DEFAULT 'Pending'")
         except:
             pass
         
@@ -330,7 +337,7 @@ def check_overdue_orders():
         cursor.execute("""
             SELECT o.order_id, o.customer_id, o.pay_later_due_date, o.delivered_at, o.amount, u.email, u.name 
             FROM Orders o
-            JOIN users u ON o.customer_id = u.user_id
+            JOIN Users u ON o.customer_id = u.user_id
             WHERE o.payment_method='Pay Later' 
             AND o.pay_later_stage='Stage1' 
             AND o.pay_later_due_date IS NOT NULL 
@@ -351,7 +358,7 @@ def check_overdue_orders():
         cursor.execute("""
             SELECT o.order_id, o.customer_id, o.pay_later_stage2_due, o.delivered_at, o.amount, u.email, u.name 
             FROM Orders o
-            JOIN users u ON o.customer_id = u.user_id
+            JOIN Users u ON o.customer_id = u.user_id
             WHERE o.payment_method='Pay Later' 
             AND o.pay_later_stage='Stage2' 
             AND o.pay_later_stage2_due IS NOT NULL 
@@ -371,7 +378,7 @@ def check_overdue_orders():
         cursor.execute("""
             SELECT o.order_id, o.customer_id, o.pay_later_stage3_due, u.email, u.name 
             FROM Orders o
-            JOIN users u ON o.customer_id = u.user_id
+            JOIN Users u ON o.customer_id = u.user_id
             WHERE o.payment_method='Pay Later' 
             AND o.pay_later_stage='Stage3' 
             AND o.pay_later_stage3_due IS NOT NULL 

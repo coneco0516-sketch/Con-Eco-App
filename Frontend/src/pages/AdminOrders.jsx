@@ -48,7 +48,7 @@ function AdminOrders() {
                       <div style={{ color: 'white' }}>{order.customer_name}</div>
                       <div style={{ 
                         fontSize: '0.7rem', 
-                        color: order.customer_score < 50 ? '#ef4444' : order.customer_score < 80 ? '#f59e0b' : '#22c55e',
+                        color: order.customer_credit_score < 50 ? '#ef4444' : order.customer_credit_score < 80 ? '#f59e0b' : '#22c55e',
                         fontWeight: 'bold'
                       }}>
                         Score: {order.customer_credit_score}
@@ -82,9 +82,9 @@ function AdminOrders() {
                     </td>
                     <td style={{ padding: '15px', fontSize: '0.8rem' }}>
                       <div>{order.date}</div>
-                      {order.payment_method === 'Pay Later' && order.pay_later_stage === 'Stage1' && (
+                      {order.payment_method === 'Pay Later' && order.pay_later_stage === 'Stage1' && order.pay_later_due_date && (
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
-                           Due: {new Date(order.pay_later_due_date).toLocaleDateString()}
+                           Due: {order.pay_later_due_date}
                         </div>
                       )}
                     </td>
