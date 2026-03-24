@@ -14,6 +14,22 @@ def check_vendor(user = Depends(get_current_user_from_cookie)):
         raise HTTPException(status_code=403, detail="Forbidden")
     return user
 
+def auto_categorize(name, description, item_type):
+    text = (name + " " + (description or "")).lower()
+    if item_type == 'product':
+        if any(w in text for w in ['cement', 'konark', 'acc', 'ultratech', 'dalmia', 'jk super', 'birla']): return 'Cement'
+        if any(w in text for w in ['steel', 'rebar', 'iron rod', 'tata tiscon', 'jindal', 'tmt bar']): return 'Steel'
+        if any(w in text for w in ['brick', 'block', 'interlock', 'fly ash', 'clay brick']): return 'Bricks'
+        if any(w in text for w in ['sand', 'aggregate', 'stone', 'crush', 'm-sand', 'river sand', 'gravel']): return 'Sand'
+        if any(w in text for w in ['wire', 'switch', 'cable', 'light', 'electric', 'mcb', 'conduit', 'socket']): return 'Electrical'
+        if any(w in text for w in ['pipe', 'tap', 'faucet', 'plumbing', 'pvc', 'cpvc', 'tank', 'valve', 'fixture', 'basin', 'commode']): return 'Plumbing'
+    else:
+        if any(w in text for w in ['labor', 'worker', 'mason', 'helper', 'contractor', 'painter', 'carpenter', 'tiles fitter']): return 'Labor'
+        if any(w in text for w in ['pipe', 'tap', 'plumbing', 'leak', 'drainage', 'sanitary']): return 'Plumbing'
+        if any(w in text for w in ['wire', 'electric', 'short', 'circuit', 'wiring', 'installation']): return 'Electrical'
+        if any(w in text for w in ['design', 'architecture', 'blueprint', 'plan', 'structure', 'elevation', 'drawing']): return 'Architecture'
+    return 'General'
+
 @router.get("/dashboard")
 def dashboard(user = Depends(check_vendor)):
     conn = get_db_connection()
@@ -53,11 +69,11 @@ def catalogue(user = Depends(check_vendor)):
         
         items = []
         
-        cursor.execute("SELECT product_id as id, 'product' as type, name, description, price, image_url, unit FROM Products WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT product_id as id, 'product' as type, name, description, price, category, image_url, unit FROM Products WHERE vendor_id=%s", (vendor_id,))
         for row in cursor.fetchall():
             items.append(row)
             
-        cursor.execute("SELECT service_id as id, 'service' as type, name, description, price, image_url, unit FROM Services WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT service_id as id, 'service' as type, name, description, price, category, image_url, unit FROM Services WHERE vendor_id=%s", (vendor_id,))
         for row in cursor.fetchall():
             items.append(row)
             
@@ -94,6 +110,7 @@ def add_catalogue_item(
     name: str = Form(...),
     description: str = Form(...),
     price: float = Form(...),
+    category: str = Form("General"),
     image_url: str = Form(""),
     unit: str = Form(""),
     user = Depends(check_vendor)
@@ -103,12 +120,16 @@ def add_catalogue_item(
         cursor = conn.cursor()
         vendor_id = user['user_id']
         
+        # Auto-categorize if General is provided
+        if category == 'General':
+            category = auto_categorize(name, description, item_type)
+            
         if item_type == 'product':
             cursor.execute("INSERT INTO Products (vendor_id, category, name, description, price, image_url, unit) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                           (vendor_id, 'General', name, description, price, image_url, unit))
+                           (vendor_id, category, name, description, price, image_url, unit))
         else:
             cursor.execute("INSERT INTO Services (vendor_id, category, name, description, price, image_url, unit) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                           (vendor_id, 'General', name, description, price, image_url, unit))
+                           (vendor_id, category, name, description, price, image_url, unit))
                            
         conn.commit()
         cursor.close()
@@ -126,6 +147,7 @@ def update_catalogue_item(
     name: str = Form(...),
     description: str = Form(...),
     price: float = Form(...),
+    category: str = Form("General"),
     image_url: str = Form(""),
     unit: str = Form(""),
     user = Depends(check_vendor)
@@ -135,15 +157,19 @@ def update_catalogue_item(
         cursor = conn.cursor()
         vendor_id = user['user_id']
         
+        # Auto-categorize if General is provided
+        if category == 'General':
+            category = auto_categorize(name, description, item_type)
+            
         if item_type == 'product':
             cursor.execute(
-                "UPDATE Products SET name=%s, description=%s, price=%s, image_url=%s, unit=%s WHERE product_id=%s AND vendor_id=%s",
-                (name, description, price, image_url, unit, item_id, vendor_id)
+                "UPDATE Products SET name=%s, description=%s, price=%s, category=%s, image_url=%s, unit=%s WHERE product_id=%s AND vendor_id=%s",
+                (name, description, price, category, image_url, unit, item_id, vendor_id)
             )
         else:
             cursor.execute(
-                "UPDATE Services SET name=%s, description=%s, price=%s, image_url=%s, unit=%s WHERE service_id=%s AND vendor_id=%s",
-                (name, description, price, image_url, unit, item_id, vendor_id)
+                "UPDATE Services SET name=%s, description=%s, price=%s, category=%s, image_url=%s, unit=%s WHERE service_id=%s AND vendor_id=%s",
+                (name, description, price, category, image_url, unit, item_id, vendor_id)
             )
                            
         conn.commit()

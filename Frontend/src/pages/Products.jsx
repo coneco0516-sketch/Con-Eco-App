@@ -75,7 +75,7 @@ function Products() {
             <option value="Sand">Sand & Aggregates</option>
             <option value="Electrical">Electricals</option>
             <option value="Plumbing">Plumbing</option>
-            <option value="Other">Other</option>
+            <option value="General">Other</option>
           </select>
         </div>
         
@@ -85,7 +85,14 @@ function Products() {
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
             {products
               .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.description?.toLowerCase().includes(searchTerm.toLowerCase()))
-              .filter(p => category === "" || p.category === category)
+              .filter(p => {
+                if (category === "") return true;
+                // Match by explicit category OR by searching for the category text in name/description
+                if (p.category === category) return true;
+                
+                const searchIn = (p.name + " " + (p.description || "")).toLowerCase();
+                return searchIn.includes(category.toLowerCase());
+              })
               .map(p => (
               <div key={p.item_id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
                 {p.image_url ? (

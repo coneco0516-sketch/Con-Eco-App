@@ -6,7 +6,7 @@ function Catalogue() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [newItem, setNewItem] = useState({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
+  const [newItem, setNewItem] = useState({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '' });
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -28,7 +28,7 @@ function Catalogue() {
 
   const openAddModal = () => {
     setEditingItem(null);
-    setNewItem({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
+    setNewItem({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '' });
     setImageFile(null);
     setShowModal(true);
   };
@@ -40,6 +40,7 @@ function Catalogue() {
       name: item.name,
       description: item.description || '',
       price: item.price,
+      category: item.category || 'General',
       image_url: item.image_url || '',
       unit: item.unit || ''
     });
@@ -82,6 +83,7 @@ function Catalogue() {
     formData.append('name', newItem.name);
     formData.append('description', newItem.description);
     formData.append('price', newItem.price);
+    formData.append('category', newItem.category);
     formData.append('image_url', finalImageUrl || '');
     formData.append('unit', newItem.unit || '');
 
@@ -105,7 +107,7 @@ function Catalogue() {
       if (data.status === 'success') {
         setShowModal(false);
         setEditingItem(null);
-        setNewItem({ type: 'product', name: '', description: '', price: '', image_url: '', unit: '' });
+        setNewItem({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '' });
         setImageFile(null);
         fetchCatalogue();
       } else {
@@ -162,7 +164,14 @@ function Catalogue() {
                   <select 
                     className="input-field" 
                     value={newItem.type} 
-                    onChange={(e) => setNewItem({...newItem, type: e.target.value})}
+                    onChange={(e) => {
+                      const newType = e.target.value;
+                      setNewItem({
+                        ...newItem, 
+                        type: newType,
+                        category: newType === 'product' ? 'Cement' : 'Labor'
+                      });
+                    }}
                     disabled={!!editingItem}
                     style={editingItem ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                   >
@@ -170,6 +179,35 @@ function Catalogue() {
                     <option value="service">Service</option>
                   </select>
                   {editingItem && <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: '4px 0 0' }}>Type cannot be changed after creation</p>}
+                </div>
+                <div>
+                  <label className="input-label">Category</label>
+                  <select 
+                    className="input-field" 
+                    value={newItem.category} 
+                    onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                    required
+                  >
+                    {newItem.type === 'product' ? (
+                      <>
+                        <option value="General">General/Other</option>
+                        <option value="Cement">Cement</option>
+                        <option value="Steel">Steel & Rebars</option>
+                        <option value="Bricks">Bricks & Blocks</option>
+                        <option value="Sand">Sand & Aggregates</option>
+                        <option value="Electrical">Electricals</option>
+                        <option value="Plumbing">Plumbing</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="General">General/Other</option>
+                        <option value="Labor">General Labor</option>
+                        <option value="Plumbing">Plumbing Services</option>
+                        <option value="Electrical">Electrical Work</option>
+                        <option value="Architecture">Architecture & Design</option>
+                      </>
+                    )}
+                  </select>
                 </div>
                 <div>
                   <label className="input-label">Item Name</label>
@@ -238,8 +276,11 @@ function Catalogue() {
                 )}
                 <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{i.name}</h3>
                 <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '0.5rem' }}>₹{i.price} <span style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>{i.unit ? `/ ${i.unit}` : ''}</span></p>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', flex: 1 }}>{i.description}</p>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Type: <span style={{textTransform: 'capitalize'}}>{i.type}</span></p>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.25rem', flex: 1 }}>{i.description}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>Type: <span style={{textTransform: 'capitalize'}}>{i.type}</span></p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--primary-color)', margin: 0 }}>Category: {i.category}</p>
+                </div>
                 
                 {/* Action Buttons */}
                 <div style={{ display: 'flex', gap: '0.5rem' }}>

@@ -73,7 +73,7 @@ function Services() {
             <option value="Plumbing">Plumbing Services</option>
             <option value="Electrical">Electrical Work</option>
             <option value="Architecture">Architecture & Design</option>
-            <option value="Other">Other Services</option>
+            <option value="General">Other Services</option>
           </select>
         </div>
         
@@ -83,7 +83,14 @@ function Services() {
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
             {services
               .filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.description?.toLowerCase().includes(searchTerm.toLowerCase()))
-              .filter(s => category === "" || s.category === category)
+              .filter(s => {
+                if (category === "") return true;
+                // Match by explicit category OR by searching for the category text in name/description
+                if (s.category === category) return true;
+                
+                const searchIn = (s.name + " " + (s.description || "")).toLowerCase();
+                return searchIn.includes(category.toLowerCase());
+              })
               .map(s => (
               <div key={s.item_id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
                 {s.image_url ? (
