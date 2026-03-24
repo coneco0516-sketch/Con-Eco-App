@@ -43,23 +43,23 @@ def ensure_credit_tables():
         
         # Add pay later columns to orders (safe - only adds if not exists)
         try:
-            cursor.execute("ALTER TABLE orders ADD COLUMN delivered_at DATETIME NULL")
+            cursor.execute("ALTER TABLE Orders ADD COLUMN delivered_at DATETIME NULL")
         except:
             pass
         try:
-            cursor.execute("ALTER TABLE orders ADD COLUMN pay_later_stage VARCHAR(20) NULL")
+            cursor.execute("ALTER TABLE Orders ADD COLUMN pay_later_stage VARCHAR(20) NULL")
         except:
             pass
         try:
-            cursor.execute("ALTER TABLE orders ADD COLUMN pay_later_due_date DATETIME NULL")
+            cursor.execute("ALTER TABLE Orders ADD COLUMN pay_later_due_date DATETIME NULL")
         except:
             pass
         try:
-            cursor.execute("ALTER TABLE orders ADD COLUMN pay_later_stage2_due DATETIME NULL")
+            cursor.execute("ALTER TABLE Orders ADD COLUMN pay_later_stage2_due DATETIME NULL")
         except:
             pass
         try:
-            cursor.execute("ALTER TABLE orders ADD COLUMN pay_later_stage3_due DATETIME NULL")
+            cursor.execute("ALTER TABLE Orders ADD COLUMN pay_later_stage3_due DATETIME NULL")
         except:
             pass
         
@@ -121,7 +121,7 @@ def is_pay_later_eligible(customer_id):
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT COUNT(*) as c FROM orders 
+            SELECT COUNT(*) as c FROM Orders 
             WHERE customer_id=%s AND payment_method='Pay Later' 
             AND pay_later_stage NOT IN ('Completed') 
             AND pay_later_stage IS NOT NULL
@@ -150,7 +150,7 @@ def set_pay_later_timeline(order_id, delivered_at=None):
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE orders SET 
+            UPDATE Orders SET 
                 delivered_at=%s,
                 pay_later_stage='Stage1',
                 pay_later_due_date=%s,
@@ -176,7 +176,7 @@ def process_pay_later_payment(order_id, customer_id):
         # Get the order details
         cursor.execute("""
             SELECT pay_later_stage, pay_later_due_date, pay_later_stage2_due, pay_later_stage3_due, delivered_at
-            FROM orders WHERE order_id=%s
+            FROM Orders WHERE order_id=%s
         """, (order_id,))
         order = cursor.fetchone()
         
@@ -201,7 +201,7 @@ def process_pay_later_payment(order_id, customer_id):
         
         # Mark order as completed
         cursor.execute(
-            "UPDATE orders SET pay_later_stage='Completed' WHERE order_id=%s",
+            "UPDATE Orders SET pay_later_stage='Completed' WHERE order_id=%s",
             (order_id,)
         )
         
@@ -280,7 +280,7 @@ def process_pay_later_default(order_id, customer_id):
         
         # Mark order as defaulted
         cursor.execute(
-            "UPDATE orders SET pay_later_stage='Defaulted' WHERE order_id=%s",
+            "UPDATE Orders SET pay_later_stage='Defaulted' WHERE order_id=%s",
             (order_id,)
         )
         
@@ -329,7 +329,7 @@ def check_overdue_orders():
         # 1. Stage 1 → Stage 2: Past stage 1 due date (30 days)
         cursor.execute("""
             SELECT o.order_id, o.customer_id, o.pay_later_due_date, o.delivered_at, o.amount, u.email, u.name 
-            FROM orders o
+            FROM Orders o
             JOIN users u ON o.customer_id = u.user_id
             WHERE o.payment_method='Pay Later' 
             AND o.pay_later_stage='Stage1' 
@@ -338,7 +338,7 @@ def check_overdue_orders():
         """, (now,))
         
         for order in cursor.fetchall():
-            cursor.execute("UPDATE orders SET pay_later_stage='Stage2' WHERE order_id=%s", (order['order_id'],))
+            cursor.execute("UPDATE Orders SET pay_later_stage='Stage2' WHERE order_id=%s", (order['order_id'],))
             
             # Send Stage 2 warning
             # Stage 2 due date is 40 days after delivery (10 days after stage 1 due)
@@ -350,7 +350,7 @@ def check_overdue_orders():
         # 2. Stage 2 → Stage 3: Past stage 2 due date (40 days)
         cursor.execute("""
             SELECT o.order_id, o.customer_id, o.pay_later_stage2_due, o.delivered_at, o.amount, u.email, u.name 
-            FROM orders o
+            FROM Orders o
             JOIN users u ON o.customer_id = u.user_id
             WHERE o.payment_method='Pay Later' 
             AND o.pay_later_stage='Stage2' 
@@ -359,7 +359,7 @@ def check_overdue_orders():
         """, (now,))
         
         for order in cursor.fetchall():
-            cursor.execute("UPDATE orders SET pay_later_stage='Stage3' WHERE order_id=%s", (order['order_id'],))
+            cursor.execute("UPDATE Orders SET pay_later_stage='Stage3' WHERE order_id=%s", (order['order_id'],))
             
             # Send Stage 3 warning (FINAL DAY)
             stage3_due_str = (order['delivered_at'] + timedelta(days=41)).strftime('%d %b %Y')
@@ -370,7 +370,7 @@ def check_overdue_orders():
         # 3. Stage 3 default: Past stage 3 due date (41 days)
         cursor.execute("""
             SELECT o.order_id, o.customer_id, o.pay_later_stage3_due, u.email, u.name 
-            FROM orders o
+            FROM Orders o
             JOIN users u ON o.customer_id = u.user_id
             WHERE o.payment_method='Pay Later' 
             AND o.pay_later_stage='Stage3' 

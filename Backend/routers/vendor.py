@@ -219,7 +219,7 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
         
         # Ensure 'Delivered' is in the status enum
         try:
-            cursor.execute("ALTER TABLE orders MODIFY COLUMN status ENUM('Pending','Processing','Completed','Cancelled','Delivered') DEFAULT 'Pending'")
+            cursor.execute("ALTER TABLE Orders MODIFY COLUMN status ENUM('Pending','Processing','Completed','Cancelled','Delivered') DEFAULT 'Pending'")
             conn.commit()
         except:
             pass
