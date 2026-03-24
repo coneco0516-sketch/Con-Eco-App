@@ -44,20 +44,50 @@ function AdminOrders() {
                 orders.map((order, idx) => (
                   <tr key={order.order_id} style={{ borderBottom: idx !== orders.length -1 ? '1px solid var(--surface-border)' : 'none' }}>
                     <td style={{ padding: '15px' }}>#{order.order_id}</td>
-                    <td style={{ padding: '15px', color: 'white' }}>{order.customer_name}</td>
+                    <td style={{ padding: '15px' }}>
+                      <div style={{ color: 'white' }}>{order.customer_name}</div>
+                      <div style={{ 
+                        fontSize: '0.7rem', 
+                        color: order.customer_score < 50 ? '#ef4444' : order.customer_score < 80 ? '#f59e0b' : '#22c55e',
+                        fontWeight: 'bold'
+                      }}>
+                        Score: {order.customer_credit_score}
+                      </div>
+                    </td>
                     <td style={{ padding: '15px', color: 'var(--primary-color)' }}>{order.vendor_name}</td>
                     <td style={{ padding: '15px' }}>{order.order_type}</td>
                     <td style={{ padding: '15px' }}>₹{order.amount}</td>
                     <td style={{ padding: '15px' }}>
-                        <span style={{ 
-                            background: order.status.toLowerCase() === 'completed' ? '#238636' : (order.status.toLowerCase() === 'cancelled' ? 'transparent' : '#d4a20b'), 
-                            color: order.status.toLowerCase() === 'cancelled' ? '#f85149' : 'white',
-                            padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' 
-                        }}>
-                            {order.status}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span style={{ 
+                              background: order.status.toLowerCase() === 'completed' ? '#238636' : (order.status.toLowerCase() === 'cancelled' ? 'transparent' : '#d4a20b'), 
+                              color: order.status.toLowerCase() === 'cancelled' ? '#f85149' : 'white',
+                              padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', textAlign: 'center'
+                          }}>
+                              {order.status}
+                          </span>
+                          <span style={{ fontSize: '0.7rem', color: '#ffd700', fontWeight: 'bold' }}>
+                            {order.payment_method}
+                          </span>
+                          {order.payment_method === 'Pay Later' && order.pay_later_stage && (
+                            <span style={{ 
+                              fontSize: '0.65rem', 
+                              color: order.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6',
+                              fontWeight: 'bold'
+                            }}>
+                              {order.pay_later_stage}
+                            </span>
+                          )}
+                        </div>
                     </td>
-                    <td style={{ padding: '15px', fontSize: '0.9rem' }}>{order.date}</td>
+                    <td style={{ padding: '15px', fontSize: '0.8rem' }}>
+                      <div>{order.date}</div>
+                      {order.payment_method === 'Pay Later' && order.pay_later_stage === 'Stage1' && (
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                           Due: {new Date(order.pay_later_due_date).toLocaleDateString()}
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}

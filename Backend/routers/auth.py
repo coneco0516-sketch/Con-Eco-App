@@ -227,7 +227,14 @@ def get_profile(request: Request):
             
         # Fetch role-specific info
         if user['role'] == 'Customer':
-            cursor.execute("SELECT city, state, verification_status FROM Customers WHERE customer_id=%s", (user['user_id'],))
+            cursor.execute("""
+                SELECT c.city, c.state, c.verification_status, 
+                       COALESCE(cs.credit_score, 100) as credit_score,
+                       cs.pay_later_blocked, cs.blocked_until
+                FROM Customers c 
+                LEFT JOIN credit_scores cs ON c.customer_id = cs.customer_id
+                WHERE c.customer_id=%s
+            """, (user['user_id'],))
             extra = cursor.fetchone()
             if extra: user.update(extra)
         elif user['role'] == 'Vendor':

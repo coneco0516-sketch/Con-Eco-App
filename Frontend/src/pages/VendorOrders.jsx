@@ -70,9 +70,57 @@ function VendorOrders() {
                     <p style={{ color: 'white', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Delivery Address:</p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{o.delivery_address || 'No address provided'}</p>
                   </div>
-                  <p style={{ color: 'white', fontSize: '0.9rem', marginBottom: 0 }}>
+                  <p style={{ color: 'white', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                     Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method}</span>
                   </p>
+                  
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      padding: '3px 10px', 
+                      borderRadius: '20px', 
+                      background: o.customer_credit_score < 50 ? 'rgba(239, 68, 68, 0.1)' : o.customer_credit_score < 80 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                      color: o.customer_credit_score < 50 ? '#ef4444' : o.customer_credit_score < 80 ? '#f59e0b' : '#22c55e',
+                      border: `1px solid ${o.customer_credit_score < 50 ? '#ef4444' : o.customer_credit_score < 80 ? '#f59e0b' : '#22c55e'}`,
+                      fontWeight: 'bold'
+                    }}>
+                      Customer Credit: {o.customer_credit_score}
+                    </span>
+
+                    {o.payment_method === 'Pay Later' && o.pay_later_stage && (
+                      <>
+                        <span style={{ 
+                          fontSize: '0.75rem', 
+                          padding: '3px 10px', 
+                          borderRadius: '20px', 
+                          background: o.pay_later_stage === 'Stage3' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                          color: o.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6',
+                          border: `1px solid ${o.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6'}`,
+                          fontWeight: 'bold'
+                        }}>
+                          {o.pay_later_stage === 'Stage1' ? 'Stage 1 (30 Days)' : 
+                           o.pay_later_stage === 'Stage2' ? 'Stage 2 (Grace)' : 
+                           o.pay_later_stage === 'Stage3' ? 'Stage 3 (FINAL DAY)' : 'Defaulted'}
+                        </span>
+                        
+                        {o.pay_later_stage === 'Stage1' && o.pay_later_due_date && (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                            Due: {new Date(o.pay_later_due_date).toLocaleDateString()}
+                          </span>
+                        )}
+                        {o.pay_later_stage === 'Stage2' && o.pay_later_stage2_due && (
+                          <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>
+                            Grace Due: {new Date(o.pay_later_stage2_due).toLocaleDateString()}
+                          </span>
+                        )}
+                        {o.pay_later_stage === 'Stage3' && o.pay_later_stage3_due && (
+                          <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 'bold' }}>
+                            FINAL DEADLINE TODAY
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '180px' }}>
                   <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin:0, fontSize: '1.2rem' }}>₹{o.amount}</p>

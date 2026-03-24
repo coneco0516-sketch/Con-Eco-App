@@ -189,10 +189,17 @@ def vendor_orders(user = Depends(check_vendor)):
             if st in stats: stats[st] = row['c']
             
         sql = """
-            SELECT o.order_id, u.name as customer_name, o.order_type, o.amount, o.status, o.delivery_address, o.payment_method, DATE_FORMAT(o.created_at, '%d %b %Y') as date 
+            SELECT o.order_id, u.name as customer_name, o.order_type, o.amount, o.status, 
+                   o.delivery_address, o.payment_method, o.pay_later_stage, 
+                   DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due_date, 
+                   DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
+                   DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
+                   COALESCE(cs.credit_score, 100) as customer_credit_score,
+                   DATE_FORMAT(o.created_at, '%d %b %Y') as date 
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
             JOIN Users u ON c.customer_id = u.user_id
+            LEFT JOIN credit_scores cs ON o.customer_id = cs.customer_id
             WHERE o.vendor_id=%s
             ORDER BY o.created_at DESC
         """

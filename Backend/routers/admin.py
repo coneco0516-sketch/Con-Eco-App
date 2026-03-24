@@ -65,8 +65,11 @@ def get_customers(user = Depends(check_admin)):
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            "SELECT c.customer_id, u.name, u.email, u.phone, c.verification_status "
-            "FROM Customers c JOIN Users u ON c.customer_id = u.user_id"
+            "SELECT c.customer_id, u.name, u.email, u.phone, c.verification_status, "
+            "COALESCE(cs.credit_score, 100) as credit_score, cs.pay_later_blocked "
+            "FROM Customers c "
+            "JOIN Users u ON c.customer_id = u.user_id "
+            "LEFT JOIN credit_scores cs ON c.customer_id = cs.customer_id"
         )
         customers = cursor.fetchall()
         cursor.close()
@@ -179,11 +182,18 @@ def get_orders(user = Depends(check_admin)):
         # Fixed: u_cust.name instead of full_name, and correct JOIN
         sql = """
         SELECT o.order_id, u_cust.name as customer_name, v.company_name as vendor_name, 
-               o.order_type, o.amount, o.status, DATE_FORMAT(o.created_at, '%d %M %Y') as date
+               o.order_type, o.amount, o.status, o.payment_method,
+               o.pay_later_stage, 
+               DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due_date, 
+               DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
+               DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
+               COALESCE(cs.credit_score, 100) as customer_credit_score,
+               DATE_FORMAT(o.created_at, '%d %M %Y') as date
         FROM Orders o
         JOIN Customers c ON o.customer_id = c.customer_id
         JOIN Users u_cust ON c.customer_id = u_cust.user_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
+        LEFT JOIN credit_scores cs ON o.customer_id = cs.customer_id
         ORDER BY o.created_at DESC
         """
         cursor.execute(sql)
