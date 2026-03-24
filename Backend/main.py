@@ -58,6 +58,18 @@ async def contact_us(form: ContactForm):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+        # Ensure table exists on production
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS contactmessages (
+                message_id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                message TEXT NOT NULL,
+                status ENUM('Unread','Read','Replied') DEFAULT 'Unread',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
         cursor.execute(
             "INSERT INTO contactmessages (name, email, message, status) VALUES (%s, %s, %s, 'Unread')",
             (form.name, form.email, form.message)

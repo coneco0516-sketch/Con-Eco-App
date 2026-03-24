@@ -25,20 +25,28 @@ function AdminContactMessages() {
 
   const fetchMessages = () => {
     fetch('/api/admin/contact_messages', { credentials: 'include' })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(text => {
+            try { return JSON.parse(text); } catch { return { status: 'error', message: `Server error: ${res.status}` }; }
+          });
+        }
+        return res.json();
+      })
       .then(data => {
         if (data.status === 'not_logged_in') {
           localStorage.removeItem('is_logged_in');
           navigate('/login');
         } else if (data.status === 'success') {
-          setMessages(data.messages);
-          setUnreadCount(data.unread_count);
-          setTotalCount(data.total_count);
+          setMessages(data.messages || []);
+          setUnreadCount(data.unread_count || 0);
+          setTotalCount(data.total_count || 0);
+          setError(null);
         } else {
           setError(data.message || 'Failed to load messages');
         }
       })
-      .catch(() => setError('Network error'));
+      .catch(err => setError('Network error: ' + err.message));
   };
 
   const handleMarkRead = (msgId) => {

@@ -311,6 +311,20 @@ def get_contact_messages(user = Depends(check_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
+        
+        # Ensure the table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS contactmessages (
+                message_id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                message TEXT NOT NULL,
+                status ENUM('Unread','Read','Replied') DEFAULT 'Unread',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        
         cursor.execute("""
             SELECT message_id, name, email, message, status,
                    DATE_FORMAT(created_at, '%d %b %Y %H:%i') as date
@@ -335,6 +349,9 @@ def get_contact_messages(user = Depends(check_admin)):
             "unread_count": unread_count,
             "total_count": total_count
         }
+    except Exception as e:
+        print(f"Error fetching contact messages: {str(e)}")
+        return {"status": "error", "message": str(e), "messages": [], "unread_count": 0, "total_count": 0}
     finally:
         conn.close()
 
