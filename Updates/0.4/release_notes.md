@@ -53,6 +53,10 @@
   - `GET /api/admin/weekly_invoices` — View all vendor invoices across the platform with outstanding/collected totals.
   - `POST /api/admin/generate_weekly_invoices` — Manually trigger invoice generation (for testing).
   - `POST /api/admin/enforce_commission_penalties` — Manually trigger penalty enforcement.
+- **Admin UI Page Added (`/admin/commissions`):**
+  - Admins can now view a full list of all vendor invoices, including the amount, due date, vendor name, strikes count, and status.
+  - See totals for "Outstanding Unpaid" vs "Total Collected" platform-wide.
+  - Two "Manual Controls" buttons added to allow admins to immediately generate invoices or enforce penalties without waiting for the automated scheduler.
 
 ---
 
