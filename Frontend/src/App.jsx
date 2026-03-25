@@ -39,6 +39,7 @@ import VendorOrders from './pages/VendorOrders';
 import Earnings from './pages/Earnings';
 import VendorAnalytics from './pages/VendorAnalytics';
 import VendorProfile from './pages/VendorProfile';
+import VendorBilling from './pages/VendorBilling';
 import './index.css';
 
 function AppContent() {
@@ -98,6 +99,7 @@ function AppContent() {
           <Route path="/vendor/catalogue" element={<Catalogue />} />
           <Route path="/vendor/orders" element={<VendorOrders />} />
           <Route path="/vendor/earnings" element={<Earnings />} />
+          <Route path="/vendor/billing" element={<VendorBilling />} />
           <Route path="/vendor/analytics" element={<VendorAnalytics />} />
           <Route path="/vendor/profile" element={<VendorProfile />} />
 

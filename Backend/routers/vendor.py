@@ -37,11 +37,13 @@ def dashboard(user = Depends(check_vendor)):
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
-        stats = {'catalogue_size': 0, 'pending_orders': 0, 'total_earnings': 0, 'verification_status': 'Pending'}
+        stats = {'catalogue_size': 0, 'pending_orders': 0, 'total_earnings': 0, 'verification_status': 'Pending', 'commission_strikes': 0, 'outstanding_commission': 0}
         
-        cursor.execute("SELECT verification_status FROM Vendors WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT verification_status, commission_strikes FROM Vendors WHERE vendor_id=%s", (vendor_id,))
         res = cursor.fetchone()
-        if res: stats['verification_status'] = res['verification_status']
+        if res: 
+            stats['verification_status'] = res['verification_status']
+            stats['commission_strikes'] = res['commission_strikes']
         
         cursor.execute("SELECT (SELECT COUNT(*) FROM Products WHERE vendor_id=%s) + (SELECT COUNT(*) FROM Services WHERE vendor_id=%s) as c", (vendor_id, vendor_id))
         res = cursor.fetchone()
@@ -55,6 +57,11 @@ def dashboard(user = Depends(check_vendor)):
         res = cursor.fetchone()
         if res: stats['total_earnings'] = res['s'] or 0
         
+        # Outstanding COD Invoices
+        cursor.execute("SELECT SUM(amount) as total FROM weekly_invoices WHERE vendor_id=%s AND status='Unpaid'", (vendor_id,))
+        res = cursor.fetchone()
+        stats['outstanding_commission'] = res['total'] or 0.0
+
         cursor.close()
         return {"status": "success", "stats": stats}
     finally:
@@ -316,5 +323,28 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         cursor.close()
         return {"status": "success", "stats": stats, "transactions": transactions}
+    finally:
+        conn.close()
+
+@router.get("/invoices")
+def get_invoices(user = Depends(check_vendor)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        vendor_id = user['user_id']
+        
+        cursor.execute("""
+            SELECT invoice_id, amount, status, 
+                   DATE_FORMAT(billing_period_start, '%d %b %Y') as start, 
+                   DATE_FORMAT(billing_period_end, '%d %b %Y') as end, 
+                   DATE_FORMAT(due_date, '%d %b %Y') as due 
+            FROM weekly_invoices 
+            WHERE vendor_id = %s 
+            ORDER BY created_at DESC
+        """, (vendor_id,))
+        invoices = cursor.fetchall()
+        
+        cursor.close()
+        return {"status": "success", "invoices": invoices}
     finally:
         conn.close()

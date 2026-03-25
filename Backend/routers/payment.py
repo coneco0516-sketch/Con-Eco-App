@@ -27,9 +27,9 @@ RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
 router = APIRouter()
 
 
-def check_customer(user=Depends(get_current_user_from_cookie)):
-    if user["role"] != "Customer":
-        raise HTTPException(status_code=403, detail="Forbidden")
+def check_user(user=Depends(get_current_user_from_cookie)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not logged in")
     return user
 
 
@@ -39,10 +39,9 @@ class CreateOrderRequest(BaseModel):
     currency: str = "INR"
 
 @router.post("/create_order")
-def create_razorpay_order(data: CreateOrderRequest, user=Depends(check_customer)):
+def create_razorpay_order(data: CreateOrderRequest, user=Depends(check_user)):
     """
-    Called by the React Checkout page before launching the Razorpay popup.
-    Returns a Razorpay 'order_id' that the frontend widget needs.
+    Called by Customers or Vendors before launching the Razorpay popup.
     """
     if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
         raise HTTPException(
@@ -57,6 +56,66 @@ def create_razorpay_order(data: CreateOrderRequest, user=Depends(check_customer)
         "payment_capture": 1   # Auto-capture payment
     })
     return {"status": "success", "order_id": order["id"], "key_id": RAZORPAY_KEY_ID}
+
+
+# ── 2. Verify Razorpay Payment for Commissions (Vendor) ──────────────────────
+class VerifyInvoiceRequest(BaseModel):
+    invoice_id:          int
+    razorpay_order_id:   str
+    razorpay_payment_id: str
+    razorpay_signature:  str
+
+@router.post("/verify_invoice")
+def verify_invoice_payment(data: VerifyInvoiceRequest, user=Depends(get_current_user_from_cookie)):
+    if user['role'] != 'Vendor':
+        raise HTTPException(status_code=403, detail="Vendor only")
+
+    # Signature verification
+    body        = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
+    expected_sig= hmac.new(
+        RAZORPAY_KEY_SECRET.encode("utf-8"),
+        body.encode("utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+
+    if expected_sig != data.razorpay_signature:
+        raise HTTPException(status_code=400, detail="Signature failed.")
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # 1. Update invoice status
+        cursor.execute(
+            "UPDATE weekly_invoices SET status='Paid' WHERE invoice_id=%s AND vendor_id=%s",
+            (data.invoice_id, user["user_id"])
+        )
+        
+        # 2. Reset strikes and verify account if it was unverified due to strikes
+        cursor.execute("UPDATE Vendors SET commission_strikes = 0, verification_status='Verified' WHERE vendor_id=%s", (user["user_id"],))
+        
+        # 3. Mark all commissions in that period as 'Paid'
+        # First get the period
+        cursor.execute("SELECT billing_period_start, billing_period_end FROM weekly_invoices WHERE invoice_id=%s", (data.invoice_id,))
+        inv = cursor.fetchone()
+        if inv:
+            cursor.execute("""
+                UPDATE commissions SET status='Paid', settled_date=CURRENT_TIMESTAMP 
+                WHERE vendor_id=%s AND status='Pending' AND created_at BETWEEN %s AND %s
+            """, (user["user_id"], inv['billing_period_start'], inv['billing_period_end']))
+        
+        conn.commit()
+        cursor.close()
+        return {"status": "success", "message": "Commission paid successfully. Account status restored."}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+def check_customer(user=Depends(get_current_user_from_cookie)):
+    if user["role"] != "Customer":
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return user
 
 
 def finalize_order(cust_id, delivery_address, payment_method, payment_status, txn_id):

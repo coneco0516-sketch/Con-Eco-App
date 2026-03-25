@@ -10,6 +10,7 @@ function VendorSidebar() {
         <li><Link to="/vendor/catalogue" className="nav-item">My Catalogue</Link></li>
         <li><Link to="/vendor/orders" className="nav-item">Incoming Orders</Link></li>
         <li><Link to="/vendor/earnings" className="nav-item">Earnings</Link></li>
+        <li><Link to="/vendor/billing" className="nav-item">Commission Bills</Link></li>
         <li><Link to="/vendor/analytics" className="nav-item">Analytics</Link></li>
         <li><Link to="/vendor/profile" className="nav-item">My Profile</Link></li>
       </ul>

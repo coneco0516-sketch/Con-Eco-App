@@ -424,3 +424,66 @@ def reply_to_contact(data: ContactReply, user = Depends(check_admin)):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
+
+
+# ===== WEEKLY COMMISSION INVOICES (Admin) =====
+
+@router.get("/weekly_invoices")
+def get_all_weekly_invoices(user = Depends(check_admin)):
+    """Admin view: All vendor weekly commission invoices."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT i.invoice_id, u.name as vendor_name, v.company_name,
+                   i.amount, i.status,
+                   DATE_FORMAT(i.billing_period_start, '%d %b %Y') as period_start,
+                   DATE_FORMAT(i.billing_period_end, '%d %b %Y') as period_end,
+                   DATE_FORMAT(i.due_date, '%d %b %Y') as due_date,
+                   v.commission_strikes,
+                   EXISTS(SELECT 1 FROM Users u2 WHERE u2.user_id = v.vendor_id AND u2.is_blocked = 1) as is_blocked
+            FROM weekly_invoices i
+            JOIN Vendors v ON i.vendor_id = v.vendor_id
+            JOIN Users u ON v.vendor_id = u.user_id
+            ORDER BY i.created_at DESC
+        """)
+        invoices = cursor.fetchall()
+
+        # Summary stats
+        cursor.execute("SELECT SUM(amount) as total FROM weekly_invoices WHERE status='Unpaid'")
+        res = cursor.fetchone()
+        outstanding = float(res['total'] or 0)
+
+        cursor.execute("SELECT SUM(amount) as total FROM weekly_invoices WHERE status='Paid'")
+        res = cursor.fetchone()
+        collected = float(res['total'] or 0)
+
+        cursor.close()
+        return {
+            "status": "success",
+            "invoices": invoices,
+            "outstanding": outstanding,
+            "collected": collected
+        }
+    finally:
+        conn.close()
+
+@router.post("/enforce_commission_penalties")
+def run_penalty_enforcement(user = Depends(check_admin)):
+    """Manually trigger penalty enforcement for overdue invoices."""
+    from commission_invoicing import enforce_penalties
+    try:
+        enforce_penalties()
+        return {"status": "success", "message": "Penalty enforcement complete."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/generate_weekly_invoices")
+def run_invoice_generation(user = Depends(check_admin)):
+    """Manually trigger weekly invoice generation."""
+    from commission_invoicing import generate_weekly_invoices
+    try:
+        generate_weekly_invoices()
+        return {"status": "success", "message": "Weekly invoices generated."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
