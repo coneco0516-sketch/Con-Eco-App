@@ -6,15 +6,20 @@ function VendorDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('is_logged_in');
     const role = localStorage.getItem('user_role');
     
-    // Allow 'Vendor' or 'Provider' based on how you differentiate if needed
     if (!isLoggedIn || role !== 'Vendor') {
       navigate('/login');
     } else {
+      // Show announcement if not seen in this session
+      if (!sessionStorage.getItem('vendor_announcement_seen')) {
+        setShowAnnouncement(true);
+      }
+
       // Fetch vendor stats including verification status
       fetch('/api/vendor/dashboard', { credentials: 'include' })
         .then(res => res.json())
@@ -31,8 +36,60 @@ function VendorDashboard() {
     }
   }, [navigate]);
 
+  const closeAnnouncement = () => {
+    setShowAnnouncement(false);
+    sessionStorage.setItem('vendor_announcement_seen', 'true');
+  };
+
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', position: 'relative' }}>
+
+      {/* Test Version Announcement Popup */}
+      {showAnnouncement && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          animation: 'fadeIn 0.4s ease-out'
+        }}>
+          <div className="glass-panel" style={{
+            maxWidth: '500px',
+            padding: '2.5rem',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.8)',
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+            <h3 style={{ color: '#ffd700', fontSize: '1.5rem', marginBottom: '1rem' }}>Test Version Active</h3>
+            <p style={{
+              color: 'white',
+              fontSize: '1.05rem',
+              lineHeight: '1.7',
+              marginBottom: '2rem'
+            }}>
+              As this is a <strong>test version</strong> of the app, all orders placed by customers will currently use <strong>COD (Cash on Delivery)</strong> only. Please process COD orders normally and check your <strong>Commission Bills</strong> page weekly.
+            </p>
+            <button
+              onClick={closeAnnouncement}
+              className="btn"
+              style={{
+                background: 'var(--primary-color)',
+                padding: '0.8rem 2rem',
+                fontSize: '1rem',
+                fontWeight: 'bold'
+              }}
+            >
+              I Understand
+            </button>
+          </div>
+        </div>
+      )}
+
       <VendorSidebar />
 
       <main style={{ flex: 1 }}>
