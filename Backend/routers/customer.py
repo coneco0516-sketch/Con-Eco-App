@@ -240,3 +240,64 @@ def get_my_services(user = Depends(check_customer)):
         return {"status": "success", "services": services}
     finally:
         conn.close()
+
+class CancelOrderData(BaseModel):
+    order_id: int
+
+@router.post("/orders/cancel")
+def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
+    """
+    Cancel an order ONLY if it is in 'Pending' state.
+    Provides 100% refund for online payments (by marking payment as Refunded).
+    For COD, simply marks as Cancelled.
+    If not pending, customer is instructed to contact the vendor.
+    """
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+            raise HTTPException(status_code=404, detail="Customer not found")
+        cust_id = cust['customer_id']
+
+        cursor.execute("""
+            SELECT status, payment_method, payment_status 
+            FROM Orders o
+            LEFT JOIN Payments p ON o.order_id = p.order_id
+            WHERE o.order_id = %s AND o.customer_id = %s
+        """, (data.order_id, cust_id))
+        order = cursor.fetchone()
+
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        if order['status'] != 'Pending':
+            return {
+                "status": "error", 
+                "message": "Order has already been accepted or processed. To cancel, please contact the vendor and request them to change the status back to 'Pending'."
+            }
+
+        # Cancel the order
+        cursor.execute("UPDATE Orders SET status='Cancelled' WHERE order_id=%s", (data.order_id,))
+        
+        # Handle payment status update
+        if order['payment_method'] in ['Card', 'UPI', 'Pay Later']:
+            cursor.execute("UPDATE Payments SET status='Refunded' WHERE order_id=%s", (data.order_id,))
+            refund_msg = "Order cancelled successfully. 100% refund initiated."
+        else:
+            # COD
+            cursor.execute("UPDATE Payments SET status='Cancelled' WHERE order_id=%s", (data.order_id,))
+            refund_msg = "Order cancelled successfully (COD)."
+            
+        conn.commit()
+        return {"status": "success", "message": refund_msg}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()

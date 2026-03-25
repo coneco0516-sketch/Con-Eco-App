@@ -70,6 +70,14 @@
 
 ---
 
+### 5. Customer Order Cancellation Flow
+- Customers can now cancel their ordered Products and booked Services directly from the `My Orders` and `My Booked Services` pages.
+- **Cancellation Rule:** Cancellation is ONLY permitted if the order status is currently **'Pending'**.
+- If the status is 'Pending', clicking "Cancel Order" will immediately cancel the order and provide a **100% refund** logic for Online payments (UPI/Card). COD orders are also marked cancelled.
+- **Post-Acceptance Rule:** If the vendor has already accepted the order (Status: 'Accepted', 'Processing', 'Shipped', etc.), the cancel button is disabled, instructing the customer to contact the vendor and request them to revert the status back to 'Pending' before a cancellation/refund can be processed.
+
+---
+
 ## 🗄️ Database Changes
 
 | Table | Change |

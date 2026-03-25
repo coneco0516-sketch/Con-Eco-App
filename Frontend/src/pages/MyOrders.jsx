@@ -80,6 +80,28 @@ function MyOrders() {
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to cancel this order? For pending online payments, a 100% refund will be initiated.")) return;
+
+    try {
+      const resp = await fetch('/api/customer/orders/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert(data.message);
+        fetchOrders();
+      } else {
+        alert("Cannot cancel: " + data.message);
+      }
+    } catch (err) {
+      alert("Error cancelling order.");
+    }
+  };
+
   const getStageBadge = (order) => {
     if (order.payment_method !== 'Pay Later' || order.payment_status === 'Completed') return null;
     
@@ -183,6 +205,25 @@ function MyOrders() {
                       Pay Now (Card/UPI)
                     </button>
                   )}
+
+                  {o.status === 'Pending' ? (
+                    <button 
+                      onClick={() => handleCancelOrder(o.order_id)}
+                      className="btn"
+                      style={{ padding: '6px 15px', fontSize: '0.85rem', background: '#e74c3c' }}
+                    >
+                      Cancel Order
+                    </button>
+                  ) : o.status !== 'Cancelled' && o.status !== 'Delivered' ? (
+                    <button 
+                      className="btn"
+                      disabled
+                      title="Please contact the vendor to change the status to Pending before cancelling."
+                      style={{ padding: '6px 15px', fontSize: '0.85rem', background: 'rgba(231, 76, 60, 0.4)', cursor: 'not-allowed' }}
+                    >
+                      Contact Vendor to Cancel
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ))}
