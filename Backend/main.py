@@ -1,11 +1,70 @@
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+import pytz
 
-app = FastAPI(title="ConEco Backend API")
+IST = pytz.timezone('Asia/Kolkata')
+
+
+def run_invoice_generation():
+    """Scheduled task: Generate weekly COD commission invoices (runs every Monday midnight IST)."""
+    try:
+        print("[SCHEDULER] Running weekly invoice generation...")
+        from commission_invoicing import generate_weekly_invoices
+        generate_weekly_invoices()
+        print("[SCHEDULER] Invoice generation complete.")
+    except Exception as e:
+        print(f"[SCHEDULER ERROR] Invoice generation failed: {e}")
+
+
+def run_penalty_enforcement():
+    """Scheduled task: Enforce penalties for overdue invoices (runs every Thursday midnight IST)."""
+    try:
+        print("[SCHEDULER] Running commission penalty enforcement...")
+        from commission_invoicing import enforce_penalties
+        enforce_penalties()
+        print("[SCHEDULER] Penalty enforcement complete.")
+    except Exception as e:
+        print(f"[SCHEDULER ERROR] Penalty enforcement failed: {e}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Start background scheduler on app startup, stop on shutdown."""
+    scheduler = BackgroundScheduler(timezone=IST)
+
+    # Every Monday at 00:01 IST → generate invoices for the past week
+    scheduler.add_job(
+        run_invoice_generation,
+        CronTrigger(day_of_week='mon', hour=0, minute=1, timezone=IST),
+        id='weekly_invoice_generation',
+        replace_existing=True
+    )
+
+    # Every Thursday at 00:01 IST → enforce penalties (3 days after invoice)
+    scheduler.add_job(
+        run_penalty_enforcement,
+        CronTrigger(day_of_week='thu', hour=0, minute=1, timezone=IST),
+        id='penalty_enforcement',
+        replace_existing=True
+    )
+
+    scheduler.start()
+    print("[SCHEDULER] Started. Invoice generation: every Monday 00:01 IST. Penalty enforcement: every Thursday 00:01 IST.")
+
+    yield  # App runs here
+
+    scheduler.shutdown()
+    print("[SCHEDULER] Stopped.")
+
+
+app = FastAPI(title="ConEco Backend API", lifespan=lifespan)
 
 import os
 
