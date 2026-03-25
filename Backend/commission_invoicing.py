@@ -23,7 +23,7 @@ def generate_weekly_invoices():
         # 2. Calculate sum of 'Pending' COD commissions for this period
         # Note: We filter by Orders with payment_method='COD' and commission status='Pending'
         cursor.execute("""
-            SELECT SUM(commission_amount) as total 
+            SELECT SUM(c.commission_amount) as total 
             FROM commissions c
             JOIN Orders o ON c.order_id = o.order_id
             WHERE c.vendor_id = %s 
