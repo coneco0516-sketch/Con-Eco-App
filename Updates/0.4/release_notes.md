@@ -16,11 +16,12 @@
 
 ---
 
-### 2. Customer Dashboard — Test Version Popup
-- A **glassy announcement popup** appears the first time a customer logs in during a session.
-- Message: *"As this is a test version of the app, if you want to place an order, kindly select the payment option as only COD (Cash on Delivery)."*
-- Uses `sessionStorage` so it shows only **once per browser session** — not on every page visit.
-- Styled with glassmorphism blur backdrop and gold accent color.
+### 2. Dashboard — Test Version Popups
+- A **glassy announcement popup** appears the first time a user logs in during a session.
+- **Customer Dashboard Popup:** *"As this is a test version of the app, if you want to place an order, kindly select the payment option as only COD (Cash on Delivery)."*
+- **Vendor Dashboard Popup:** *"As this is a test version of the app, all orders placed by customers will currently use COD (Cash on Delivery) only. Please process COD orders normally and check your Commission Bills page weekly."*
+- Uses `sessionStorage` with separate keys (`vendor_announcement_seen` vs customer) so it shows only **once per browser session** per role.
+- Styled with premium glassmorphism blur backdrop, dark overlay, and gold accent color.
 
 ---
 
