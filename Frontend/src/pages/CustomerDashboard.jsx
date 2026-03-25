@@ -6,12 +6,20 @@ function CustomerDashboard() {
   const navigate = useNavigate();
   const [credit, setCredit] = useState(null);
 
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
+
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('is_logged_in');
     const role = localStorage.getItem('user_role');
     
     if (!isLoggedIn || role !== 'Customer') {
       navigate('/login');
+    }
+
+    // Show announcement if not seen in this session
+    const hasSeen = sessionStorage.getItem('announcement_seen');
+    if (!hasSeen) {
+      setShowAnnouncement(true);
     }
 
     // Fetch credit score
@@ -23,9 +31,61 @@ function CustomerDashboard() {
       .catch(() => {});
   }, [navigate]);
 
+  const closeAnnouncement = () => {
+    setShowAnnouncement(false);
+    sessionStorage.setItem('announcement_seen', 'true');
+  };
+
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', position: 'relative' }}>
       
+      {/* Test Version Announcement Popup */}
+      {showAnnouncement && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          animation: 'fadeIn 0.4s ease-out'
+        }}>
+          <div className="glass-panel" style={{
+            maxWidth: '500px',
+            padding: '2.5rem',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.8)',
+            position: 'relative'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+            <h3 style={{ color: '#ffd700', fontSize: '1.5rem', marginBottom: '1rem' }}>Test Version Active</h3>
+            <p style={{ 
+              color: 'white', 
+              fontSize: '1.1rem', 
+              lineHeight: '1.6',
+              marginBottom: '2rem'
+            }}>
+              As this is a <strong>test version</strong> of the app, if you want to place an order, kindly select the payment option as <strong>only COD (Cash on Delivery)</strong>.
+            </p>
+            <button 
+              onClick={closeAnnouncement}
+              className="btn"
+              style={{ 
+                background: 'var(--primary-color)', 
+                padding: '0.8rem 2rem', 
+                fontSize: '1rem',
+                fontWeight: 'bold'
+              }}
+            >
+              I Understand
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* LEFT PANEL: Sidebar */}
       <CustomerSidebar />
 

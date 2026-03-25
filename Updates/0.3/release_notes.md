@@ -52,7 +52,7 @@
  -> Added the feature to filter the products/Services based on the category. ✅
  -> Added the feature to auto-categorize the products/Services based on the category. ✅
 
-10. After Order placed in order history of customer the customer must see that order's specific vendor contact details to contact them for any queries. this feature i want to add.
+10. After Order placed in order history of customer the customer must see that order's specific vendor contact details to contact them for any queries. this feature i want to add. ✅
 
 11. 
 
