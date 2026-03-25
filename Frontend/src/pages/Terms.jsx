@@ -17,6 +17,13 @@ function Terms() {
           Vendors must provide completely accurate and legal descriptions of the materials and services they are listing. Any deliberate misinformation entails immediate account verification revocation.
         </p>
         
+        <h3 style={{ color: 'white', marginBottom: '1rem' }}>Refund & Cancellation Policy</h3>
+        <ul style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6', paddingLeft: '1.5rem' }}>
+          <li><strong>100% Refund (Pre-Acceptance):</strong> Customers are eligible for a 100% refund for online payments if they cancel their order while the status is still "Pending" (i.e., before the vendor has accepted the order).</li>
+          <li><strong>Post-Acceptance Cancellations:</strong> Once an order is accepted by the vendor (status changes from "Pending"), direct cancellation is disabled. The customer must contact the vendor directly and request them to revert the order status back to "Pending" in order to process a cancellation and refund.</li>
+          <li><strong>Cash on Delivery (COD):</strong> The same cancellation timeline rules apply to COD orders. While no online payment refund is necessary, the order can only be cancelled while in the "Pending" state.</li>
+        </ul>
+        
         <h3 style={{ color: 'white', marginBottom: '1rem' }}>Limitation of Liability</h3>
         <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
           ConEco functions strictly as an intermediary facilitator platform and disclaims liability for any discrepancy regarding service quality or disputes between vendors and customers. We do however moderate conflicts appropriately.
