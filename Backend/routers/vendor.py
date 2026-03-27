@@ -449,7 +449,8 @@ def vendor_earnings(user = Depends(check_vendor)):
                    p.transaction_date as raw_date
             FROM Payments p
             JOIN Orders o ON p.order_id = o.order_id
-            WHERE o.vendor_id=%s
+            WHERE o.vendor_id=%s 
+              AND (o.payment_method = 'COD' OR COALESCE(o.vendor_credited, False) = True)
         """
         
         sql_payouts = """
