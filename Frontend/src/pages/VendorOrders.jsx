@@ -71,6 +71,11 @@ function VendorOrders() {
               <div key={o.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ flex: 1 }}>
                   <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>Order #{o.order_id} - {o.customer_name}</h4>
+                  {o.status !== 'Pending' && o.customer_phone && (
+                    <p style={{ color: '#3fb950', fontSize: '0.9rem', margin: '0 0 0.5rem 0', fontWeight: 'bold' }}>
+                      📞 {o.customer_phone}
+                    </p>
+                  )}
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Ordered on: {o.date}</p>
                   <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)', marginBottom: '0.5rem' }}>
                     <p style={{ color: 'white', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Delivery Address:</p>

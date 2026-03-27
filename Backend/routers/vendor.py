@@ -222,7 +222,7 @@ def vendor_orders(user = Depends(check_vendor)):
             if st in stats: stats[st] = row['c']
             
         sql = """
-            SELECT o.order_id, u.name as customer_name, o.order_type, o.amount, o.status, 
+            SELECT o.order_id, u.name as customer_name, u.phone as customer_phone, o.order_type, o.amount, o.status, 
                    o.delivery_address, o.payment_method, o.pay_later_stage, 
                    DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due_date, 
                    DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
