@@ -171,10 +171,10 @@ def api_health():
 @app.get("/api/test-email")
 def test_email_endpoint():
     """Diagnostic endpoint to force a test email and check logs."""
-    from email_service import send_email, SENDGRID_API_KEY, FROM_EMAIL
+    from email_service import send_email, RESEND_API_KEY, FROM_EMAIL
 
     report = {
-        "sendgrid_configured": bool(SENDGRID_API_KEY),
+        "resend_configured": bool(RESEND_API_KEY),
         "from_email": FROM_EMAIL,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }

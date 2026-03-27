@@ -1,12 +1,11 @@
 """
-Email notification service using SendGrid API
+Email notification service using Resend API
 Handles all email sending for login notifications, account updates, verification, etc.
-NOTE: Gmail SMTP is blocked by Railway (Errno 101). SendGrid uses HTTPS and is never blocked.
+NOTE: Uses Resend (https://resend.com) via HTTPS — works on Railway, excellent Gmail deliverability.
 """
 
 import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, ReplyTo
+import requests
 from datetime import datetime
 from database import get_db_connection
 from dotenv import load_dotenv
@@ -39,49 +38,56 @@ def log_email_attempt(to_email, subject, status, error=None):
     except Exception as e:
         print(f"DEBUG: Could not log email attempt: {str(e)}")
 
-# --- SendGrid Configuration ---
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
-GMAIL_USER       = os.environ.get("FROM_EMAIL", "coneco0516@gmail.com")
+# --- Resend Configuration ---
+RESEND_API_KEY   = os.environ.get("RESEND_API_KEY", "")
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")  # kept for reference
+FROM_EMAIL       = "onboarding@resend.dev"   # verified Resend sender (free plan)
+REPLY_TO_EMAIL   = os.environ.get("FROM_EMAIL", "coneco0516@gmail.com")
+GMAIL_USER       = REPLY_TO_EMAIL
 GMAIL_PASSWORD   = os.environ.get("GMAIL_APP_PASSWORD", "")  # kept for reference
-FROM_EMAIL       = GMAIL_USER
 APP_NAME  = "ConEco"
 APP_URL   = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.app")
 
-if not SENDGRID_API_KEY:
-    print("CRITICAL WARNING: SENDGRID_API_KEY environment variable is missing!")
+if not RESEND_API_KEY:
+    print("CRITICAL WARNING: RESEND_API_KEY environment variable is missing!")
 else:
-    print("INFO: SendGrid API Key is configured.")
+    print("INFO: Resend API Key is configured.")
 
 def send_email(to_email, subject, html_content, plain_text=None):
     """
-    Send email using SendGrid (HTTPS — works on Railway).
-    FROM address is coneco0516@gmail.com which is a verified SendGrid sender.
+    Send email using Resend API (HTTPS — works on Railway, excellent Gmail deliverability).
     """
-    if not SENDGRID_API_KEY:
-        error_msg = "SENDGRID_API_KEY is missing."
+    if not RESEND_API_KEY:
+        error_msg = "RESEND_API_KEY is missing from environment variables."
         print(f"WARNING: {error_msg} Email to {to_email} not sent.")
         log_email_attempt(to_email, subject, "ConfigError", error_msg)
         return False
 
     try:
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        message = Mail(
-            from_email=Email(FROM_EMAIL, APP_NAME),
-            to_emails=To(to_email),
-            subject=subject,
-            html_content=html_content or "<p>No content</p>"
-        )
-        # Set reply-to so users can reply and reach the Gmail inbox
-        message.reply_to = ReplyTo(FROM_EMAIL, APP_NAME)
-
+        payload = {
+            "from":     f"{APP_NAME} <{FROM_EMAIL}>",
+            "to":       [to_email],
+            "reply_to": REPLY_TO_EMAIL,
+            "subject":  subject,
+            "html":     html_content or "<p>No content</p>",
+        }
         if plain_text:
-            message.plain_text_content = plain_text
+            payload["text"] = plain_text
 
-        response = sg.send(message)
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type":  "application/json",
+            },
+            json=payload,
+            timeout=15
+        )
+
         success = response.status_code in [200, 201, 202]
-        print(f"Email to {to_email} — SendGrid status: {response.status_code}")
+        print(f"Resend email to {to_email} — HTTP {response.status_code}: {response.text}")
         log_email_attempt(to_email, subject, "Success" if success else "Failed",
-                          f"HTTP {response.status_code}")
+                          f"HTTP {response.status_code}: {response.text}")
         return success
 
     except Exception as e:
