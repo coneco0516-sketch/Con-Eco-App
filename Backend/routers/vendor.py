@@ -273,6 +273,12 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
                 conn.commit()
                 set_pay_later_timeline(data.order_id)
                 
+        if data.status == 'Cancelled':
+            cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
+        elif data.status == 'Pending':
+            # Logic: If order is moved back to Pending, reset payment status (allows Vendor to "Undo" a manual 'Paid' mark)
+            if order and order['payment_method'] in ['COD', 'Pay Later (Cash)']:
+                cursor.execute("UPDATE Payments SET status='Pending' WHERE order_id=%s", (data.order_id,))
         elif data.status != 'Cancelled':
             # Logic: If turning from Cancelled to anything else, reset payment status to Pending
             cursor.execute("UPDATE Payments SET status='Pending' WHERE order_id=%s AND status IN ('Failed', 'Cancelled')", (data.order_id,))
