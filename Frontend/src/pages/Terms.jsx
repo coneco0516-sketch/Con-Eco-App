@@ -24,6 +24,15 @@ function Terms() {
           <li><strong>Cash on Delivery (COD):</strong> The same cancellation timeline rules apply to COD orders. While no online payment refund is necessary, the order can only be cancelled while in the "Pending" state.</li>
         </ul>
         
+        <h3 style={{ color: 'white', marginBottom: '1rem' }}>Delivery Charges Policy</h3>
+        <div style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+          <p style={{ marginBottom: '1rem' }}>Delivery charges are not included in the order total displayed on the ConEco platform.</p>
+          <p style={{ marginBottom: '1rem' }}>As delivery costs vary based on location, distance, and local transportation conditions, ConEco does not fix, control, or standardize delivery charges.</p>
+          <p style={{ marginBottom: '1rem' }}>After placing an order, customers and vendors are required to communicate directly to finalize the delivery arrangements and applicable charges.</p>
+          <p style={{ marginBottom: '1rem' }}>The delivery fee shall be paid separately by the customer, either directly to the delivery personnel or to the vendor, as mutually agreed between the customer and the vendor.</p>
+          <p>ConEco shall not be held responsible or liable for any disputes, differences, or issues arising between the customer and the vendor regarding delivery charges, payment, or related arrangements.</p>
+        </div>
+        
         <h3 style={{ color: 'white', marginBottom: '1rem' }}>Limitation of Liability</h3>
         <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
           ConEco functions strictly as an intermediary facilitator platform and disclaims liability for any discrepancy regarding service quality or disputes between vendors and customers. We do however moderate conflicts appropriately.
