@@ -166,7 +166,19 @@ function VendorOrders() {
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '180px' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: 0, fontSize: '1.2rem' }}>₹{o.amount}</p>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0 0 4px 0', fontSize: '1.2rem' }}>
+                      ₹{o.payment_method === 'COD' ? o.amount : o.base_amount}
+                    </p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
+                      {o.payment_method === 'COD' ? 'Gross (Collect Cash)' : 'Net Payout'}
+                    </p>
+                    {o.payment_method !== 'COD' && (
+                      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', margin: '4px 0 0 0' }}>
+                        Gross: ₹{o.amount}
+                      </p>
+                    )}
+                  </div>
 
                   {o.payment_method === 'Pay Later' && o.status === 'Pending' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

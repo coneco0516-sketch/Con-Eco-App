@@ -19,6 +19,7 @@ function Earnings() {
         if (data.stats) {
             setEarnings({ 
                 total: data.stats.total || 0, 
+                total_net: data.stats.total_net || 0,
                 online_total: data.stats.online_total || 0,
                 cod_total: data.stats.cod_total || 0,
                 pending_online: data.stats.pending_online || 0,
@@ -82,7 +83,10 @@ function Earnings() {
                   <h3 style={{ margin: 0, color: 'white', marginBottom: '0.25rem' }}>Collected Offline (COD): <strong style={{color: '#f59e0b'}}>₹{earnings.cod_total || 0}</strong></h3>
                   <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pending COD Collections: ₹{earnings.pending_cod || 0}</p>
                   
-                  <h4 style={{ margin: '0', color: 'white' }}>Total Gross Sales: ₹{earnings.total || 0}</h4>
+                  <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
+                    <h4 style={{ margin: '0', color: 'var(--primary-color)', fontSize: '1.2rem' }}>Net Payout: ₹{earnings.total_net || 0}</h4>
+                    <p style={{ margin: '0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Total Gross Sales: ₹{earnings.total || 0}</p>
+                  </div>
                 </div>
                 <button className="btn" onClick={handleWithdrawClick} style={{ background: '#238636' }}>Withdraw to Bank</button>
              </div>

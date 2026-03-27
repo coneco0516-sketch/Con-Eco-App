@@ -222,7 +222,7 @@ def vendor_orders(user = Depends(check_vendor)):
             if st in stats: stats[st] = row['c']
             
         sql = """
-            SELECT o.order_id, u.name as customer_name, u.phone as customer_phone, o.order_type, o.amount, o.status, 
+            SELECT o.order_id, u.name as customer_name, u.phone as customer_phone, o.order_type, o.amount, o.base_amount, o.status, 
                    o.delivery_address, o.payment_method, o.pay_later_stage, pvt.status as payment_status,
                    DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due_date, 
                    DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
@@ -413,7 +413,25 @@ def vendor_earnings(user = Depends(check_vendor)):
         pcod = cursor.fetchone()
         stats['pending_cod'] = float(pcod['s']) if pcod and pcod['s'] else 0
         
-        stats['total'] = stats['online_total'] + stats['cod_total']
+        # Calculate Net COD (Subtracting commission)
+        cursor.execute("""
+            SELECT SUM(o.base_amount) as s 
+            FROM Orders o 
+            JOIN Payments p ON o.order_id = p.order_id 
+            WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method='COD'
+        """, (vendor_id,))
+        cod_net_res = cursor.fetchone()
+        stats['cod_net'] = float(cod_net_res['s']) if cod_net_res and cod_net_res['s'] else 0
+        
+        # Total for the stats panel
+        stats['total_net'] = stats['online_total'] + stats['cod_net']
+        
+        cursor.execute("SELECT SUM(amount) as s FROM Orders WHERE vendor_id=%s AND status='Completed'", (vendor_id,))
+        gross_res = cursor.fetchone()
+        stats['total_gross'] = float(gross_res['s']) if gross_res and gross_res['s'] else 0
+        
+        # For backward compatibility with the frontend if it uses 'total'
+        stats['total'] = stats['total_gross']
         
         try:
             cursor.execute("CREATE TABLE IF NOT EXISTS Payouts (payout_id INT AUTO_INCREMENT PRIMARY KEY, vendor_id INT, amount DECIMAL(10,2), account_name VARCHAR(100), account_number VARCHAR(100), ifsc VARCHAR(50), status ENUM('Pending', 'Completed', 'Rejected') DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id))")
@@ -424,7 +442,7 @@ def vendor_earnings(user = Depends(check_vendor)):
         sql_payments = """
             SELECT DATE_FORMAT(p.transaction_date, '%%d %%b %%Y') as date, 
                    CONCAT('Order #', o.order_id, ' Payment (', p.status, ')') as description, 
-                   p.amount, p.transaction_date as raw_date
+                   CASE WHEN o.payment_method = 'COD' THEN p.amount ELSE o.base_amount END as amount, p.transaction_date as raw_date
             FROM Payments p
             JOIN Orders o ON p.order_id = o.order_id
             WHERE o.vendor_id=%s
