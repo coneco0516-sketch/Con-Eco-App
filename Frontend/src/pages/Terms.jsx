@@ -18,11 +18,11 @@ function Terms() {
         </p>
         
         <h3 style={{ color: 'white', marginBottom: '1rem' }}>Refund & Cancellation Policy</h3>
-        <ul style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6', paddingLeft: '1.5rem' }}>
-          <li><strong>100% Refund (Pre-Acceptance):</strong> Customers are eligible for a 100% refund for online payments if they cancel their order while the status is still "Pending" (i.e., before the vendor has accepted the order).</li>
-          <li><strong>Post-Acceptance Cancellations:</strong> Once an order is accepted by the vendor (status changes from "Pending"), direct cancellation is disabled. The customer must contact the vendor directly and request them to revert the order status back to "Pending" in order to process a cancellation and refund.</li>
-          <li><strong>Cash on Delivery (COD):</strong> The same cancellation timeline rules apply to COD orders. While no online payment refund is necessary, the order can only be cancelled while in the "Pending" state.</li>
-        </ul>
+        <div style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+          <p style={{ marginBottom: '1rem' }}><strong>100% Refund (Pre-Acceptance):</strong> Customers are eligible for a 100% refund for online payments if they cancel their order while the status is still "Pending" (i.e., before the vendor has accepted the order).</p>
+          <p style={{ marginBottom: '1rem' }}><strong>Post-Acceptance Cancellations:</strong> Once an order is accepted by the vendor (status changes from "Pending"), direct cancellation is disabled. The customer must contact the vendor directly and request them to revert the order status back to "Pending" in order to process a cancellation and refund.</p>
+          <p><strong>Cash on Delivery (COD):</strong> The same cancellation timeline rules apply to COD orders. While no online payment refund is necessary, the order can only be cancelled while in the "Pending" state.</p>
+        </div>
         
         <h3 style={{ color: 'white', marginBottom: '1rem' }}>Delivery Charges Policy</h3>
         <div style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
