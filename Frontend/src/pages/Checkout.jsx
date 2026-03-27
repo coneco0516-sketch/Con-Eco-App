@@ -172,8 +172,8 @@ function Checkout() {
   const isPayLaterBlocked = creditInfo && !creditInfo.eligible;
 
   const paymentOptions = [
-    { id: 'UPI', label: 'UPI (PhonePe, GPay)', icon: '📱' },
-    { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
+    // { id: 'UPI', label: 'UPI (PhonePe, GPay)', icon: '📱' },
+    // { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
     { id: 'Pay Later', label: 'Pay Later (Request Credit)', icon: '📅', disabled: isPayLaterBlocked },
   ];
