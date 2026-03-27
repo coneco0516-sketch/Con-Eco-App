@@ -99,7 +99,9 @@ function AdminPayments() {
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Txn ID</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Customer</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Vendor</th>
-                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Amount</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Total</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Base (Net)</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Commission</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Status</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Date</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Action</th>
@@ -117,6 +119,8 @@ function AdminPayments() {
                     <td style={{ padding: '15px', color: 'white' }}>{p.customer_name}</td>
                     <td style={{ padding: '15px', color: 'var(--primary-color)' }}>{p.vendor_name}</td>
                     <td style={{ padding: '15px', fontWeight: 'bold' }}>₹{p.amount}</td>
+                    <td style={{ padding: '15px', color: '#3fb950', fontWeight: 'bold' }}>₹{p.base_amount}</td>
+                    <td style={{ padding: '15px', color: '#da3633' }}>₹{p.commission}</td>
                     <td style={{ padding: '15px' }}>
                         <span style={{ 
                             background: p.status.toLowerCase() === 'completed' ? '#238636' : '#d4a20b', 

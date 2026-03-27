@@ -226,7 +226,7 @@ def get_payments(user = Depends(check_admin)):
         # Added columns: payment_method, vendor_credited, order_id, base_amount
         sql = """
         SELECT DATE_FORMAT(p.transaction_date, '%d %b %Y') as date, p.txn_id, u_cust.name as customer_name,
-               v.company_name as vendor_name, p.amount, p.status, o.payment_method, COALESCE(o.vendor_credited, 0) as vendor_credited, o.order_id, o.base_amount
+               v.company_name as vendor_name, p.amount, (p.amount - o.base_amount) as commission, p.status, o.payment_method, COALESCE(o.vendor_credited, 0) as vendor_credited, o.order_id, o.base_amount
         FROM Payments p
         JOIN Orders o ON p.order_id = o.order_id
         JOIN Customers c ON o.customer_id = c.customer_id
