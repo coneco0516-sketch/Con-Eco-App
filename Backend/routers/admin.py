@@ -279,6 +279,63 @@ def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(check_admin)):
         cursor.close()
         conn.close()
 
+@router.get("/payouts")
+def get_payouts(user = Depends(check_admin)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        try: cursor.execute("CREATE TABLE IF NOT EXISTS Payouts (payout_id INT AUTO_INCREMENT PRIMARY KEY, vendor_id INT, amount DECIMAL(10,2), account_name VARCHAR(100), account_number VARCHAR(100), ifsc VARCHAR(50), status ENUM('Pending', 'Completed', 'Rejected') DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id))")
+        except: pass
+        conn.commit()
+        
+        cursor.execute("""
+            SELECT p.payout_id, v.company_name, p.amount, p.account_name, p.account_number, p.ifsc, p.status, DATE_FORMAT(p.created_at, '%d %b %Y') as date
+            FROM Payouts p
+            JOIN Vendors v ON p.vendor_id = v.vendor_id
+            ORDER BY p.created_at DESC
+        """)
+        payouts = cursor.fetchall()
+        return {"status": "success", "payouts": payouts}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+class PayoutAction(BaseModel):
+    payout_id: int
+
+@router.post("/payouts/approve")
+def approve_payout(data: PayoutAction, user = Depends(check_admin)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE Payouts SET status='Completed' WHERE payout_id=%s AND status='Pending'", (data.payout_id,))
+        if cursor.rowcount == 0:
+            return {"status": "error", "message": "Payout not found or already processed."}
+        conn.commit()
+        return {"status": "success", "message": "Payout approved."}
+    finally:
+        cursor.close()
+        conn.close()
+
+@router.post("/payouts/reject")
+def reject_payout(data: PayoutAction, user = Depends(check_admin)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT vendor_id, amount FROM Payouts WHERE payout_id=%s AND status='Pending'", (data.payout_id,))
+        p = cursor.fetchone()
+        if not p:
+            return {"status": "error", "message": "Payout not found or already processed."}
+        
+        cursor.execute("UPDATE Payouts SET status='Rejected' WHERE payout_id=%s", (data.payout_id,))
+        cursor.execute("UPDATE Vendors SET wallet_balance = wallet_balance + %s WHERE vendor_id=%s", (p['amount'], p['vendor_id']))
+        conn.commit()
+        return {"status": "success", "message": "Payout rejected and amount refunded to vendor."}
+    finally:
+        cursor.close()
+        conn.close()
+
 @router.get("/commissions")
 def get_commission_report(user = Depends(check_admin)):
     """

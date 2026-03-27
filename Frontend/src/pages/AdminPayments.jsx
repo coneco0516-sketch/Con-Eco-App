@@ -4,6 +4,7 @@ import AdminSidebar from '../components/AdminSidebar';
 function AdminPayments() {
   const [stats, setStats] = useState({ total_revenue: 0, pending: 0, completed: 0 });
   const [transactions, setTransactions] = useState([]);
+  const [payouts, setPayouts] = useState([]);
 
   useEffect(() => {
     fetch('/api/admin/payments', { credentials: 'include' })
@@ -15,6 +16,15 @@ function AdminPayments() {
         }
       })
       .catch(err => console.error("Error loading payments:", err));
+      
+    fetch('/api/admin/payouts', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          setPayouts(data.payouts || []);
+        }
+      })
+      .catch(err => console.error("Error loading payouts:", err));
   }, []);
 
   const handleCreditVendor = async (orderId) => {
@@ -34,6 +44,26 @@ function AdminPayments() {
       }
     } catch (err) {
       console.error("Credit fail:", err);
+      alert("Network error.");
+    }
+  };
+
+  const handlePayoutAction = async (payoutId, action) => {
+    try {
+      const resp = await fetch(`/api/admin/payouts/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payout_id: payoutId }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert(data.message);
+        window.location.reload();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
       alert("Network error.");
     }
   };
@@ -110,6 +140,62 @@ function AdminPayments() {
                         <span style={{ color: '#d4a20b', fontSize: '0.8rem' }}>COD - Audit Weekly</span>
                       ) : (
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>N/A</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </section>
+
+        <h2 style={{ fontSize: '1.5rem', color: 'white', marginTop: '2rem' }}>Vendor Payout Requests</h2>
+        <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
+        <section className="glass-panel" style={{ overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead style={{ background: 'rgba(0,0,0,0.3)' }}>
+              <tr>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Vendor</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Amount</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Bank Details</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Status</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Date</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payouts.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>No payout requests.</td>
+                </tr>
+              ) : (
+                payouts.map((p, idx) => (
+                  <tr key={p.payout_id} style={{ borderBottom: idx !== payouts.length -1 ? '1px solid var(--surface-border)' : 'none' }}>
+                    <td style={{ padding: '15px', color: 'white' }}>{p.company_name}</td>
+                    <td style={{ padding: '15px', fontWeight: 'bold' }}>₹{p.amount}</td>
+                    <td style={{ padding: '15px', fontSize: '0.9rem' }}>
+                        <div><strong>A/C:</strong> {p.account_number}</div>
+                        <div><strong>Name:</strong> {p.account_name}</div>
+                        <div><strong>IFSC:</strong> {p.ifsc}</div>
+                    </td>
+                    <td style={{ padding: '15px' }}>
+                        <span style={{ 
+                            background: p.status === 'Completed' ? '#238636' : p.status === 'Rejected' ? '#da3633' : '#d4a20b', 
+                            color: 'white',
+                            padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' 
+                        }}>
+                            {p.status}
+                        </span>
+                    </td>
+                    <td style={{ padding: '15px', fontSize: '0.9rem' }}>{p.date}</td>
+                    <td style={{ padding: '15px' }}>
+                      {p.status === 'Pending' ? (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => handlePayoutAction(p.payout_id, 'approve')} style={{ background: '#238636', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>Approve</button>
+                          <button onClick={() => handlePayoutAction(p.payout_id, 'reject')} style={{ background: '#da3633', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>Reject</button>
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--text-secondary)' }}>Done</span>
                       )}
                     </td>
                   </tr>

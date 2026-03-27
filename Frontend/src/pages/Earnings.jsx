@@ -91,7 +91,9 @@ function Earnings() {
                   {earnings.breakdowns.map((b, idx) => (
                     <li key={idx} style={{ padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between' }}>
                       <span>{b.description}</span>
-                      <span style={{ color: '#238636', fontWeight: 'bold' }}>+₹{b.amount}</span>
+                      <span style={{ color: b.amount >= 0 ? '#238636' : '#da3633', fontWeight: 'bold' }}>
+                        {b.amount >= 0 ? '+' : ''}₹{b.amount}
+                      </span>
                     </li>
                   ))}
                 </ul>

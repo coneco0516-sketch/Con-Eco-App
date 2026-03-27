@@ -321,6 +321,7 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
 
 class WithdrawRequest(BaseModel):
     amount: float
+    account_name: str
     account_number: str
     ifsc: str
 
@@ -337,8 +338,28 @@ def vendor_withdraw(data: WithdrawRequest, user = Depends(check_vendor)):
         
         if bal < data.amount or data.amount <= 0:
             return {"status": "error", "message": "Insufficient wallet balance"}
+            
+        try:
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS Payouts (
+                payout_id INT AUTO_INCREMENT PRIMARY KEY,
+                vendor_id INT,
+                amount DECIMAL(10,2),
+                account_name VARCHAR(100),
+                account_number VARCHAR(100),
+                ifsc VARCHAR(50),
+                status ENUM('Pending', 'Completed', 'Rejected') DEFAULT 'Pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id)
+            )
+            """)
+        except:
+            pass
         
         cursor.execute("UPDATE Vendors SET wallet_balance = wallet_balance - %s WHERE vendor_id=%s", (data.amount, vendor_id))
+        
+        cursor.execute("INSERT INTO Payouts (vendor_id, amount, account_name, account_number, ifsc) VALUES (%s, %s, %s, %s, %s)",
+                       (vendor_id, data.amount, data.account_name, data.account_number, data.ifsc))
         conn.commit()
         return {"status": "success"}
     except Exception as e:
@@ -394,14 +415,38 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         stats['total'] = stats['online_total'] + stats['cod_total']
         
-        sql = """
-            SELECT DATE_FORMAT(p.transaction_date, '%d %b %Y') as date, o.order_id, o.order_type, p.amount, p.status
+        try:
+            cursor.execute("CREATE TABLE IF NOT EXISTS Payouts (payout_id INT AUTO_INCREMENT PRIMARY KEY, vendor_id INT, amount DECIMAL(10,2), account_name VARCHAR(100), account_number VARCHAR(100), ifsc VARCHAR(50), status ENUM('Pending', 'Completed', 'Rejected') DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id))")
+            conn.commit()
+        except:
+            pass
+            
+        sql_payments = """
+            SELECT DATE_FORMAT(p.transaction_date, '%%d %%b %%Y') as date, 
+                   CONCAT('Order #', o.order_id, ' Payment (', p.status, ')') as description, 
+                   p.amount, p.transaction_date as raw_date
             FROM Payments p
             JOIN Orders o ON p.order_id = o.order_id
             WHERE o.vendor_id=%s
-            ORDER BY p.transaction_date DESC
         """
-        cursor.execute(sql, (vendor_id,))
+        
+        sql_payouts = """
+            SELECT DATE_FORMAT(created_at, '%%d %%b %%Y') as date,
+                   CONCAT('Bank Withdrawal (', status, ')') as description,
+                   -amount as amount, created_at as raw_date
+            FROM Payouts
+            WHERE vendor_id=%s
+        """
+        
+        sql_combined = f"""
+            SELECT date, description, CAST(amount AS CHAR) as amount FROM (
+                ({sql_payments})
+                UNION ALL
+                ({sql_payouts})
+            ) as combined
+            ORDER BY raw_date DESC
+        """
+        cursor.execute(sql_combined, (vendor_id, vendor_id))
         transactions = cursor.fetchall()
         
         cursor.close()
