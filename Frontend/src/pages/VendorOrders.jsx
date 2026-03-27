@@ -108,7 +108,7 @@ function VendorOrders() {
                         {o.payment_status || 'Pending'}
                       </span>
                     </p>
-                    {o.payment_method === 'COD' && o.payment_status !== 'Completed' && (
+                    {['COD', 'Pay Later (Cash)'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
                       <button 
                         onClick={() => handlePaymentStatusChange(o.order_id, 'Completed')}
                         style={{ fontSize: '0.75rem', padding: '3px 8px', background: 'transparent', border: '1px solid #22c55e', color: '#22c55e', borderRadius: '4px', cursor: 'pointer' }}>

@@ -271,11 +271,8 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
         cursor.execute("UPDATE Orders SET status=%s WHERE order_id=%s AND vendor_id=%s", (data.status, data.order_id, vendor_id))
         
         if data.status in ['Completed', 'Delivered']:
-            if order and order['payment_method'] == 'COD':
-                # Rule: COD automatically means Cash was Collected on Delivery
-                cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
-            elif data.status == 'Completed':
-                # Any other Complete order auto completes payment
+            if data.status == 'Completed' and order and order['payment_method'] not in ['COD', 'Pay Later (Cash)']:
+                # For non-cash orders, mark payment as Completed when order is Completed
                 cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
                 
             if data.status == 'Delivered' and order and order['payment_method'].startswith('Pay Later') and order['delivered_at'] is None:
@@ -317,6 +314,11 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
             return {"status": "error", "message": "Only Cash/Offline orders can have their payment status updated manually."}
             
         cursor.execute("UPDATE Payments SET status=%s WHERE order_id=%s", (data.status, data.order_id))
+        
+        # If it's a Pay Later order and marked as Completed/Paid, also update the order record
+        if data.status == 'Completed' and order['payment_method'] == 'Pay Later (Cash)':
+            cursor.execute("UPDATE Orders SET pay_later_stage='Completed' WHERE order_id=%s", (data.order_id,))
+            
         conn.commit()
         return {"status": "success"}
     except Exception as e:
