@@ -69,6 +69,16 @@ function AdminOrders() {
                           <span style={{ fontSize: '0.7rem', color: '#ffd700', fontWeight: 'bold' }}>
                             {order.payment_method}
                           </span>
+                          <span style={{ 
+                            fontSize: '0.7rem', 
+                            background: order.payment_status === 'Completed' ? 'rgba(35, 134, 54, 0.2)' : 'rgba(210, 109, 14, 0.2)', 
+                            color: order.payment_status === 'Completed' ? '#3fb950' : '#d26d0e',
+                            padding: '1px 6px', 
+                            borderRadius: '4px',
+                            textAlign: 'center'
+                          }}>
+                            {order.payment_status}
+                          </span>
                           {order.payment_method === 'Pay Later' && order.pay_later_stage && (order.status === 'Delivered' || order.status === 'Completed') && (
                             <span style={{ 
                               fontSize: '0.65rem', 

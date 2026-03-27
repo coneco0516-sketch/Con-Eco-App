@@ -182,7 +182,7 @@ def get_orders(user = Depends(check_admin)):
         # Fixed: u_cust.name instead of full_name, and correct JOIN
         sql = """
         SELECT o.order_id, u_cust.name as customer_name, v.company_name as vendor_name, 
-               o.order_type, o.amount, o.status, o.payment_method,
+               o.order_type, o.amount, o.status, o.payment_method, pvt.status as payment_status,
                o.pay_later_stage, 
                DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due_date, 
                DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
@@ -193,6 +193,7 @@ def get_orders(user = Depends(check_admin)):
         JOIN Customers c ON o.customer_id = c.customer_id
         JOIN Users u_cust ON c.customer_id = u_cust.user_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
+        JOIN Payments pvt ON o.order_id = pvt.order_id
         LEFT JOIN credit_scores cs ON o.customer_id = cs.customer_id
         ORDER BY o.created_at DESC
         """
