@@ -171,10 +171,11 @@ def api_health():
 @app.get("/api/test-email")
 def test_email_endpoint():
     """Diagnostic endpoint to force a test email and check logs."""
-    from email_service import send_email, SENDGRID_API_KEY, FROM_EMAIL
+    from email_service import send_email, GMAIL_USER, GMAIL_PASSWORD, FROM_EMAIL
     
     report = {
-        "api_key_configured": bool(SENDGRID_API_KEY),
+        "gmail_user": GMAIL_USER,
+        "gmail_password_configured": bool(GMAIL_PASSWORD),
         "from_email": FROM_EMAIL,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
@@ -182,8 +183,8 @@ def test_email_endpoint():
     try:
         success = send_email(
             "coneco0516@gmail.com", 
-            "Production Diagnostic Test", 
-            "<h1>Diagnostics are running!</h1><p>This is a test to verify the email system is correctly deployed on Railway.</p>"
+            "Production Gmail SMTP Test", 
+            "<h1>Gmail SMTP is working!</h1><p>Emails are now being sent directly through Google's servers.</p>"
         )
         report["email_sent"] = success
         return report
