@@ -394,6 +394,7 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         # 2. Collected Offline (COD)
         cursor.execute("""
+            SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
             WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
@@ -403,6 +404,7 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         # 3. Pending Online (Not credited yet / needs admin audit)
         cursor.execute("""
+            SELECT SUM(o.base_amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id
             WHERE o.vendor_id=%s AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)') AND COALESCE(o.vendor_credited, 0) = 0 AND p.status='Completed'
@@ -412,6 +414,7 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         # 4. Pending COD (Not collected yet)
         cursor.execute("""
+            SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
             WHERE o.vendor_id=%s AND p.status != 'Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
@@ -421,6 +424,7 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         # Calculate Net COD (Subtracting commission)
         cursor.execute("""
+            SELECT SUM(o.base_amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
             WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
