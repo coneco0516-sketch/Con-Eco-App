@@ -272,7 +272,7 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer))
     """
     Handles COD and Pay Later (Request Credit) orders.
     """
-    if data.payment_method not in ['COD', 'Pay Later']:
+    if data.payment_method != 'COD' and not data.payment_method.startswith('Pay Later'):
         raise HTTPException(status_code=400, detail="Invalid offline payment method.")
 
     conn = get_db_connection()
@@ -286,7 +286,7 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer))
         raise HTTPException(status_code=404, detail="Customer not found")
 
     # Check Pay Later eligibility
-    if data.payment_method == 'Pay Later':
+    if data.payment_method.startswith('Pay Later'):
         eligible, reason, score = is_pay_later_eligible(row["customer_id"])
         if not eligible:
             raise HTTPException(status_code=403, detail=reason)
