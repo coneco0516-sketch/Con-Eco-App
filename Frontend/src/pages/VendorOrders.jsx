@@ -57,6 +57,12 @@ function VendorOrders() {
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Track requests, update shipping statuses, and process deliveries.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
+        <div style={{ padding: '1rem', background: 'rgba(255, 215, 0, 0.1)', borderLeft: '4px solid #ffd700', borderRadius: '4px', marginBottom: '1.5rem' }}>
+          <p style={{ color: '#ffd700', margin: 0, fontSize: '1rem', fontWeight: 'bold' }}>
+            Note: Delivery charges are separate. Confirm with customer and collect directly. ConEco is not responsible.
+          </p>
+        </div>
+
         {loading ? (
           <p>Loading orders...</p>
         ) : orders.length > 0 ? (
