@@ -152,8 +152,8 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             total_amount = round(base_amount + commission_amount, 2)
             
             # Insert order with commission breakdown, delivery address and payment method
-            order_status = 'Pending' if payment_method in ['COD', 'Pay Later'] else 'Processing'
-            if payment_method == 'Pay Later':
+            order_status = 'Pending' if payment_method == 'COD' or payment_method.startswith('Pay Later') else 'Processing'
+            if payment_method.startswith('Pay Later'):
                 order_status = 'Pending' # Credit request needs approval usually
 
             cursor.execute(

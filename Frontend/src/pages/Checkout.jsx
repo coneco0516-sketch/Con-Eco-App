@@ -42,7 +42,7 @@ function Checkout() {
       .then(data => {
         if (data.status === 'success') setCreditInfo(data);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const [paymentMethod, setPaymentMethod] = useState('UPI');
@@ -53,28 +53,28 @@ function Checkout() {
       setError('Please enter a delivery address.');
       return;
     }
-    
+
     if (!ackDelivery) {
       setError('Please acknowledge the delivery charges notice before proceeding.');
       return;
     }
-    
+
     // Block if Pay Later is not eligible
-    if (paymentMethod === 'Pay Later' && creditInfo && !creditInfo.eligible) {
-      setError(creditInfo.reason);
-      return;
+    if (paymentMethod.startsWith('Pay Later') && creditInfo && !creditInfo.eligible) {
+        setError(creditInfo.reason);
+        return;
     }
-    
+
     setPaying(true);
     setError('');
 
-    if (paymentMethod === 'COD' || paymentMethod === 'Pay Later') {
-      try {
-        const res = await fetch('/api/payment/place_order_offline', {
+    if (paymentMethod === 'COD' || paymentMethod.startsWith('Pay Later')) {
+        try {
+            const res = await fetch('/api/payment/place_order_offline', {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             delivery_address: address,
             payment_method: paymentMethod
           })
@@ -133,11 +133,11 @@ function Checkout() {
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature:  response.razorpay_signature,
-            delivery_address:    address,
-            payment_method:      paymentMethod
+            razorpay_signature: response.razorpay_signature,
+            delivery_address: address,
+            payment_method: paymentMethod
           })
         });
         const verifyData = await verifyRes.json();
@@ -175,7 +175,8 @@ function Checkout() {
     // { id: 'UPI', label: 'UPI (PhonePe, GPay)', icon: '📱' },
     // { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
-    { id: 'Pay Later', label: 'Pay Later (Request Credit)', icon: '📅', disabled: isPayLaterBlocked },
+    { id: 'Pay Later (Online)', label: 'Pay Later (Online)', icon: '📅', disabled: isPayLaterBlocked },
+    { id: 'Pay Later (Cash)', label: 'Pay Later (Cash)', icon: '📅', disabled: isPayLaterBlocked },
   ];
 
   return (
@@ -215,11 +216,11 @@ function Checkout() {
               <span style={{ color: 'white' }}>Total Amount</span>
               <span style={{ color: 'var(--primary-color)' }}>₹{total.toFixed(2)}</span>
             </div>
-            
+
             <div style={{ marginBottom: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
-              <label style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Delivery Address (Site Location) <span style={{color: 'var(--danger-color)'}}>*</span></label>
-              <textarea 
-                value={address} 
+              <label style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Delivery Address (Site Location) <span style={{ color: 'var(--danger-color)' }}>*</span></label>
+              <textarea
+                value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Enter complete delivery address, pin code, and contact person..."
                 rows="3"
@@ -235,13 +236,13 @@ function Checkout() {
                   marginBottom: '1rem'
                 }}
               ></textarea>
-              
+
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginTop: '0.5rem', background: 'rgba(255,215,0,0.1)', padding: '1rem', borderRadius: '6px', border: '1px solid rgba(255,215,0,0.3)' }}>
-                <input 
-                  type="checkbox" 
-                  id="ackDelivery" 
-                  checked={ackDelivery} 
-                  onChange={(e) => setAckDelivery(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  id="ackDelivery"
+                  checked={ackDelivery}
+                  onChange={(e) => setAckDelivery(e.target.checked)}
                   style={{ marginTop: '0.2rem', cursor: 'pointer', width: '18px', height: '18px', accentColor: '#ffd700' }}
                 />
                 <label htmlFor="ackDelivery" style={{ color: '#ffd700', fontSize: '0.9rem', lineHeight: '1.4', cursor: 'pointer' }}>
@@ -252,28 +253,28 @@ function Checkout() {
 
             <div style={{ marginBottom: '2rem' }}>
               <label style={{ color: 'white', display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>Select Payment Method</label>
-              
+
               {/* Credit Score Badge */}
               {creditInfo && (
-                <div style={{ 
-                  display: 'flex', alignItems: 'center', gap: '0.75rem', 
-                  marginBottom: '1rem', padding: '0.75rem 1rem', 
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  marginBottom: '1rem', padding: '0.75rem 1rem',
                   borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
                   border: '1px solid var(--surface-border)'
                 }}>
                   <span style={{ fontSize: '1.2rem' }}>📊</span>
                   <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Credit Score:</span>
-                  <span style={{ 
+                  <span style={{
                     fontWeight: 'bold', fontSize: '1.1rem',
                     color: creditInfo.credit_score >= 80 ? '#2ecc71' : creditInfo.credit_score >= 50 ? '#f1c40f' : '#e74c3c'
                   }}>
                     {creditInfo.credit_score}/100
                   </span>
                   {creditInfo.blocked && (
-                    <span style={{ 
-                      fontSize: '0.75rem', color: '#e74c3c', 
-                      background: 'rgba(231,76,60,0.15)', padding: '2px 8px', 
-                      borderRadius: '4px', marginLeft: 'auto' 
+                    <span style={{
+                      fontSize: '0.75rem', color: '#e74c3c',
+                      background: 'rgba(231,76,60,0.15)', padding: '2px 8px',
+                      borderRadius: '4px', marginLeft: 'auto'
                     }}>
                       🚫 Blocked until {creditInfo.blocked_until}
                     </span>
@@ -283,7 +284,7 @@ function Checkout() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 {paymentOptions.map((opt) => (
-                  <div 
+                  <div
                     key={opt.id}
                     onClick={() => !opt.disabled && setPaymentMethod(opt.id)}
                     style={{
@@ -315,24 +316,24 @@ function Checkout() {
             </div>
 
             {error && <p style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</p>}
-            
-            <button 
-              onClick={handlePayment} 
-              disabled={paying} 
-              className="btn" 
+
+            <button
+              onClick={handlePayment}
+              disabled={paying}
+              className="btn"
               style={{ width: '100%', fontSize: '1.1rem', padding: '0.9rem' }}
             >
               {paying ? 'Processing...' : (
-                paymentMethod === 'COD' ? 'Place Order (COD)' : 
-                paymentMethod === 'Pay Later' ? 'Request Credit' : 
-                `Pay ₹${total.toFixed(2)} via Razorpay`
+                paymentMethod === 'COD' ? 'Place Order (COD)' :
+                  paymentMethod.startsWith('Pay Later') ? 'Request Credit' :
+                    `Pay ₹${total.toFixed(2)} via Razorpay`
               )}
             </button>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '1rem', textAlign: 'center' }}>
-              {paymentMethod === 'COD' ? '💵 You will pay when the items are delivered.' : 
-               paymentMethod === 'Pay Later' ? '📅 Subject to vendor credit approval.' :
-               '🔒 Secured by Razorpay. Supports UPI, Cards, Net Banking & Wallets.'}
+              {paymentMethod === 'COD' ? '💵 You will pay when the items are delivered.' :
+                paymentMethod.startsWith('Pay Later') ? '📅 Subject to vendor credit approval.' :
+                  '🔒 Secured by Razorpay. Supports UPI, Cards, Net Banking & Wallets.'}
             </p>
           </div>
         )}
