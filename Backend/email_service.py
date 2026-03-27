@@ -1,11 +1,12 @@
 """
-Email notification service using SendGrid API
+Email notification service using Gmail SMTP
 Handles all email sending for login notifications, account updates, verification, etc.
 """
 
 import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from datetime import datetime
 from database import get_db_connection
 from dotenv import load_dotenv
@@ -40,19 +41,21 @@ def log_email_attempt(to_email, subject, status, error=None):
     except Exception as e:
         print(f"DEBUG: Could not log email attempt: {str(e)}")
 
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-if not SENDGRID_API_KEY:
-    print("CRITICAL WARNING: SENDGRID_API_KEY environment variable is missing!")
-else:
-    print("INFO: SendGrid API Key is configured via environment.")
-
-FROM_EMAIL = os.environ.get("FROM_EMAIL", "coneco0516@gmail.com")
+# --- Gmail SMTP Configuration ---
+GMAIL_USER     = os.environ.get("FROM_EMAIL", "coneco0516@gmail.com")
+GMAIL_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+FROM_EMAIL     = GMAIL_USER
 APP_NAME = "ConEco"
 APP_URL = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.app")
 
+if not GMAIL_PASSWORD:
+    print("CRITICAL WARNING: GMAIL_APP_PASSWORD environment variable is missing!")
+else:
+    print("INFO: Gmail SMTP credentials are configured.")
+
 def send_email(to_email, subject, html_content, plain_text=None):
     """
-    Send email using SendGrid
+    Send email using Gmail SMTP.
     
     Args:
         to_email (str): Recipient email address
@@ -63,41 +66,37 @@ def send_email(to_email, subject, html_content, plain_text=None):
     Returns:
         bool: True if sent successfully, False otherwise
     """
-    if not SENDGRID_API_KEY:
-        error_msg = "SENDGRID_API_KEY is missing from environment variables."
+    if not GMAIL_PASSWORD:
+        error_msg = "GMAIL_APP_PASSWORD is missing from environment variables."
         print(f"WARNING: {error_msg} Email to {to_email} not sent.")
         log_email_attempt(to_email, subject, "ConfigError", error_msg)
         return False
-    
+
     try:
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        
-        message = Mail(
-            from_email=Email(FROM_EMAIL, APP_NAME),
-            to_emails=To(to_email),
-            subject=subject,
-            html_content=html_content or "<p>No content</p>"
-        )
-        
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"]    = f"{APP_NAME} <{GMAIL_USER}>"
+        msg["To"]      = to_email
+
+        # Attach plain text first, then HTML (email clients prefer the last part)
         if plain_text:
-            message.text_content = plain_text
-        
-        response = sg.send(message)
-        print(f"Email sent to {to_email}. Status: {response.status_code}")
-        success = response.status_code in [200, 201, 202]
-        
-        # Log success to DB
-        log_email_attempt(to_email, subject, "Success" if success else "Failed", f"Status: {response.status_code}")
-        
-        return success
-        
+            msg.attach(MIMEText(plain_text, "plain"))
+        msg.attach(MIMEText(html_content or "<p>No content</p>", "html"))
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(GMAIL_USER, GMAIL_PASSWORD)
+            server.sendmail(GMAIL_USER, to_email, msg.as_string())
+
+        print(f"Email sent successfully to {to_email} via Gmail SMTP.")
+        log_email_attempt(to_email, subject, "Success")
+        return True
+
     except Exception as e:
         error_msg = str(e)
         print(f"Error sending email to {to_email}: {error_msg}")
-        
-        # Log error to DB
         log_email_attempt(to_email, subject, "Error", error_msg)
-        
         return False
 
 
