@@ -83,9 +83,7 @@ def send_email(to_email, subject, html_content, plain_text=None):
             msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content or "<p>No content</p>", "html"))
 
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.ehlo()
-            server.starttls()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
             server.login(GMAIL_USER, GMAIL_PASSWORD)
             server.sendmail(GMAIL_USER, to_email, msg.as_string())
 
