@@ -17,6 +17,27 @@ function AdminPayments() {
       .catch(err => console.error("Error loading payments:", err));
   }, []);
 
+  const handleCreditVendor = async (orderId) => {
+    try {
+      const resp = await fetch('/api/admin/payments/credit_vendor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert(data.message);
+        window.location.reload();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
+      console.error("Credit fail:", err);
+      alert("Network error.");
+    }
+  };
+
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <AdminSidebar />
@@ -51,6 +72,7 @@ function AdminPayments() {
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Amount</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Status</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Date</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -75,6 +97,21 @@ function AdminPayments() {
                         </span>
                     </td>
                     <td style={{ padding: '15px', fontSize: '0.9rem' }}>{p.date}</td>
+                    <td style={{ padding: '15px' }}>
+                      {p.status.toLowerCase() === 'completed' && p.payment_method !== 'COD' ? (
+                        p.vendor_credited ? (
+                          <span style={{ color: '#238636', fontSize: '0.8rem', fontWeight: 'bold' }}>Credited ✅</span>
+                        ) : (
+                          <button onClick={() => handleCreditVendor(p.order_id)} style={{ fontSize: '0.75rem', padding: '4px 8px', background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', borderRadius: '4px', cursor: 'pointer' }}>
+                            Credit Net: ₹{p.base_amount}
+                          </button>
+                        )
+                      ) : p.payment_method === 'COD' ? (
+                        <span style={{ color: '#d4a20b', fontSize: '0.8rem' }}>COD - Audit Weekly</span>
+                      ) : (
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>N/A</span>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}

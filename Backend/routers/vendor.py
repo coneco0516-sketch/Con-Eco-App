@@ -319,6 +319,35 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
         cursor.close()
         conn.close()
 
+class WithdrawRequest(BaseModel):
+    amount: float
+    account_number: str
+    ifsc: str
+
+@router.post("/withdraw")
+def vendor_withdraw(data: WithdrawRequest, user = Depends(check_vendor)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        vendor_id = user['user_id']
+        
+        cursor.execute("SELECT wallet_balance FROM Vendors WHERE vendor_id=%s", (vendor_id,))
+        res = cursor.fetchone()
+        bal = res['wallet_balance'] if res and res['wallet_balance'] else 0
+        
+        if bal < data.amount or data.amount <= 0:
+            return {"status": "error", "message": "Insufficient wallet balance"}
+        
+        cursor.execute("UPDATE Vendors SET wallet_balance = wallet_balance - %s WHERE vendor_id=%s", (data.amount, vendor_id))
+        conn.commit()
+        return {"status": "success"}
+    except Exception as e:
+        conn.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
+
 @router.get("/earnings")
 def vendor_earnings(user = Depends(check_vendor)):
     conn = get_db_connection()

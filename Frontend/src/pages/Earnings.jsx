@@ -37,11 +37,27 @@ function Earnings() {
     setShowWithdrawModal(true);
   };
 
-  const processWithdraw = (e) => {
+  const processWithdraw = async (e) => {
     e.preventDefault();
-    alert(`Success! Withdrawal request for ₹${earnings.online_total} has been submitted to account ${bankDetails.accountNumber}.`);
-    setShowWithdrawModal(false);
-    setBankDetails({ accountName: '', accountNumber: '', ifsc: '' });
+    try {
+      const resp = await fetch('/api/vendor/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: earnings.online_total, account_number: bankDetails.accountNumber, ifsc: bankDetails.ifsc }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert(`Success! Withdrawal request for ₹${earnings.online_total} has been submitted to account ${bankDetails.accountNumber}.`);
+        setShowWithdrawModal(false);
+        setBankDetails({ accountName: '', accountNumber: '', ifsc: '' });
+        fetchEarnings();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
+      alert("Network error processing withdrawal.");
+    }
   };
 
   return (

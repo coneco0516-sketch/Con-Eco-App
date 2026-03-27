@@ -223,10 +223,10 @@ def get_payments(user = Depends(check_admin)):
         res = cursor.fetchone()
         if res: stats['completed'] = res['c'] or 0
         
-        # Fixed columns: transaction_date instead of payment_date, txn_id instead of payment_id
+        # Added columns: payment_method, vendor_credited, order_id, base_amount
         sql = """
         SELECT DATE_FORMAT(p.transaction_date, '%d %b %Y') as date, p.txn_id, u_cust.name as customer_name,
-               v.company_name as vendor_name, p.amount, p.status
+               v.company_name as vendor_name, p.amount, p.status, o.payment_method, COALESCE(o.vendor_credited, 0) as vendor_credited, o.order_id, o.base_amount
         FROM Payments p
         JOIN Orders o ON p.order_id = o.order_id
         JOIN Customers c ON o.customer_id = c.customer_id
@@ -240,6 +240,43 @@ def get_payments(user = Depends(check_admin)):
         cursor.close()
         return {"status": "success", "stats": stats, "transactions": transactions}
     finally:
+        conn.close()
+
+class CreditVendorUpdate(BaseModel):
+    order_id: int
+
+@router.post("/payments/credit_vendor")
+def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(check_admin)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # Safe schema checks
+        try: cursor.execute("ALTER TABLE Vendors ADD COLUMN wallet_balance DECIMAL(10,2) DEFAULT 0.00")
+        except: pass
+        try: cursor.execute("ALTER TABLE Orders ADD COLUMN vendor_credited BOOLEAN DEFAULT False")
+        except: pass
+        conn.commit()
+
+        cursor.execute("SELECT vendor_id, base_amount, vendor_credited FROM Orders WHERE order_id=%s", (data.order_id,))
+        order = cursor.fetchone()
+        
+        if not order:
+            return {"status": "error", "message": "Order not found"}
+        if order['vendor_credited']:
+            return {"status": "error", "message": "Vendor wallet already credited"}
+
+        net_amount = order['base_amount']
+
+        cursor.execute("UPDATE Vendors SET wallet_balance = COALESCE(wallet_balance, 0) + %s WHERE vendor_id=%s", (net_amount, order['vendor_id']))
+        cursor.execute("UPDATE Orders SET vendor_credited = True WHERE order_id=%s", (data.order_id,))
+        
+        conn.commit()
+        return {"status": "success", "message": f"Successfully credited ₹{net_amount} to vendor wallet."}
+    except Exception as e:
+        conn.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        cursor.close()
         conn.close()
 
 @router.get("/commissions")
