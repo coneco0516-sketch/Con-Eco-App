@@ -265,19 +265,26 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
         except:
             pass
         
+        cursor.execute("SELECT payment_method, customer_id, delivered_at FROM Orders WHERE order_id=%s", (data.order_id,))
+        order = cursor.fetchone()
+
         cursor.execute("UPDATE Orders SET status=%s WHERE order_id=%s AND vendor_id=%s", (data.status, data.order_id, vendor_id))
         
-        if data.status == 'Completed':
-            cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
-        elif data.status == 'Cancelled':
-            cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
-        elif data.status == 'Delivered':
-            # Check if this is a Pay Later order → trigger timeline
-            cursor.execute("SELECT payment_method, customer_id, delivered_at FROM Orders WHERE order_id=%s", (data.order_id,))
-            order = cursor.fetchone()
-            if order and order['payment_method'] == 'Pay Later' and order['delivered_at'] is None:
+        if data.status in ['Completed', 'Delivered']:
+            if order and order['payment_method'] == 'COD':
+                # Rule: COD automatically means Cash was Collected on Delivery
+                cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
+            elif data.status == 'Completed':
+                # Any other Complete order auto completes payment
+                cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
+                
+            if data.status == 'Delivered' and order and order['payment_method'].startswith('Pay Later') and order['delivered_at'] is None:
+                # Rule: Timeline triggers
                 conn.commit()
                 set_pay_later_timeline(data.order_id)
+                
+        elif data.status == 'Cancelled':
+            cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
             
         conn.commit()
         cursor.close()
