@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 
 function Earnings() {
-  const [earnings, setEarnings] = useState({ total: 0, online_total: 0, cod_total: 0, breakdowns: [] });
+  const [earnings, setEarnings] = useState({ total: 0, online_total: 0, cod_total: 0, pending_online: 0, pending_cod: 0, breakdowns: [] });
   const [loading, setLoading] = useState(true);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [bankDetails, setBankDetails] = useState({ accountName: '', accountNumber: '', ifsc: '' });
@@ -21,6 +21,8 @@ function Earnings() {
                 total: data.stats.total || 0, 
                 online_total: data.stats.online_total || 0,
                 cod_total: data.stats.cod_total || 0,
+                pending_online: data.stats.pending_online || 0,
+                pending_cod: data.stats.pending_cod || 0,
                 breakdowns: data.transactions 
             });
         }
@@ -72,11 +74,15 @@ function Earnings() {
           <p>Loading earnings data...</p>
         ) : (
           <div className="glass-panel" style={{ padding: '2rem' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                 <div>
-                  <h3 style={{ margin: 0, color: 'white', marginBottom: '0.5rem' }}>Withdrawable Balance (Online): <strong style={{color: 'var(--primary-color)'}}>₹{earnings.online_total || 0}</strong></h3>
-                  <h3 style={{ margin: 0, color: 'white' }}>Collected Offline (COD): <strong style={{color: '#f59e0b'}}>₹{earnings.cod_total || 0}</strong></h3>
-                  <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Total Net Sales: ₹{earnings.total || 0}</p>
+                  <h3 style={{ margin: 0, color: 'white', marginBottom: '0.25rem' }}>Withdrawable Balance (Online): <strong style={{color: 'var(--primary-color)'}}>₹{earnings.online_total || 0}</strong></h3>
+                  <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pending Online Credits: ₹{earnings.pending_online || 0}</p>
+                  
+                  <h3 style={{ margin: 0, color: 'white', marginBottom: '0.25rem' }}>Collected Offline (COD): <strong style={{color: '#f59e0b'}}>₹{earnings.cod_total || 0}</strong></h3>
+                  <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pending COD Collections: ₹{earnings.pending_cod || 0}</p>
+                  
+                  <h4 style={{ margin: '0', color: 'white' }}>Total Gross Sales: ₹{earnings.total || 0}</h4>
                 </div>
                 <button className="btn" onClick={handleWithdrawClick} style={{ background: '#238636' }}>Withdraw to Bank</button>
              </div>

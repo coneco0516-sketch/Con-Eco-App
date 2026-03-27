@@ -355,25 +355,43 @@ def vendor_earnings(user = Depends(check_vendor)):
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
-        stats = { 'total': 0, 'this_month': 0, 'pending': 0, 'online_total': 0, 'cod_total': 0 }
+        stats = { 'total': 0, 'this_month': 0, 'pending': 0, 'online_total': 0, 'cod_total': 0, 'pending_online': 0, 'pending_cod': 0 }
         
-        cursor.execute("SELECT o.payment_method, SUM(o.amount) as s FROM Orders o WHERE o.vendor_id=%s AND o.status='Completed' GROUP BY o.payment_method", (vendor_id,))
-        for row in cursor.fetchall():
-            if row['payment_method'] == 'COD':
-                stats['cod_total'] += row['s'] or 0
-            else:
-                stats['online_total'] += row['s'] or 0
-            stats['total'] += row['s'] or 0
+        # 1. Withdrawable (Online) - strict wallet balance
+        cursor.execute("SELECT wallet_balance FROM Vendors WHERE vendor_id=%s", (vendor_id,))
+        v_res = cursor.fetchone()
+        stats['online_total'] = float(v_res['wallet_balance']) if v_res and v_res['wallet_balance'] else 0
         
-        # Simple workaround for SQLite or MySQL generic date handling
-        # Let's standardly map mysql
-        cursor.execute("SELECT SUM(amount) as s FROM Orders WHERE vendor_id=%s AND status='Completed' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())", (vendor_id,))
-        res = cursor.fetchone()
-        if res: stats['this_month'] = res['s'] or 0
+        # 2. Collected Offline (COD)
+        cursor.execute("""
+            SELECT SUM(p.amount) as s 
+            FROM Orders o 
+            JOIN Payments p ON o.order_id = p.order_id 
+            WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method='COD'
+        """, (vendor_id,))
+        cod_res = cursor.fetchone()
+        stats['cod_total'] = float(cod_res['s']) if cod_res and cod_res['s'] else 0
         
-        cursor.execute("SELECT SUM(amount) as s FROM Orders WHERE vendor_id=%s AND status='Pending'", (vendor_id,))
-        res = cursor.fetchone()
-        if res: stats['pending'] = res['s'] or 0
+        # 3. Pending Online (Not credited yet)
+        cursor.execute("""
+            SELECT SUM(o.base_amount) as s 
+            FROM Orders o 
+            WHERE o.vendor_id=%s AND o.payment_method != 'COD' AND COALESCE(o.vendor_credited, 0) = 0 AND o.status='Completed'
+        """, (vendor_id,))
+        ponline = cursor.fetchone()
+        stats['pending_online'] = float(ponline['s']) if ponline and ponline['s'] else 0
+        
+        # 4. Pending COD (Not collected yet)
+        cursor.execute("""
+            SELECT SUM(p.amount) as s 
+            FROM Orders o 
+            JOIN Payments p ON o.order_id = p.order_id 
+            WHERE o.vendor_id=%s AND p.status != 'Completed' AND o.payment_method='COD'
+        """, (vendor_id,))
+        pcod = cursor.fetchone()
+        stats['pending_cod'] = float(pcod['s']) if pcod and pcod['s'] else 0
+        
+        stats['total'] = stats['online_total'] + stats['cod_total']
         
         sql = """
             SELECT DATE_FORMAT(p.transaction_date, '%d %b %Y') as date, o.order_id, o.order_type, p.amount, p.status
