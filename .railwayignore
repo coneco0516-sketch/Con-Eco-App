@@ -8,5 +8,5 @@ __pycache__/
 .env
 Backend/.env
 Frontend/.env
-Frontend/dist/
+# Frontend/dist/ removed to allow serving from backend on Railway
 .git/
