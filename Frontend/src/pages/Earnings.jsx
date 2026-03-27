@@ -90,20 +90,49 @@ function Earnings() {
                 </div>
                 <button className="btn" onClick={handleWithdrawClick} style={{ background: '#238636' }}>Withdraw to Bank</button>
              </div>
-             {earnings.breakdowns && earnings.breakdowns.length > 0 ? (
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {earnings.breakdowns.map((b, idx) => (
-                    <li key={idx} style={{ padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>{b.description}</span>
-                      <span style={{ color: b.amount >= 0 ? '#238636' : '#da3633', fontWeight: 'bold' }}>
-                        {b.amount >= 0 ? '+' : ''}₹{b.amount}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-             ) : (
+              <h2 style={{ fontSize: '1.5rem', color: 'white', marginTop: '2.5rem' }}>Transaction History</h2>
+              <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
+              
+              {earnings.breakdowns && earnings.breakdowns.length > 0 ? (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead style={{ background: 'rgba(0,0,0,0.3)' }}>
+                      <tr>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Date</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Details</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Gross</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Commission</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Net</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {earnings.breakdowns.map((b, idx) => (
+                        <tr key={idx} style={{ borderBottom: idx !== earnings.breakdowns.length - 1 ? '1px solid var(--surface-border)' : 'none' }}>
+                          <td style={{ padding: '12px', fontSize: '0.85rem' }}>{b.date}</td>
+                          <td style={{ padding: '12px', color: 'white' }}>{b.description}</td>
+                          <td style={{ padding: '12px' }}>₹{b.gross}</td>
+                          <td style={{ padding: '12px', color: '#da3633' }}>-₹{b.commission}</td>
+                          <td style={{ padding: '12px', color: b.net >= 0 ? '#3fb950' : '#da3633', fontWeight: 'bold' }}>
+                            {b.net >= 0 ? '+' : ''}₹{b.net}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{ 
+                                background: b.status === 'Completed' || b.status === 'Paid' ? 'rgba(63, 185, 80, 0.15)' : 'rgba(212, 162, 11, 0.15)',
+                                color: b.status === 'Completed' || b.status === 'Paid' ? '#3fb950' : '#d4a20b',
+                                padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold'
+                            }}>
+                                {b.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
                 <p style={{ color: 'var(--text-secondary)' }}>No transactions recorded yet.</p>
-             )}
+              )}
           </div>
         )}
       </main>

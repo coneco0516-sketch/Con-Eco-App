@@ -441,8 +441,12 @@ def vendor_earnings(user = Depends(check_vendor)):
             
         sql_payments = """
             SELECT DATE_FORMAT(p.transaction_date, '%%d %%b %%Y') as date, 
-                   CONCAT('Order #', o.order_id, ' Payment (', p.status, ')') as description, 
-                   CASE WHEN o.payment_method = 'COD' THEN p.amount ELSE o.base_amount END as amount, p.transaction_date as raw_date
+                   CONCAT('Order #', o.order_id) as description, 
+                   p.amount as gross,
+                   (o.amount - o.base_amount) as commission,
+                   o.base_amount as net,
+                   p.status,
+                   p.transaction_date as raw_date
             FROM Payments p
             JOIN Orders o ON p.order_id = o.order_id
             WHERE o.vendor_id=%s
@@ -450,14 +454,18 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         sql_payouts = """
             SELECT DATE_FORMAT(created_at, '%%d %%b %%Y') as date,
-                   CONCAT('Bank Withdrawal (', status, ')') as description,
-                   -amount as amount, created_at as raw_date
+                   'Bank Withdrawal' as description,
+                   amount as gross,
+                   0 as commission,
+                   -amount as net,
+                   status,
+                   created_at as raw_date
             FROM Payouts
             WHERE vendor_id=%s
         """
         
         sql_combined = f"""
-            SELECT date, description, CAST(amount AS CHAR) as amount FROM (
+            SELECT date, description, CAST(gross AS CHAR) as gross, CAST(commission AS CHAR) as commission, CAST(net AS CHAR) as net, status FROM (
                 ({sql_payments})
                 UNION ALL
                 ({sql_payouts})
