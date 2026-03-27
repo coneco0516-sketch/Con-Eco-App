@@ -103,7 +103,7 @@ function VendorOrders() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
                     <p style={{ color: 'white', fontSize: '0.9rem', margin: 0 }}>
-                      Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method}</span> 
+                      Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method || 'N/A'}</span> 
                       <span style={{ marginLeft: '10px', fontSize: '0.8rem', padding: '2px 8px', borderRadius: '4px', background: o.payment_status === 'Completed' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: o.payment_status === 'Completed' ? '#22c55e' : '#f59e0b' }}>
                         {o.payment_status || 'Pending'}
                       </span>
@@ -169,12 +169,12 @@ function VendorOrders() {
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '180px' }}>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0 0 4px 0', fontSize: '1.2rem' }}>
-                      ₹{o.payment_method === 'COD' ? o.amount : o.base_amount}
+                      ₹{['COD', 'Pay Later (Cash)'].includes(o.payment_method) ? o.amount : o.base_amount}
                     </p>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
-                      {o.payment_method === 'COD' ? 'Gross (Collect Cash)' : 'Net Payout'}
-                    </p>
-                    {o.payment_method !== 'COD' && (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
+                    {['COD', 'Pay Later (Cash)'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
+                  </p>
+                    {!['COD', 'Pay Later (Cash)'].includes(o.payment_method) && (
                       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', margin: '4px 0 0 0' }}>
                         Gross: ₹{o.amount}
                       </p>
