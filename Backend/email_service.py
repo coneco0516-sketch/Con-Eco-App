@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-FROM_EMAIL = os.environ.get("FROM_EMAIL", "noreply@coneco.com")
+FROM_EMAIL = os.environ.get("FROM_EMAIL", "coneco0516@gmail.com")
 APP_NAME = "ConEco"
 APP_URL = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.app")
 

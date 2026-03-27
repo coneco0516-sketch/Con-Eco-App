@@ -2,6 +2,7 @@ import os
 import hmac
 import hashlib
 import razorpay
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -12,6 +13,7 @@ from credit_system import (
     process_pay_later_payment, check_overdue_orders,
     get_or_create_credit_score
 )
+from email_service import send_order_confirmation, get_notification_preferences
 
 load_dotenv()
 
@@ -178,6 +180,29 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
 
         # Clear the cart
         cursor.execute("DELETE FROM Cart WHERE customer_id=%s", (cust_id,))
+        
+        # ── SEND ORDER CONFIRMATION EMAIL ─────────────────────────────────────
+        try:
+            cursor.execute("SELECT name, email FROM Users WHERE user_id=%s", (cust_id,))
+            user_data = cursor.fetchone()
+            if user_data:
+                # Prepare details for the email
+                # For simplified email, we'll just send a summary of the transaction
+                order_summary = {
+                    "order_id": txn_id,
+                    "total_amount": "Total Calculated in DB",
+                    "status": "Confirmed",
+                    "date": datetime.now().strftime("%d %b %Y %H:%M")
+                }
+                
+                # Check preferences
+                prefs = get_notification_preferences(cust_id)
+                if prefs.get('order_alerts', True):
+                    send_order_confirmation(user_data['email'], user_data['name'], order_summary)
+                    print(f"DEBUG: Order confirmation sent to {user_data['email']}")
+        except Exception as email_err:
+            print(f"ERROR: Could not send order confirmation: {email_err}")
+
         conn.commit()
         cursor.close()
         return True, "Orders placed successfully"
