@@ -372,11 +372,12 @@ def vendor_earnings(user = Depends(check_vendor)):
         cod_res = cursor.fetchone()
         stats['cod_total'] = float(cod_res['s']) if cod_res and cod_res['s'] else 0
         
-        # 3. Pending Online (Not credited yet)
+        # 3. Pending Online (Not credited yet / needs admin audit)
         cursor.execute("""
             SELECT SUM(o.base_amount) as s 
             FROM Orders o 
-            WHERE o.vendor_id=%s AND o.payment_method != 'COD' AND COALESCE(o.vendor_credited, 0) = 0 AND o.status='Completed'
+            JOIN Payments p ON o.order_id = p.order_id
+            WHERE o.vendor_id=%s AND o.payment_method != 'COD' AND COALESCE(o.vendor_credited, 0) = 0 AND p.status='Completed'
         """, (vendor_id,))
         ponline = cursor.fetchone()
         stats['pending_online'] = float(ponline['s']) if ponline and ponline['s'] else 0

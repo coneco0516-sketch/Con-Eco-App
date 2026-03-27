@@ -77,7 +77,7 @@ function Earnings() {
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                 <div>
                   <h3 style={{ margin: 0, color: 'white', marginBottom: '0.25rem' }}>Withdrawable Balance (Online): <strong style={{color: 'var(--primary-color)'}}>₹{earnings.online_total || 0}</strong></h3>
-                  <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pending Online Credits: ₹{earnings.pending_online || 0}</p>
+                  <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pending Admin Audit: ₹{earnings.pending_online || 0}</p>
                   
                   <h3 style={{ margin: 0, color: 'white', marginBottom: '0.25rem' }}>Collected Offline (COD): <strong style={{color: '#f59e0b'}}>₹{earnings.cod_total || 0}</strong></h3>
                   <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pending COD Collections: ₹{earnings.pending_cod || 0}</p>
