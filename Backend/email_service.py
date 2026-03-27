@@ -13,6 +13,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+if not SENDGRID_API_KEY:
+    print("CRITICAL WARNING: SENDGRID_API_KEY environment variable is missing!")
+else:
+    print("INFO: SendGrid API Key is configured via environment.")
+
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "coneco0516@gmail.com")
 APP_NAME = "ConEco"
 APP_URL = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.app")
