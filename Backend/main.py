@@ -1,6 +1,7 @@
 # Version: RESTORE_STABLE_V1.1
 from pathlib import Path
 from contextlib import asynccontextmanager
+from datetime import datetime
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, FileResponse
@@ -166,6 +167,29 @@ def api_health():
         return {"db": "connected"}
     except Exception as e:
         return {"db": "failed", "error": str(e)}
+
+@app.get("/api/test-email")
+def test_email_endpoint():
+    """Diagnostic endpoint to force a test email and check logs."""
+    from email_service import send_email, SENDGRID_API_KEY, FROM_EMAIL
+    
+    report = {
+        "api_key_configured": bool(SENDGRID_API_KEY),
+        "from_email": FROM_EMAIL,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    try:
+        success = send_email(
+            "coneco0516@gmail.com", 
+            "Production Diagnostic Test", 
+            "<h1>Diagnostics are running!</h1><p>This is a test to verify the email system is correctly deployed on Railway.</p>"
+        )
+        report["email_sent"] = success
+        return report
+    except Exception as e:
+        report["error"] = str(e)
+        return report
 
 frontend_dir = Path(__file__).resolve().parent.parent / "Frontend" / "dist"
 
