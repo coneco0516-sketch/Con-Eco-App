@@ -386,8 +386,11 @@ def vendor_earnings(user = Depends(check_vendor)):
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
-        stats = { 'total': 0, 'this_month': 0, 'pending': 0, 'online_total': 0, 'cod_total': 0, 'pending_online': 0, 'pending_cod': 0 }
-        
+        # 0. Data Repair: If any orders are missing payment_method (due to the old bug), 
+        # assume they are COD if they were placed via the offline flow.
+        cursor.execute("UPDATE Orders SET payment_method='COD' WHERE payment_method IS NULL AND vendor_id=%s", (vendor_id,))
+        conn.commit()
+
         # 1. Withdrawable (Online) - strict wallet balance
         cursor.execute("SELECT wallet_balance FROM Vendors WHERE vendor_id=%s", (vendor_id,))
         v_res = cursor.fetchone()

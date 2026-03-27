@@ -210,6 +210,10 @@ def get_payments(user = Depends(check_admin)):
     try:
         cursor = conn.cursor(dictionary=True)
         
+        # 0. Global Repair: Fix missing payment_methods
+        cursor.execute("UPDATE Orders SET payment_method='COD' WHERE payment_method IS NULL")
+        conn.commit()
+        
         stats = {'total_revenue': 0, 'pending': 0, 'completed': 0}
         
         cursor.execute("SELECT SUM(p.amount) as s FROM Payments p JOIN Orders o ON p.order_id = o.order_id WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')")
