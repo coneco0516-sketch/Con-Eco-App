@@ -287,7 +287,7 @@ def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
             refund_msg = "Order cancelled successfully. 100% refund initiated."
         else:
             # COD
-            cursor.execute("UPDATE Payments SET status='Cancelled' WHERE order_id=%s", (data.order_id,))
+            cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
             refund_msg = "Order cancelled successfully (COD)."
             
         conn.commit()

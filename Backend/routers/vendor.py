@@ -215,6 +215,10 @@ def vendor_orders(user = Depends(check_vendor)):
         
         stats = { 'total': 0, 'pending': 0, 'completed': 0, 'cancelled': 0 }
         
+        # Data Repair: Reset payment status to 'Pending' if order is active but payment is marked 'Failed' or 'Cancelled'
+        cursor.execute("UPDATE Payments p JOIN Orders o ON p.order_id = o.order_id SET p.status='Pending' WHERE o.vendor_id=%s AND o.status != 'Cancelled' AND p.status IN ('Failed', 'Cancelled')", (vendor_id,))
+        conn.commit()
+
         cursor.execute("SELECT status, COUNT(*) as c FROM Orders WHERE vendor_id=%s GROUP BY status", (vendor_id,))
         for row in cursor.fetchall():
             stats['total'] += row['c']
