@@ -326,11 +326,15 @@ def vendor_earnings(user = Depends(check_vendor)):
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
-        stats = { 'total': 0, 'this_month': 0, 'pending': 0 }
+        stats = { 'total': 0, 'this_month': 0, 'pending': 0, 'online_total': 0, 'cod_total': 0 }
         
-        cursor.execute("SELECT SUM(amount) as s FROM Orders WHERE vendor_id=%s AND status='Completed'", (vendor_id,))
-        res = cursor.fetchone()
-        if res: stats['total'] = res['s'] or 0
+        cursor.execute("SELECT o.payment_method, SUM(o.amount) as s FROM Orders o WHERE o.vendor_id=%s AND o.status='Completed' GROUP BY o.payment_method", (vendor_id,))
+        for row in cursor.fetchall():
+            if row['payment_method'] == 'COD':
+                stats['cod_total'] += row['s'] or 0
+            else:
+                stats['online_total'] += row['s'] or 0
+            stats['total'] += row['s'] or 0
         
         # Simple workaround for SQLite or MySQL generic date handling
         # Let's standardly map mysql
