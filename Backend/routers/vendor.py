@@ -214,11 +214,7 @@ def vendor_orders(user = Depends(check_vendor)):
         vendor_id = user['user_id']
         
         stats = { 'total': 0, 'pending': 0, 'completed': 0, 'cancelled': 0 }
-        
-        # Data Repair: Reset payment status to 'Pending' if order is active but payment is marked 'Failed' or 'Cancelled'
-        cursor.execute("UPDATE Payments p JOIN Orders o ON p.order_id = o.order_id SET p.status='Pending' WHERE o.vendor_id=%s AND o.status != 'Cancelled' AND p.status IN ('Failed', 'Cancelled')", (vendor_id,))
-        conn.commit()
-
+        # Removed heavy data repair join from global GET - moved to update step for efficiency
         cursor.execute("SELECT status, COUNT(*) as c FROM Orders WHERE vendor_id=%s GROUP BY status", (vendor_id,))
         for row in cursor.fetchall():
             stats['total'] += row['c']
@@ -262,13 +258,6 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
-        # Ensure 'Delivered', 'Shipped', 'Out for Delivery' are in the status enum
-        try:
-            cursor.execute("ALTER TABLE Orders MODIFY COLUMN status ENUM('Pending','Processing','Shipped','Out for Delivery','Completed','Cancelled','Delivered') DEFAULT 'Pending'")
-            conn.commit()
-        except:
-            pass
-        
         cursor.execute("SELECT payment_method, customer_id, delivered_at FROM Orders WHERE order_id=%s", (data.order_id,))
         order = cursor.fetchone()
 
@@ -284,8 +273,9 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
                 conn.commit()
                 set_pay_later_timeline(data.order_id)
                 
-        elif data.status == 'Cancelled':
-            cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
+        elif data.status != 'Cancelled':
+            # Logic: If turning from Cancelled to anything else, reset payment status to Pending
+            cursor.execute("UPDATE Payments SET status='Pending' WHERE order_id=%s AND status IN ('Failed', 'Cancelled')", (data.order_id,))
             
         conn.commit()
         cursor.close()
