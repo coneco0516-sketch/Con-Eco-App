@@ -49,6 +49,26 @@ function VendorOrders() {
     }
   };
 
+  const handlePaymentStatusChange = async (orderId, newStatus) => {
+    try {
+      const resp = await fetch('/api/vendor/orders/update_payment_status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, status: newStatus }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert("Payment status updated to " + newStatus);
+        fetchOrders();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
+      alert("Network error updating payment status.");
+    }
+  };
+
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <VendorSidebar />
@@ -81,9 +101,21 @@ function VendorOrders() {
                     <p style={{ color: 'white', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Delivery Address:</p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{o.delivery_address || 'No address provided'}</p>
                   </div>
-                  <p style={{ color: 'white', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-                    Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method}</span>
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
+                    <p style={{ color: 'white', fontSize: '0.9rem', margin: 0 }}>
+                      Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method}</span> 
+                      <span style={{ marginLeft: '10px', fontSize: '0.8rem', padding: '2px 8px', borderRadius: '4px', background: o.payment_status === 'Completed' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: o.payment_status === 'Completed' ? '#22c55e' : '#f59e0b' }}>
+                        {o.payment_status || 'Pending'}
+                      </span>
+                    </p>
+                    {o.payment_method === 'COD' && o.payment_status !== 'Completed' && (
+                      <button 
+                        onClick={() => handlePaymentStatusChange(o.order_id, 'Completed')}
+                        style={{ fontSize: '0.75rem', padding: '3px 8px', background: 'transparent', border: '1px solid #22c55e', color: '#22c55e', borderRadius: '4px', cursor: 'pointer' }}>
+                        Mark as Paid
+                      </button>
+                    )}
+                  </div>
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                     <span style={{

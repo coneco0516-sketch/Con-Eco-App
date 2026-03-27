@@ -223,7 +223,7 @@ def vendor_orders(user = Depends(check_vendor)):
             
         sql = """
             SELECT o.order_id, u.name as customer_name, u.phone as customer_phone, o.order_type, o.amount, o.status, 
-                   o.delivery_address, o.payment_method, o.pay_later_stage, 
+                   o.delivery_address, o.payment_method, o.pay_later_stage, pvt.status as payment_status,
                    DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due_date, 
                    DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
                    DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
@@ -232,6 +232,7 @@ def vendor_orders(user = Depends(check_vendor)):
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
             JOIN Users u ON c.customer_id = u.user_id
+            JOIN Payments pvt ON o.order_id = pvt.order_id
             LEFT JOIN credit_scores cs ON o.customer_id = cs.customer_id
             WHERE o.vendor_id=%s
             ORDER BY o.created_at DESC
@@ -287,6 +288,36 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
     finally:
         conn.close()
 
+
+class PaymentStatusUpdate(BaseModel):
+    order_id: int
+    status: str
+
+@router.post("/orders/update_payment_status")
+def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check_vendor)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        vendor_id = user['user_id']
+        
+        cursor.execute("SELECT payment_method FROM Orders WHERE order_id=%s AND vendor_id=%s", (data.order_id, vendor_id))
+        order = cursor.fetchone()
+        
+        if not order:
+            return {"status": "error", "message": "Order not found or no permission"}
+            
+        if order['payment_method'] != 'COD':
+            return {"status": "error", "message": "Only COD orders can have their payment status updated manually."}
+            
+        cursor.execute("UPDATE Payments SET status=%s WHERE order_id=%s", (data.status, data.order_id))
+        conn.commit()
+        return {"status": "success"}
+    except Exception as e:
+        conn.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        cursor.close()
+        conn.close()
 
 @router.get("/earnings")
 def vendor_earnings(user = Depends(check_vendor)):
