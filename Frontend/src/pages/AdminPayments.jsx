@@ -16,7 +16,7 @@ function AdminPayments() {
         }
       })
       .catch(err => console.error("Error loading payments:", err));
-      
+
     fetch('/api/admin/payouts', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
@@ -83,7 +83,7 @@ function AdminPayments() {
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'white' }}>Pending Payments</h3>
-            <p className="stat-value" style={{ color: '#d4a20b', WebkitTextFillColor: '#d4a20b' }}>₹{stats.pending}</p>
+            <p className="stat-value" style={{ color: '#d4a20b', WebkitTextFillColor: '#d4a20b' }}>{stats.pending}</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'white' }}>Completed Transactions</h3>
@@ -114,7 +114,7 @@ function AdminPayments() {
                 </tr>
               ) : (
                 transactions.map((p, idx) => (
-                  <tr key={p.txn_id} style={{ borderBottom: idx !== transactions.length -1 ? '1px solid var(--surface-border)' : 'none' }}>
+                  <tr key={p.txn_id} style={{ borderBottom: idx !== transactions.length - 1 ? '1px solid var(--surface-border)' : 'none' }}>
                     <td style={{ padding: '15px' }}>#{p.txn_id}</td>
                     <td style={{ padding: '15px', color: 'white' }}>{p.customer_name}</td>
                     <td style={{ padding: '15px', color: 'var(--primary-color)' }}>{p.vendor_name}</td>
@@ -122,13 +122,13 @@ function AdminPayments() {
                     <td style={{ padding: '15px', color: '#3fb950', fontWeight: 'bold' }}>₹{p.base_amount}</td>
                     <td style={{ padding: '15px', color: '#da3633' }}>₹{p.commission}</td>
                     <td style={{ padding: '15px' }}>
-                        <span style={{ 
-                            background: p.status.toLowerCase() === 'completed' ? '#238636' : '#d4a20b', 
-                            color: 'white',
-                            padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' 
-                        }}>
-                            {p.status}
-                        </span>
+                      <span style={{
+                        background: p.status.toLowerCase() === 'completed' ? '#238636' : '#d4a20b',
+                        color: 'white',
+                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold'
+                      }}>
+                        {p.status}
+                      </span>
                     </td>
                     <td style={{ padding: '15px', fontSize: '0.9rem' }}>{p.date}</td>
                     <td style={{ padding: '15px' }}>
@@ -174,22 +174,22 @@ function AdminPayments() {
                 </tr>
               ) : (
                 payouts.map((p, idx) => (
-                  <tr key={p.payout_id} style={{ borderBottom: idx !== payouts.length -1 ? '1px solid var(--surface-border)' : 'none' }}>
+                  <tr key={p.payout_id} style={{ borderBottom: idx !== payouts.length - 1 ? '1px solid var(--surface-border)' : 'none' }}>
                     <td style={{ padding: '15px', color: 'white' }}>{p.company_name}</td>
                     <td style={{ padding: '15px', fontWeight: 'bold' }}>₹{p.amount}</td>
                     <td style={{ padding: '15px', fontSize: '0.9rem' }}>
-                        <div><strong>A/C:</strong> {p.account_number}</div>
-                        <div><strong>Name:</strong> {p.account_name}</div>
-                        <div><strong>IFSC:</strong> {p.ifsc}</div>
+                      <div><strong>A/C:</strong> {p.account_number}</div>
+                      <div><strong>Name:</strong> {p.account_name}</div>
+                      <div><strong>IFSC:</strong> {p.ifsc}</div>
                     </td>
                     <td style={{ padding: '15px' }}>
-                        <span style={{ 
-                            background: p.status === 'Completed' ? '#238636' : p.status === 'Rejected' ? '#da3633' : '#d4a20b', 
-                            color: 'white',
-                            padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' 
-                        }}>
-                            {p.status}
-                        </span>
+                      <span style={{
+                        background: p.status === 'Completed' ? '#238636' : p.status === 'Rejected' ? '#da3633' : '#d4a20b',
+                        color: 'white',
+                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold'
+                      }}>
+                        {p.status}
+                      </span>
                     </td>
                     <td style={{ padding: '15px', fontSize: '0.9rem' }}>{p.date}</td>
                     <td style={{ padding: '15px' }}>
