@@ -175,7 +175,7 @@ function Checkout() {
     // { id: 'UPI', label: 'UPI (PhonePe, GPay)', icon: '📱' },
     // { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
-    { id: 'Pay Later (Online)', label: 'Pay Later (Online)', icon: '📅', disabled: isPayLaterBlocked },
+    // { id: 'Pay Later (Online)', label: 'Pay Later (Online)', icon: '📅', disabled: isPayLaterBlocked },
     { id: 'Pay Later (Cash)', label: 'Pay Later (Cash)', icon: '📅', disabled: isPayLaterBlocked },
   ];
 
