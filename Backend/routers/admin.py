@@ -215,11 +215,21 @@ def get_payments(user = Depends(check_admin)):
         res = cursor.fetchone()
         if res: stats['total_revenue'] = res['s'] or 0
         
-        cursor.execute("SELECT COUNT(*) as c FROM Payments WHERE status='Pending'")
+        cursor.execute("""
+            SELECT COUNT(*) as c 
+            FROM Payments p 
+            JOIN Orders o ON p.order_id = o.order_id 
+            WHERE p.status='Pending' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
+        """)
         res = cursor.fetchone()
         if res: stats['pending'] = res['c'] or 0
         
-        cursor.execute("SELECT COUNT(*) as c FROM Payments WHERE status='Completed'")
+        cursor.execute("""
+            SELECT COUNT(*) as c 
+            FROM Payments p 
+            JOIN Orders o ON p.order_id = o.order_id 
+            WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
+        """)
         res = cursor.fetchone()
         if res: stats['completed'] = res['c'] or 0
         

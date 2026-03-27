@@ -132,7 +132,7 @@ function AdminPayments() {
                     </td>
                     <td style={{ padding: '15px', fontSize: '0.9rem' }}>{p.date}</td>
                     <td style={{ padding: '15px' }}>
-                      {p.status.toLowerCase() === 'completed' && p.payment_method !== 'COD' ? (
+                      {p.status.toLowerCase() === 'completed' && !['COD', 'Pay Later (Cash)'].includes(p.payment_method) ? (
                         p.vendor_credited ? (
                           <span style={{ color: '#238636', fontSize: '0.8rem', fontWeight: 'bold' }}>Credited ✅</span>
                         ) : (
@@ -140,8 +140,8 @@ function AdminPayments() {
                             Credit Net: ₹{p.base_amount}
                           </button>
                         )
-                      ) : p.payment_method === 'COD' ? (
-                        <span style={{ color: '#d4a20b', fontSize: '0.8rem' }}>COD - Audit Weekly</span>
+                      ) : ['COD', 'Pay Later (Cash)'].includes(p.payment_method) ? (
+                        <span style={{ color: '#d4a20b', fontSize: '0.8rem' }}>{p.payment_method} - Audit Weekly</span>
                       ) : (
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>N/A</span>
                       )}

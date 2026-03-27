@@ -306,8 +306,8 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
         if not order:
             return {"status": "error", "message": "Order not found or no permission"}
             
-        if order['payment_method'] != 'COD':
-            return {"status": "error", "message": "Only COD orders can have their payment status updated manually."}
+        if order['payment_method'] not in ['COD', 'Pay Later (Cash)']:
+            return {"status": "error", "message": "Only Cash/Offline orders can have their payment status updated manually."}
             
         cursor.execute("UPDATE Payments SET status=%s WHERE order_id=%s", (data.status, data.order_id))
         conn.commit()
@@ -385,40 +385,36 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         # 2. Collected Offline (COD)
         cursor.execute("""
-            SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method='COD'
+            WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
         """, (vendor_id,))
         cod_res = cursor.fetchone()
         stats['cod_total'] = float(cod_res['s']) if cod_res and cod_res['s'] else 0
         
         # 3. Pending Online (Not credited yet / needs admin audit)
         cursor.execute("""
-            SELECT SUM(o.base_amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id
-            WHERE o.vendor_id=%s AND o.payment_method != 'COD' AND COALESCE(o.vendor_credited, 0) = 0 AND p.status='Completed'
+            WHERE o.vendor_id=%s AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)') AND COALESCE(o.vendor_credited, 0) = 0 AND p.status='Completed'
         """, (vendor_id,))
         ponline = cursor.fetchone()
         stats['pending_online'] = float(ponline['s']) if ponline and ponline['s'] else 0
         
         # 4. Pending COD (Not collected yet)
         cursor.execute("""
-            SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status != 'Completed' AND o.payment_method='COD'
+            WHERE o.vendor_id=%s AND p.status != 'Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
         """, (vendor_id,))
         pcod = cursor.fetchone()
         stats['pending_cod'] = float(pcod['s']) if pcod and pcod['s'] else 0
         
         # Calculate Net COD (Subtracting commission)
         cursor.execute("""
-            SELECT SUM(o.base_amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method='COD'
+            WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
         """, (vendor_id,))
         cod_net_res = cursor.fetchone()
         stats['cod_net'] = float(cod_net_res['s']) if cod_net_res and cod_net_res['s'] else 0
@@ -450,7 +446,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             FROM Payments p
             JOIN Orders o ON p.order_id = o.order_id
             WHERE o.vendor_id=%s 
-              AND (o.payment_method = 'COD' OR COALESCE(o.vendor_credited, False) = True)
+              AND (o.payment_method IN ('COD', 'Pay Later (Cash)') OR COALESCE(o.vendor_credited, False) = True)
         """
         
         sql_payouts = """
