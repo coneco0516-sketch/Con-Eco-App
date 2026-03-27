@@ -11,6 +11,34 @@ from database import get_db_connection
 from dotenv import load_dotenv
 
 load_dotenv()
+from database import get_db_connection
+
+def log_email_attempt(to_email, subject, status, error=None):
+    """Log email attempt to database for debugging"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS email_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                to_email VARCHAR(255),
+                subject VARCHAR(255),
+                status VARCHAR(50),
+                error_message TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        
+        cursor.execute("""
+            INSERT INTO email_logs (to_email, subject, status, error_message)
+            VALUES (%s, %s, %s, %s)
+        """, (to_email, subject, status, error))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"DEBUG: Could not log email attempt: {str(e)}")
 
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 if not SENDGRID_API_KEY:
@@ -36,7 +64,9 @@ def send_email(to_email, subject, html_content, plain_text=None):
         bool: True if sent successfully, False otherwise
     """
     if not SENDGRID_API_KEY:
-        print(f"WARNING: SENDGRID_API_KEY not set. Email to {to_email} not sent.")
+        error_msg = "SENDGRID_API_KEY is missing from environment variables."
+        print(f"WARNING: {error_msg} Email to {to_email} not sent.")
+        log_email_attempt(to_email, subject, "ConfigError", error_msg)
         return False
     
     try:
@@ -54,10 +84,20 @@ def send_email(to_email, subject, html_content, plain_text=None):
         
         response = sg.send(message)
         print(f"Email sent to {to_email}. Status: {response.status_code}")
-        return response.status_code in [200, 201, 202]
+        success = response.status_code in [200, 201, 202]
+        
+        # Log success to DB
+        log_email_attempt(to_email, subject, "Success" if success else "Failed", f"Status: {response.status_code}")
+        
+        return success
         
     except Exception as e:
-        print(f"Error sending email to {to_email}: {str(e)}")
+        error_msg = str(e)
+        print(f"Error sending email to {to_email}: {error_msg}")
+        
+        # Log error to DB
+        log_email_attempt(to_email, subject, "Error", error_msg)
+        
         return False
 
 
