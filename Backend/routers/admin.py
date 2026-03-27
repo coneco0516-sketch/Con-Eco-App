@@ -226,6 +226,16 @@ def get_payments(user = Depends(check_admin)):
         if res: stats['pending'] = res['c'] or 0
         
         cursor.execute("""
+            SELECT SUM(p.amount) as c 
+            FROM Payments p 
+            JOIN Orders o ON p.order_id = o.order_id 
+            WHERE p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+        """)
+        res = cursor.fetchone()
+        stats['vendor_collected'] = float(res['c']) if res and res['c'] else 0
+        
+        # Original stats continued
+        cursor.execute("""
             SELECT COUNT(*) as c 
             FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 

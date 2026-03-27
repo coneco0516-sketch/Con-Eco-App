@@ -78,16 +78,16 @@ function AdminPayments() {
         {/* SUMMARY CARDS */}
         <section style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
-            <h3 style={{ color: 'white' }}>Total Revenue</h3>
+            <h3 style={{ color: 'white' }}>Platform Revenue (Online)</h3>
             <p className="stat-value">₹{stats.total_revenue}</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
-            <h3 style={{ color: 'white' }}>Pending Payments</h3>
-            <p className="stat-value" style={{ color: '#d4a20b', WebkitTextFillColor: '#d4a20b' }}>{stats.pending}</p>
+            <h3 style={{ color: 'white' }}>Vendor Collected Cash</h3>
+            <p className="stat-value" style={{ color: '#f59e0b', WebkitTextFillColor: '#f59e0b' }}>₹{stats.vendor_collected || 0}</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
-            <h3 style={{ color: 'white' }}>Completed Transactions</h3>
-            <p className="stat-value">{stats.completed}</p>
+            <h3 style={{ color: 'white' }}>Pending Admin Audit</h3>
+            <p className="stat-value" style={{ color: '#d4a20b', WebkitTextFillColor: '#d4a20b' }}>{stats.pending}</p>
           </div>
         </section>
 

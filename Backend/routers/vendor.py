@@ -398,7 +398,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
         """, (vendor_id,))
         cod_res = cursor.fetchone()
         stats['cod_total'] = float(cod_res['s']) if cod_res and cod_res['s'] else 0
@@ -428,7 +428,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(o.base_amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status='Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
         """, (vendor_id,))
         cod_net_res = cursor.fetchone()
         stats['cod_net'] = float(cod_net_res['s']) if cod_net_res and cod_net_res['s'] else 0
