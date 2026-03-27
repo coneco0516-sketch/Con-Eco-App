@@ -581,3 +581,12 @@ def run_invoice_generation(user = Depends(check_admin)):
         return {"status": "success", "message": "Weekly invoices generated."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+@router.post("/pay_later/check_overdue")
+def run_pay_later_check(user = Depends(check_admin)):
+    """Manually trigger check for overdue pay later orders."""
+    from credit_system import check_overdue_orders
+    try:
+        actions = check_overdue_orders()
+        return {"status": "success", "message": f"Credit check complete. Actions taken: {len(actions)}", "actions": actions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

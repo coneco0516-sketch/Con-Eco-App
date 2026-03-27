@@ -273,9 +273,9 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
             cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
         elif data.status == 'Delivered':
             # Check if this is a Pay Later order → trigger timeline
-            cursor.execute("SELECT payment_method, customer_id FROM Orders WHERE order_id=%s", (data.order_id,))
+            cursor.execute("SELECT payment_method, customer_id, delivered_at FROM Orders WHERE order_id=%s", (data.order_id,))
             order = cursor.fetchone()
-            if order and order['payment_method'] == 'Pay Later':
+            if order and order['payment_method'] == 'Pay Later' and order['delivered_at'] is None:
                 conn.commit()
                 set_pay_later_timeline(data.order_id)
             
