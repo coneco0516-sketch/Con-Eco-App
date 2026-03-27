@@ -130,7 +130,8 @@ function VendorOrders() {
                       Customer Credit: {o.customer_credit_score}
                     </span>
 
-                    {o.payment_method === 'Pay Later' && o.pay_later_stage && (
+                    {o.payment_method === 'Pay Later' && o.pay_later_stage && (o.status === 'Delivered' || o.status === 'Completed' || o.status === 'Shipped' || o.status === 'Out for Delivery' ? false : false) ? null : 
+                     o.payment_method === 'Pay Later' && o.pay_later_stage && (o.status === 'Delivered' || o.status === 'Completed') && (
                       <>
                         <span style={{
                           fontSize: '0.75rem',

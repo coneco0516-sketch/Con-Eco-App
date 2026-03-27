@@ -69,7 +69,7 @@ function AdminOrders() {
                           <span style={{ fontSize: '0.7rem', color: '#ffd700', fontWeight: 'bold' }}>
                             {order.payment_method}
                           </span>
-                          {order.payment_method === 'Pay Later' && order.pay_later_stage && (
+                          {order.payment_method === 'Pay Later' && order.pay_later_stage && (order.status === 'Delivered' || order.status === 'Completed') && (
                             <span style={{ 
                               fontSize: '0.65rem', 
                               color: order.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6',
@@ -82,7 +82,7 @@ function AdminOrders() {
                     </td>
                     <td style={{ padding: '15px', fontSize: '0.8rem' }}>
                       <div>{order.date}</div>
-                      {order.payment_method === 'Pay Later' && order.pay_later_stage === 'Stage1' && order.pay_later_due_date && (
+                      {order.payment_method === 'Pay Later' && (order.status === 'Delivered' || order.status === 'Completed') && order.pay_later_due_date && (
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
                            Due: {order.pay_later_due_date}
                         </div>

@@ -103,7 +103,7 @@ function MyOrders() {
   };
 
   const getStageBadge = (order) => {
-    if (order.payment_method !== 'Pay Later' || order.payment_status === 'Completed') return null;
+    if (order.payment_method !== 'Pay Later' || order.payment_status === 'Completed' || (order.status !== 'Delivered' && order.status !== 'Completed')) return null;
     
     const stage = order.pay_later_stage;
     const due = order.pay_later_due || order.pay_later_stage2_due || order.pay_later_stage3_due;
