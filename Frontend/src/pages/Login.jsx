@@ -18,7 +18,7 @@ function Login() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, password: password }),
-        credentials: 'include' 
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -26,7 +26,7 @@ function Login() {
       if (data.status === 'success') {
         localStorage.setItem('is_logged_in', 'true');
         localStorage.setItem('user_role', data.role);
-        
+
         if (data.role === 'Admin') navigate('/admin');
         else if (data.role === 'Vendor') navigate('/vendor');
         else navigate('/customer');
@@ -47,29 +47,29 @@ function Login() {
   return (
     <div className="auth-container glass-panel">
       <h2 className="auth-title">Welcome Back</h2>
-      {error && <p style={{ color: 'var(--danger-color)', marginBottom: '1rem', background: 'rgba(248,81,73,0.1)', padding:'0.5rem', borderRadius:'4px' }}>{error}</p>}
-      
+      {error && <p style={{ color: 'var(--danger-color)', marginBottom: '1rem', background: 'rgba(248,81,73,0.1)', padding: '0.5rem', borderRadius: '4px' }}>{error}</p>}
+
       <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
         <div>
           <label className="input-label">Email Address</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="admin@coneco.com"
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            required 
-            className="input-field" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="input-field"
           />
         </div>
         <div>
           <label className="input-label">Password</label>
-          <input 
-            type="password" 
+          <input
+            type="password"
             placeholder="••••••••"
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
-            className="input-field" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="input-field"
           />
           <div style={{ textAlign: 'right', marginTop: '0.3rem' }}>
             <Link to="/forgot-password" style={{ color: 'var(--primary-color)', fontSize: '0.9rem', textDecoration: 'none' }}>Forgot Password?</Link>

@@ -22,6 +22,7 @@ function Checkout() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState('');
   const [address, setAddress] = useState('');
+  const [ackDelivery, setAckDelivery] = useState(false);
   const [creditInfo, setCreditInfo] = useState(null);
   const navigate = useNavigate();
 
@@ -50,6 +51,11 @@ function Checkout() {
     if (cart.length === 0) return;
     if (!address.trim()) {
       setError('Please enter a delivery address.');
+      return;
+    }
+    
+    if (!ackDelivery) {
+      setError('Please acknowledge the delivery charges notice before proceeding.');
       return;
     }
     
@@ -229,6 +235,19 @@ function Checkout() {
                   marginBottom: '1rem'
                 }}
               ></textarea>
+              
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginTop: '0.5rem', background: 'rgba(255,215,0,0.1)', padding: '1rem', borderRadius: '6px', border: '1px solid rgba(255,215,0,0.3)' }}>
+                <input 
+                  type="checkbox" 
+                  id="ackDelivery" 
+                  checked={ackDelivery} 
+                  onChange={(e) => setAckDelivery(e.target.checked)} 
+                  style={{ marginTop: '0.2rem', cursor: 'pointer', width: '18px', height: '18px', accentColor: '#ffd700' }}
+                />
+                <label htmlFor="ackDelivery" style={{ color: '#ffd700', fontSize: '0.9rem', lineHeight: '1.4', cursor: 'pointer' }}>
+                  <strong>Note:</strong> Delivery charges are not included in the order. Please confirm delivery cost with the vendor after placing the order. ConEco is not responsible for delivery charges.
+                </label>
+              </div>
             </div>
 
             <div style={{ marginBottom: '2rem' }}>
