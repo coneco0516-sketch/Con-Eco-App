@@ -53,7 +53,13 @@ def dashboard(user = Depends(check_vendor)):
         res = cursor.fetchone()
         if res: stats['pending_orders'] = res['c'] or 0
         
-        cursor.execute("SELECT SUM(amount) as s FROM Orders WHERE vendor_id=%s AND status='Completed'", (vendor_id,))
+        # Count gross sales for all orders with successful payments OR completed status
+        cursor.execute("""
+            SELECT SUM(o.amount) as s 
+            FROM Orders o 
+            LEFT JOIN Payments p ON o.order_id = p.order_id 
+            WHERE o.vendor_id=%s AND (o.status='Completed' OR p.status IN ('Completed', 'Paid'))
+        """, (vendor_id,))
         res = cursor.fetchone()
         if res: stats['total_earnings'] = res['s'] or 0
         
@@ -432,7 +438,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status != 'Completed' AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+            WHERE o.vendor_id=%s AND p.status NOT IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
         """, (vendor_id,))
         pcod = cursor.fetchone()
         stats['pending_cod'] = float(pcod['s']) if pcod and pcod['s'] else 0
@@ -450,7 +456,13 @@ def vendor_earnings(user = Depends(check_vendor)):
         # Total for the stats panel
         stats['total_net'] = stats['online_total'] + stats['cod_net']
         
-        cursor.execute("SELECT SUM(amount) as s FROM Orders WHERE vendor_id=%s AND status='Completed'", (vendor_id,))
+        # Count gross sales for all orders with successful payments OR completed status
+        cursor.execute("""
+            SELECT SUM(o.amount) as s 
+            FROM Orders o 
+            LEFT JOIN Payments p ON o.order_id = p.order_id 
+            WHERE o.vendor_id=%s AND (o.status='Completed' OR p.status IN ('Completed', 'Paid'))
+        """, (vendor_id,))
         gross_res = cursor.fetchone()
         stats['total_gross'] = float(gross_res['s']) if gross_res and gross_res['s'] else 0
         
