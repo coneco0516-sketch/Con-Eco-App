@@ -476,13 +476,13 @@ def vendor_earnings(user = Depends(check_vendor)):
             pass
             
         sql_payments = """
-            SELECT DATE_FORMAT(p.transaction_date, '%%d %%b %%Y') as date, 
+            SELECT DATE_FORMAT(o.created_at, '%%d %%b %%Y') as date, 
                    CONCAT('Order #', o.order_id) as description, 
                    p.amount as gross,
                    (o.amount - o.base_amount) as commission,
                    o.base_amount as net,
                    p.status,
-                   p.transaction_date as raw_date
+                   o.created_at as raw_date
             FROM Payments p
             JOIN Orders o ON p.order_id = o.order_id
             WHERE o.vendor_id=%s 
