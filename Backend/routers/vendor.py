@@ -386,6 +386,17 @@ def vendor_earnings(user = Depends(check_vendor)):
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
+        stats = {
+            'online_total': 0,
+            'cod_total': 0,
+            'pending_online': 0,
+            'pending_cod': 0,
+            'cod_net': 0,
+            'total_net': 0,
+            'total_gross': 0,
+            'total': 0
+        }
+        
         # 0. Data Repair: If any orders are missing payment_method (due to the old bug), 
         # assume they are COD if they were placed via the offline flow.
         cursor.execute("UPDATE Orders SET payment_method='COD' WHERE payment_method IS NULL AND vendor_id=%s", (vendor_id,))

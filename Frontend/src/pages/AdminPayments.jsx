@@ -87,7 +87,8 @@ function AdminPayments() {
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'white' }}>Pending Admin Audit</h3>
-            <p className="stat-value" style={{ color: '#d4a20b', WebkitTextFillColor: '#d4a20b' }}>{stats.pending}</p>
+            <p className="stat-value" style={{ color: '#d4a20b', WebkitTextFillColor: '#d4a20b' }}>₹{stats.pending_audit_amount || 0}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '-10px' }}>({stats.pending} items pending)</p>
           </div>
         </section>
 

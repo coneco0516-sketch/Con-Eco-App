@@ -68,27 +68,27 @@ function AdminDashboard() {
           {/* Row 2 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Orders Details</h4>
-              <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Total: <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{stats.total_orders}</span></p>
-              <Link to="/admin/orders" className="btn" style={{ background: '#d26d0e' }}>Manage Orders</Link>
+              <h4 style={{ color: 'white', marginBottom: '10px' }}>Total Sales (Online)</h4>
+              <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats.total_revenue}</p>
+              <Link to="/admin/payments" className="btn" style={{ background: '#d26d0e' }}>Detailed Payments</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Payments</h4>
-              <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>₹ <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{stats.total_revenue}</span></p>
-              <Link to="/admin/payments" className="btn" style={{ background: '#d4a20b' }}>View Payments</Link>
+              <h4 style={{ color: 'white', marginBottom: '10px' }}>Platform Commission</h4>
+              <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: 'var(--primary-color)' }}>₹{stats.total_commission || 0}</p>
+              <Link to="/admin/commissions" className="btn" style={{ background: '#d4a20b' }}>Revenue Report</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Analytics</h4>
-              <p style={{ height: '1.1rem', marginBottom: '15px' }}></p>
-              <Link to="/admin/analytics" className="btn" style={{ background: '#c1396a' }}>View Analytics</Link>
+              <h4 style={{ color: 'white', marginBottom: '10px' }}>Pending Settlements</h4>
+              <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: stats.pending_settlement > 0 ? '#f59e0b' : 'var(--text-secondary)' }}>₹{stats.pending_settlement || 0}</p>
+              <Link to="/admin/payouts" className="btn" style={{ background: '#c1396a' }}>Process Payouts</Link>
             </div>
-
+            
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Contact Messages</h4>
-              <p style={{ height: '1.1rem', marginBottom: '15px' }}></p>
-              <Link to="/admin/contact-messages" className="btn" style={{ background: '#3498db' }}>View Messages</Link>
+              <h3 style={{ color: 'white', marginBottom: '10px' }}>Messages</h3>
+              <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Check contact inquiries.</p>
+              <Link to="/admin/contact-messages" className="btn" style={{ background: '#3498db' }}>View Inbox</Link>
             </div>
           </div>
           {/* Row 3 - Maintenance */}

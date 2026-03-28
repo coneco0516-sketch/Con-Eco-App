@@ -142,13 +142,13 @@ function VendorDashboard() {
           {/* Row 1 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Catalogue Management</h3>
+              <h3 style={{ color: 'white', marginBottom: '10px' }}>Catalogue {stats && stats.catalogue_size !== undefined ? <span style={{color: 'var(--primary-color)'}}>({stats.catalogue_size})</span> : ''}</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Add or edit your product listings and services.</p>
               <Link to="/vendor/catalogue" className="btn" style={{ background: '#238636' }}>Manage Catalogue</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Incoming Orders</h3>
+              <h3 style={{ color: 'white', marginBottom: '10px' }}>Orders {stats && stats.pending_orders > 0 ? <span style={{color: '#f85149'}}>({stats.pending_orders} New)</span> : ''}</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Check requested materials and services.</p>
               <Link to="/vendor/orders" className="btn" style={{ background: '#1a7f37' }}>View Orders</Link>
             </div>
@@ -158,14 +158,16 @@ function VendorDashboard() {
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h4 style={{ color: 'white', marginBottom: '10px' }}>Total Earnings</h4>
-              <p style={{ fontSize: '1rem', marginBottom: '15px' }}>Track your revenue flow and payout statuses.</p>
-              <Link to="/vendor/earnings" className="btn" style={{ background: '#d26d0e' }}>View Earnings</Link>
+              <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats ? stats.total_earnings : '...'}</p>
+              <Link to="/vendor/earnings" className="btn" style={{ background: '#d26d0e' }}>View Detailed Breakdown</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Sales Analytics</h4>
-              <p style={{ fontSize: '1rem', marginBottom: '15px' }}>Analyze your sales data to maximize profits.</p>
-              <Link to="/vendor/analytics" className="btn" style={{ background: '#c1396a' }}>View Analytics</Link>
+              <h4 style={{ color: 'white', marginBottom: '10px' }}>Commission Bills</h4>
+              <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: stats && stats.outstanding_commission > 0 ? '#f85149' : 'var(--primary-color)' }}>
+                ₹{stats ? stats.outstanding_commission : '0'}
+              </p>
+              <Link to="/vendor/verify-billing" className="btn" style={{ background: '#c1396a' }}>Pay Invoices</Link>
             </div>
           </div>
         </div>

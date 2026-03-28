@@ -1,0 +1,40 @@
+﻿        cursor = conn.cursor(dictionary=True)
+        
+        # 0. Global Repair: Fix missing payment_methods
+        cursor.execute("UPDATE Orders SET payment_method='COD' WHERE payment_method IS NULL")
+        conn.commit()
+        
+        stats = {'total_revenue': 0, 'pending': 0, 'completed': 0}
+        
+        cursor.execute("SELECT SUM(p.amount) as s FROM Payments p JOIN Orders o ON p.order_id = o.order_id WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')")
+        res = cursor.fetchone()
+        if res: stats['total_revenue'] = res['s'] or 0
+        
+        cursor.execute("""
+            SELECT COUNT(*) as c 
+            FROM Payments p 
+            JOIN Orders o ON p.order_id = o.order_id 
+            WHERE p.status='Pending' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
+        """)
+        res = cursor.fetchone()
+        if res: stats['pending'] = res['c'] or 0
+        
+        cursor.execute("""
+            SELECT SUM(p.amount) as c 
+            FROM Payments p 
+            JOIN Orders o ON p.order_id = o.order_id 
+            WHERE p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+        """)
+        res = cursor.fetchone()
+        stats['vendor_collected'] = float(res['c']) if res and res['c'] else 0
+        
+        # Original stats continued
+        cursor.execute("""
+            SELECT COUNT(*) as c 
+            FROM Payments p 
+            JOIN Orders o ON p.order_id = o.order_id 
+            WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
+        """)
+        res = cursor.fetchone()
+        if res: stats['completed'] = res['c'] or 0
+        

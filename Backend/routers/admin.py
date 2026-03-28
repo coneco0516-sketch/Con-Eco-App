@@ -214,21 +214,36 @@ def get_payments(user = Depends(check_admin)):
         cursor.execute("UPDATE Orders SET payment_method='COD' WHERE payment_method IS NULL")
         conn.commit()
         
-        stats = {'total_revenue': 0, 'pending': 0, 'completed': 0}
-        
-        cursor.execute("SELECT SUM(p.amount) as s FROM Payments p JOIN Orders o ON p.order_id = o.order_id WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')")
-        res = cursor.fetchone()
-        if res: stats['total_revenue'] = res['s'] or 0
-        
+        # 1. Platform Revenue
         cursor.execute("""
-            SELECT COUNT(*) as c 
-            FROM Payments p 
+            SELECT SUM(p.amount) as s FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
-            WHERE p.status='Pending' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
+            WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
         """)
         res = cursor.fetchone()
-        if res: stats['pending'] = res['c'] or 0
+        stats = {
+            'total_revenue': float(res['s']) if res and res['s'] else 0,
+            'pending': 0,
+            'pending_audit_amount': 0,
+            'vendor_collected': 0,
+            'completed': 0
+        }
         
+        # 2. Pending Admin Audit (Completed Online Payments awaiting credit)
+        cursor.execute("""
+            SELECT SUM(o.base_amount) as s, COUNT(*) as c 
+            FROM Payments p 
+            JOIN Orders o ON p.order_id = o.order_id 
+            WHERE p.status='Completed' 
+              AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)') 
+              AND COALESCE(o.vendor_credited, 0) = 0
+        """)
+        res = cursor.fetchone()
+        if res:
+            stats['pending_audit_amount'] = float(res['s']) if res['s'] else 0
+            stats['pending'] = res['c'] or 0
+        
+        # 3. Vendor Collected Cash
         cursor.execute("""
             SELECT SUM(p.amount) as c 
             FROM Payments p 
