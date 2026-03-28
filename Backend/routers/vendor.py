@@ -501,11 +501,11 @@ def vendor_earnings(user = Depends(check_vendor)):
             WHERE vendor_id=%s
         """
         
-        sql_combined = f"""
+        sql_combined = """
             SELECT date, description, CAST(gross AS CHAR) as gross, CAST(commission AS CHAR) as commission, CAST(net AS CHAR) as net, status FROM (
-                ({sql_payments})
+                " + sql_payments + "
                 UNION ALL
-                ({sql_payouts})
+                " + sql_payouts + "
             ) as combined
             ORDER BY raw_date DESC
         """
