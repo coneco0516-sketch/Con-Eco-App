@@ -92,9 +92,7 @@ function AdminPayments() {
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Transactions</h3>
-            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: 'white' }}>
-              {transactions.length}
-            </p>
+            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: 'white' }}>{transactions.length}</p>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>All offline orders</p>
           </div>
         </section>
