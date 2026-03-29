@@ -116,7 +116,7 @@ function AdminPayments() {
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Vendor</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Total Amount</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Base Amount</th>
-                  <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Comm. %</th>
+                  <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Commission (5%)</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Method</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Payment Status</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Date</th>
@@ -155,8 +155,8 @@ function AdminPayments() {
                       <td style={{ padding: '13px 15px', color: '#3fb950', fontWeight: '500' }}>
                         ₹{parseFloat(p.base_amount || 0).toFixed(2)}
                       </td>
-                      <td style={{ padding: '13px 15px', color: '#f59e0b', fontSize: '0.9rem' }}>
-                        {p.amount > 0 ? (((p.amount - (p.base_amount || 0)) / p.amount) * 100).toFixed(1) : 0}%
+                      <td style={{ padding: '13px 15px', color: '#da3633', fontWeight: '500' }}>
+                        ₹{parseFloat(p.commission || 0).toFixed(2)}
                       </td>
                       <td style={{ padding: '13px 15px' }}>
                         <span style={{
