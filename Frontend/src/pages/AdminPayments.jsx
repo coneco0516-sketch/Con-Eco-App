@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 
 function AdminPayments() {
-  const [stats, setStats] = useState({ total_revenue: 0, pending: 0, completed: 0 });
+  const [stats, setStats] = useState({ total_revenue: 0, vendor_collected: 0 });
   const [transactions, setTransactions] = useState([]);
-  const [payouts, setPayouts] = useState([]);
+  const [filter, setFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
@@ -27,46 +28,24 @@ function AdminPayments() {
       });
   }, []);
 
-  const handleCreditVendor = async (orderId) => {
-    try {
-      const resp = await fetch('/api/admin/payments/credit_vendor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderId }),
-        credentials: 'include'
-      });
-      const data = await resp.json();
-      if (data.status === 'success') {
-        alert(data.message);
-        window.location.reload();
-      } else {
-        alert("Error: " + data.message);
-      }
-    } catch (err) {
-      console.error("Credit fail:", err);
-      alert("Network error.");
-    }
+  const statusColor = (status) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'completed' || s === 'paid') return { background: '#238636', color: 'white' };
+    if (s === 'failed' || s === 'cancelled') return { background: '#da3633', color: 'white' };
+    return { background: '#d4a20b', color: 'white' };
   };
 
-  const handlePayoutAction = async (payoutId, action) => {
-    try {
-      const resp = await fetch(`/api/admin/payouts/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payout_id: payoutId }),
-        credentials: 'include'
-      });
-      const data = await resp.json();
-      if (data.status === 'success') {
-        alert(data.message);
-        window.location.reload();
-      } else {
-        alert("Error: " + data.message);
-      }
-    } catch (err) {
-      alert("Network error.");
-    }
-  };
+  const filteredTxns = filter === 'All'
+    ? transactions
+    : transactions.filter(t => (t.status || '').toLowerCase() === filter.toLowerCase());
+
+  const totalPending = transactions
+    .filter(t => (t.status || '').toLowerCase() === 'pending')
+    .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+
+  const totalCollected = transactions
+    .filter(t => ['completed', 'paid'].includes((t.status || '').toLowerCase()))
+    .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
 
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
@@ -89,6 +68,11 @@ function AdminPayments() {
             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Pending Collection</h3>
             <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#f59e0b' }}>₹{totalPending.toFixed(2)}</p>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Awaiting cash collection</p>
+          </div>
+          <div className="stat-card glass-panel" style={{ flex: 1 }}>
+            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Collected This Period</h3>
+            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#3fb950' }}>₹{totalCollected.toFixed(2)}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Paid/Completed transactions</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Transactions</h3>
