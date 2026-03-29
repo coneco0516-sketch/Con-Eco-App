@@ -39,7 +39,7 @@ def dashboard_stats(user = Depends(check_admin)):
         res = cursor.fetchone()
         if res: stats['total_orders'] = res['c'] or 0
         
-        cursor.execute("SELECT SUM(amount) as s FROM Payments WHERE status='Completed'")
+        cursor.execute("SELECT SUM(amount) as s FROM Payments WHERE status IN ('Completed', 'Paid')")
         res = cursor.fetchone()
         if res: stats['total_revenue'] = res['s'] or 0
         
@@ -218,7 +218,7 @@ def get_payments(user = Depends(check_admin)):
         cursor.execute("""
             SELECT SUM(p.amount) as s FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
-            WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
+            WHERE p.status IN ('Completed', 'Paid') AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
         """)
         res = cursor.fetchone()
         stats = {

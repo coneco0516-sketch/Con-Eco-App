@@ -68,7 +68,7 @@ function AdminDashboard() {
           {/* Row 2 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Total Sales (Online)</h4>
+              <h4 style={{ color: 'white', marginBottom: '10px' }}>Total Sales (Offline)</h4>
               <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats.total_revenue}</p>
               <Link to="/admin/payments" className="btn" style={{ background: '#d26d0e' }}>Detailed Payments</Link>
             </div>
@@ -82,7 +82,7 @@ function AdminDashboard() {
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h4 style={{ color: 'white', marginBottom: '10px' }}>Pending Settlements</h4>
               <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: stats.pending_settlement > 0 ? '#f59e0b' : 'var(--text-secondary)' }}>₹{stats.pending_settlement || 0}</p>
-              <Link to="/admin/payouts" className="btn" style={{ background: '#c1396a' }}>Process Payouts</Link>
+              <Link to="/admin/commissions" className="btn" style={{ background: '#c1396a' }}>Check Commissions</Link>
             </div>
             
             <div className="stat-card glass-panel" style={{ flex: 1 }}>

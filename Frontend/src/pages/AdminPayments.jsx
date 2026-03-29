@@ -78,7 +78,7 @@ function AdminPayments() {
         {/* SUMMARY CARDS */}
         <section style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
-            <h3 style={{ color: 'white' }}>Platform Revenue (Online)</h3>
+            <h3 style={{ color: 'white' }}>Platform Revenue (Offline)</h3>
             <p className="stat-value">₹{stats.total_revenue}</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
