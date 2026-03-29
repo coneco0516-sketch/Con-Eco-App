@@ -11,7 +11,7 @@ function VendorDashboard() {
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('is_logged_in');
     const role = localStorage.getItem('user_role');
-    
+
     if (!isLoggedIn || role !== 'Vendor') {
       navigate('/login');
     } else {
@@ -102,7 +102,7 @@ function VendorDashboard() {
           <div style={{
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            background: stats.verification_status === 'Pending' 
+            background: stats.verification_status === 'Pending'
               ? 'rgba(212, 162, 11, 0.2)'
               : 'rgba(248, 81, 73, 0.2)',
             border: `2px solid ${stats.verification_status === 'Pending' ? '#d4a20b' : '#f85149'}`,
@@ -112,7 +112,7 @@ function VendorDashboard() {
               color: stats.verification_status === 'Pending' ? '#d4a20b' : '#f85149',
               margin: '0 0 0.5rem 0'
             }}>
-              {stats.verification_status === 'Pending' 
+              {stats.verification_status === 'Pending'
                 ? '⏳ Pending QC Verification'
                 : '✗ Verification Rejected'
               }
@@ -142,13 +142,13 @@ function VendorDashboard() {
           {/* Row 1 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Catalogue {stats && stats.catalogue_size !== undefined ? <span style={{color: 'var(--primary-color)'}}>({stats.catalogue_size})</span> : ''}</h3>
+              <h3 style={{ color: 'white', marginBottom: '10px' }}>Catalogue {stats && stats.catalogue_size !== undefined ? <span style={{ color: 'var(--primary-color)' }}>({stats.catalogue_size})</span> : ''}</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Add or edit your product listings and services.</p>
               <Link to="/vendor/catalogue" className="btn" style={{ background: '#238636' }}>Manage Catalogue</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Orders {stats && stats.pending_orders > 0 ? <span style={{color: '#f85149'}}>({stats.pending_orders} New)</span> : ''}</h3>
+              <h3 style={{ color: 'white', marginBottom: '10px' }}>Orders {stats && stats.pending_orders > 0 ? <span style={{ color: '#f85149' }}>({stats.pending_orders} New)</span> : ''}</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Check requested materials and services.</p>
               <Link to="/vendor/orders" className="btn" style={{ background: '#1a7f37' }}>View Orders</Link>
             </div>
@@ -167,7 +167,7 @@ function VendorDashboard() {
               <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: stats && stats.outstanding_commission > 0 ? '#f85149' : 'var(--primary-color)' }}>
                 ₹{stats ? stats.outstanding_commission : '0'}
               </p>
-              <Link to="/vendor/verify-billing" className="btn" style={{ background: '#c1396a' }}>Pay Invoices</Link>
+              <Link to="/vendor/Billing" className="btn" style={{ background: '#c1396a' }}>Pay Invoices</Link>
             </div>
           </div>
         </div>
