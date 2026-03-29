@@ -288,11 +288,15 @@ def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(check_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
-        # Safe schema checks
-        try: cursor.execute("ALTER TABLE Vendors ADD COLUMN wallet_balance DECIMAL(10,2) DEFAULT 0.00")
-        except: pass
-        try: cursor.execute("ALTER TABLE Orders ADD COLUMN vendor_credited BOOLEAN DEFAULT False")
-        except: pass
+        # 0. Schema Check: Ensure VendorWallets table exists (just in case)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS VendorWallets (
+                wallet_id INT AUTO_INCREMENT PRIMARY KEY,
+                vendor_id INT UNIQUE,
+                balance DECIMAL(10,2) DEFAULT 0.00,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        """)
         conn.commit()
 
         cursor.execute("SELECT vendor_id, base_amount, vendor_credited FROM Orders WHERE order_id=%s", (data.order_id,))
@@ -305,7 +309,11 @@ def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(check_admin)):
 
         net_amount = order['base_amount']
 
-        cursor.execute("UPDATE Vendors SET wallet_balance = COALESCE(wallet_balance, 0) + %s WHERE vendor_id=%s", (net_amount, order['vendor_id']))
+        # 1. Ensure wallet exists
+        cursor.execute("INSERT IGNORE INTO VendorWallets (vendor_id, balance) VALUES (%s, 0.00)", (order['vendor_id'],))
+        
+        # 2. Update balance
+        cursor.execute("UPDATE VendorWallets SET balance = balance + %s WHERE vendor_id=%s", (net_amount, order['vendor_id']))
         cursor.execute("UPDATE Orders SET vendor_credited = True WHERE order_id=%s", (data.order_id,))
         
         conn.commit()
@@ -367,7 +375,8 @@ def reject_payout(data: PayoutAction, user = Depends(check_admin)):
             return {"status": "error", "message": "Payout not found or already processed."}
         
         cursor.execute("UPDATE Payouts SET status='Rejected' WHERE payout_id=%s", (data.payout_id,))
-        cursor.execute("UPDATE Vendors SET wallet_balance = wallet_balance + %s WHERE vendor_id=%s", (p['amount'], p['vendor_id']))
+        # Refund to VendorWallets
+        cursor.execute("UPDATE VendorWallets SET balance = balance + %s WHERE vendor_id=%s", (p['amount'], p['vendor_id']))
         conn.commit()
         return {"status": "success", "message": "Payout rejected and amount refunded to vendor."}
     finally:

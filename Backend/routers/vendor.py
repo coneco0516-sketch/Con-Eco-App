@@ -408,10 +408,14 @@ def vendor_earnings(user = Depends(check_vendor)):
         cursor.execute("UPDATE Orders SET payment_method='COD' WHERE payment_method IS NULL AND vendor_id=%s", (vendor_id,))
         conn.commit()
 
-        # 1. Withdrawable (Online) - strict wallet balance
-        cursor.execute("SELECT wallet_balance FROM Vendors WHERE vendor_id=%s", (vendor_id,))
-        v_res = cursor.fetchone()
-        stats['online_total'] = float(v_res['wallet_balance']) if v_res and v_res['wallet_balance'] else 0
+        # 1. Withdrawable (Online) - use VendorWallets table
+        cursor.execute("SELECT balance FROM VendorWallets WHERE vendor_id=%s", (vendor_id,))
+        w_res = cursor.fetchone()
+        if not w_res:
+            # If no wallet exists yet, treat as 0 (and maybe create at next credit)
+            stats['online_total'] = 0
+        else:
+            stats['online_total'] = float(w_res['balance']) if w_res['balance'] else 0
         
         # 2. Collected Offline (COD)
         cursor.execute("""
