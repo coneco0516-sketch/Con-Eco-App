@@ -270,7 +270,7 @@ function Checkout() {
                   }}>
                     {creditInfo.credit_score}/100
                   </span>
-                  {creditInfo.blocked && (
+                  {!!creditInfo.blocked && (
                     <span style={{
                       fontSize: '0.75rem', color: '#e74c3c',
                       background: 'rgba(231,76,60,0.15)', padding: '2px 8px',
