@@ -41,18 +41,16 @@ def dashboard_stats(user = Depends(check_admin)):
         
         cursor.execute("SELECT SUM(amount) as s FROM Payments WHERE status IN ('Completed', 'Paid')")
         res = cursor.fetchone()
-        if res: stats['total_revenue'] = res['s'] or 0
+        stats['total_revenue'] = float(res['s'] or 0) if res else 0
         
         # Add commission stats
         cursor.execute("SELECT SUM(commission_amount) as s FROM commissions WHERE status='Settled'")
         res = cursor.fetchone()
-        if res and res.get('s'): 
-            stats['total_commission'] = float(res.get('s', 0)) or 0
-        
+        stats['total_commission'] = float(res['s'] or 0) if res else 0
+
         cursor.execute("SELECT SUM(commission_amount) as s FROM commissions WHERE status='Pending'")
         res = cursor.fetchone()
-        if res and res.get('s'): 
-            stats['pending_settlement'] = float(res.get('s', 0)) or 0
+        stats['pending_settlement'] = float(res['s'] or 0) if res else 0
         
         cursor.close()
         return {"status": "success", "stats": stats}
