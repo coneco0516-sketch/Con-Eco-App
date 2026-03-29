@@ -501,19 +501,32 @@ def vendor_earnings(user = Depends(check_vendor)):
             WHERE vendor_id=%s
         """
         
-        sql_combined = """
-            SELECT * FROM (
-                " + sql_payments + "
-                UNION ALL
-                " + sql_payouts + "
-            ) as combined
-            ORDER BY raw_date DESC
-        """
-        cursor.execute(sql_combined, (vendor_id, vendor_id))
-        transactions = cursor.fetchall()
+        cursor.execute(sql_payments, (vendor_id,))
+        payments_rows = cursor.fetchall() or []
+        
+        cursor.execute(sql_payouts, (vendor_id,))
+        payouts_rows = cursor.fetchall() or []
+        
+        transactions = sorted(
+            payments_rows + payouts_rows,
+            key=lambda x: x['raw_date'],
+            reverse=True
+        )
+        
+        # 4. JSON Cleanup
+        cleaned = []
+        for t in transactions:
+            cleaned.append({
+                'date': t['date'],
+                'description': t['description'],
+                'gross': float(t['gross'] or 0),
+                'commission': float(t['commission'] or 0),
+                'net': float(t['net'] or 0),
+                'status': t['status']
+            })
         
         cursor.close()
-        return {"status": "success", "stats": stats, "transactions": transactions}
+        return {"status": "success", "stats": stats, "transactions": cleaned}
     finally:
         conn.close()
 
