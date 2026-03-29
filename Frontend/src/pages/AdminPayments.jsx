@@ -70,11 +70,6 @@ function AdminPayments() {
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Awaiting cash collection</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
-            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Collected This Period</h3>
-            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#3fb950' }}>₹{totalCollected.toFixed(2)}</p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Paid/Completed transactions</p>
-          </div>
-          <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Transactions</h3>
             <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: 'white' }}>{transactions.length}</p>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>All offline orders</p>
