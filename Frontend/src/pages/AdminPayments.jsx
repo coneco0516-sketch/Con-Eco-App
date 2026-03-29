@@ -14,11 +14,7 @@ function AdminPayments() {
       .then(data => {
         if (data.status === 'success') {
           setStats(data.stats);
-          // Only keep offline payment methods
-          const offline = (data.transactions || []).filter(t =>
-            ['COD', 'Pay Later (Cash)'].includes(t.payment_method)
-          );
-          setTransactions(offline);
+          setTransactions(data.transactions || []);
         }
         setLoading(false);
       })

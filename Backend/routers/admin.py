@@ -218,7 +218,7 @@ def get_payments(user = Depends(check_admin)):
         cursor.execute("""
             SELECT SUM(p.amount) as s FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
-            WHERE p.status IN ('Completed', 'Paid') AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
+            WHERE p.status IN ('Completed', 'Paid')
         """)
         res = cursor.fetchone()
         stats = {
