@@ -15,7 +15,7 @@ function AdminDashboard() {
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('is_logged_in');
     const role = localStorage.getItem('user_role');
-    
+
     if (!isLoggedIn || role !== 'Admin') {
       navigate('/login');
       return;
@@ -30,7 +30,7 @@ function AdminDashboard() {
         } else if (data.stats) {
           setStats(data.stats);
         } else {
-            setError(data.message || 'Failed to load stats');
+          setError(data.message || 'Failed to load stats');
         }
       })
       .catch(err => setError('Network or authorization error.'));
@@ -38,7 +38,7 @@ function AdminDashboard() {
 
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
-      
+
       {/* LEFT PANEL: Sidebar */}
       <AdminSidebar />
 
@@ -74,17 +74,11 @@ function AdminDashboard() {
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Platform Commission</h4>
-              <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: 'var(--primary-color)' }}>₹{stats.total_commission || 0}</p>
-              <Link to="/admin/commissions" className="btn" style={{ background: '#d4a20b' }}>Revenue Report</Link>
-            </div>
-
-            <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Pending Settlements</h4>
+              <h4 style={{ color: 'white', marginBottom: '10px' }}>Pending Commissions Settelement</h4>
               <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: stats.pending_settlement > 0 ? '#f59e0b' : 'var(--text-secondary)' }}>₹{stats.pending_settlement || 0}</p>
               <Link to="/admin/commissions" className="btn" style={{ background: '#c1396a' }}>Check Commissions</Link>
             </div>
-            
+
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h3 style={{ color: 'white', marginBottom: '10px' }}>Messages</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Check contact inquiries.</p>
@@ -98,11 +92,11 @@ function AdminDashboard() {
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>Manually trigger background tasks for credit scoring and billing.</p>
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                className="btn" 
+              <button
+                className="btn"
                 style={{ background: '#3b82f6', fontSize: '0.85rem' }}
                 onClick={async () => {
-                  if(!window.confirm("Run Pay Later Audit? This will advance stages for overdue orders.")) return;
+                  if (!window.confirm("Run Pay Later Audit? This will advance stages for overdue orders.")) return;
                   const res = await fetch('/api/admin/pay_later/check_overdue', { method: 'POST', credentials: 'include' });
                   const data = await res.json();
                   alert(data.message);
@@ -110,11 +104,11 @@ function AdminDashboard() {
               >
                 Run Credit Audit
               </button>
-              <button 
-                className="btn" 
+              <button
+                className="btn"
                 style={{ background: '#238636', fontSize: '0.85rem' }}
                 onClick={async () => {
-                  if(!window.confirm("Generate Weekly Invoices for COD commissions?")) return;
+                  if (!window.confirm("Generate Weekly Invoices for COD commissions?")) return;
                   const res = await fetch('/api/admin/generate_weekly_invoices', { method: 'POST', credentials: 'include' });
                   const data = await res.json();
                   alert(data.message);
