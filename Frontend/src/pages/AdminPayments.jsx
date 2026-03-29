@@ -81,17 +81,13 @@ function AdminPayments() {
         {/* SUMMARY CARDS */}
         <section style={{ display: 'flex', gap: '20px', marginBottom: '2rem' }}>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
-            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Offline Revenue</h3>
-            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#3fb950' }}>
-              ₹{parseFloat(stats.vendor_collected || 0).toFixed(2)}
-            </p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Collected by vendors (COD/Pay Later)</p>
+            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Sales (Offline)</h3>
+            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#3fb950' }}>₹{stats.total_revenue}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Total offline sales</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Pending Collection</h3>
-            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#f59e0b' }}>
-              ₹{totalPending.toFixed(2)}
-            </p>
+            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#f59e0b' }}>₹{totalPending.toFixed(2)}</p>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Awaiting cash collection</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
