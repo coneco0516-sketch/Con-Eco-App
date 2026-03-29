@@ -129,7 +129,7 @@ def is_pay_later_eligible(customer_id):
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT COUNT(*) as c FROM Orders 
-            WHERE customer_id=%s AND payment_method='Pay Later' 
+            WHERE customer_id=%s AND payment_method LIKE 'Pay Later%' 
             AND pay_later_stage NOT IN ('Completed') 
             AND pay_later_stage IS NOT NULL
         """, (customer_id,))
@@ -163,7 +163,7 @@ def set_pay_later_timeline(order_id, delivered_at=None):
                 pay_later_due_date=%s,
                 pay_later_stage2_due=%s,
                 pay_later_stage3_due=%s
-            WHERE order_id=%s AND payment_method='Pay Later'
+            WHERE order_id=%s AND payment_method LIKE 'Pay Later%'
         """, (delivered_at, stage1_due, stage2_due, stage3_due, order_id))
         conn.commit()
         cursor.close()
@@ -338,7 +338,7 @@ def check_overdue_orders():
             SELECT o.order_id, o.customer_id, o.pay_later_due_date, o.delivered_at, o.amount, u.email, u.name 
             FROM Orders o
             JOIN Users u ON o.customer_id = u.user_id
-            WHERE o.payment_method='Pay Later' 
+            WHERE o.payment_method LIKE 'Pay Later%' 
             AND o.pay_later_stage='Stage1' 
             AND o.pay_later_due_date IS NOT NULL 
             AND o.pay_later_due_date < %s
@@ -359,7 +359,7 @@ def check_overdue_orders():
             SELECT o.order_id, o.customer_id, o.pay_later_stage2_due, o.delivered_at, o.amount, u.email, u.name 
             FROM Orders o
             JOIN Users u ON o.customer_id = u.user_id
-            WHERE o.payment_method='Pay Later' 
+            WHERE o.payment_method LIKE 'Pay Later%' 
             AND o.pay_later_stage='Stage2' 
             AND o.pay_later_stage2_due IS NOT NULL 
             AND o.pay_later_stage2_due < %s
@@ -379,7 +379,7 @@ def check_overdue_orders():
             SELECT o.order_id, o.customer_id, o.pay_later_stage3_due, u.email, u.name 
             FROM Orders o
             JOIN Users u ON o.customer_id = u.user_id
-            WHERE o.payment_method='Pay Later' 
+            WHERE o.payment_method LIKE 'Pay Later%' 
             AND o.pay_later_stage='Stage3' 
             AND o.pay_later_stage3_due IS NOT NULL 
             AND o.pay_later_stage3_due < %s
