@@ -157,10 +157,10 @@
                 return false;
             }
 
-            // Email validation
+            // Email validation — strict: valid local part, domain, and TLD of 2-3 chars only
             let email = document.querySelector('input[name="email"]').value;
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                error.innerText = "Please enter a valid email address.";
+            if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}$/.test(email)) {
+                error.innerText = "Please enter a valid email address (e.g. name@example.com).";
                 return false;
             }
 

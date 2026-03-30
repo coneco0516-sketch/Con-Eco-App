@@ -32,10 +32,10 @@ function Register() {
       return;
     }
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email validation — strict: valid local part, domain, and TLD of 2-3 chars only
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}$/;
     if (!emailRegex.test(formData.email)) {
-      setError("Please enter a valid email address.");
+      setError("Please enter a valid email address (e.g. name@example.com).");
       return;
     }
 
