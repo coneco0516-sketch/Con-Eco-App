@@ -21,7 +21,7 @@ export default function VerifyEmailSent() {
       const response = await fetch('/api/auth/resend-verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
+        body: JSON.stringify({ email })
       });
 
       const data = await response.json();

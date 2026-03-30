@@ -382,17 +382,19 @@ def verify_email(token: str):
         conn.close()
 
 
+class ResendVerificationRequest(BaseModel):
+    email: str
+
 @router.post("/resend-verification")
-def resend_verification(request: Request):
+def resend_verification(request: ResendVerificationRequest):
     """Resend email verification token"""
-    user_info = get_current_user_from_cookie(request)
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute("""
-            SELECT user_id, name, email, email_verified FROM Users WHERE user_id = %s
-        """, (user_info['user_id'],))
+            SELECT user_id, name, email, email_verified FROM Users WHERE email = %s
+        """, (request.email,))
         
         user = cursor.fetchone()
         if not user:
@@ -406,7 +408,7 @@ def resend_verification(request: Request):
         cursor.execute("""
             UPDATE Users SET email_verification_token = %s, email_verification_sent_at = NOW() 
             WHERE user_id = %s
-        """, (verification_token, user_info['user_id']))
+        """, (verification_token, user['user_id']))
         
         conn.commit()
         cursor.close()
