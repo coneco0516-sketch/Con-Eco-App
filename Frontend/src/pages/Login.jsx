@@ -6,7 +6,13 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  const handleTogglePassword = () => {
+    setShowPassword(true);
+    setTimeout(() => setShowPassword(false), 5000);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -61,16 +67,24 @@ function Login() {
             className="input-field"
           />
         </div>
-        <div>
+        <div style={{ position: 'relative' }}>
           <label className="input-label">Password</label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             className="input-field"
+            style={{ paddingRight: '2.5rem' }}
           />
+          <button 
+            type="button" 
+            onClick={handleTogglePassword} 
+            style={{ position: 'absolute', right: '10px', top: '38px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}
+          >
+            {showPassword ? '👁️' : '👁️‍🗨️'}
+          </button>
           <div style={{ textAlign: 'right', marginTop: '0.3rem' }}>
             <Link to="/forgot-password" style={{ color: 'var(--primary-color)', fontSize: '0.9rem', textDecoration: 'none' }}>Forgot Password?</Link>
           </div>

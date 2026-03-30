@@ -8,9 +8,21 @@ function Register() {
     customerCity: '', customerState: ''
   });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleTogglePassword = () => {
+    setShowPassword(true);
+    setTimeout(() => setShowPassword(false), 5000);
+  };
+
+  const handleToggleConfirmPassword = () => {
+    setShowConfirmPassword(true);
+    setTimeout(() => setShowConfirmPassword(false), 5000);
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -157,13 +169,19 @@ function Register() {
         )}
 
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, position: 'relative' }}>
             <label className="input-label">Password</label>
-            <input type="password" name="password" onChange={handleChange} required className="input-field" />
+            <input type={showPassword ? "text" : "password"} name="password" onChange={handleChange} required className="input-field" style={{ paddingRight: '2.5rem' }} />
+            <button type="button" onClick={handleTogglePassword} style={{ position: 'absolute', right: '10px', top: '38px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}>
+              {showPassword ? '👁️' : '👁️‍🗨️'}
+            </button>
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, position: 'relative' }}>
             <label className="input-label">Confirm Password</label>
-            <input type="password" name="confirmPassword" onChange={handleChange} required className="input-field" />
+            <input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" onChange={handleChange} required className="input-field" style={{ paddingRight: '2.5rem' }} />
+            <button type="button" onClick={handleToggleConfirmPassword} style={{ position: 'absolute', right: '10px', top: '38px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}>
+              {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+            </button>
           </div>
         </div>
 

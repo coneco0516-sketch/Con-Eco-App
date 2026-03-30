@@ -33,12 +33,25 @@
             <input type="text" id="email" required><br><br>
 
             <label for="password">Password:</label>
-            <input type="password" id="password" required><br><br>
+            <div style="position: relative; display: inline-block;">
+                <input type="password" id="password" required style="padding-right: 30px; box-sizing: border-box;">
+                <button type="button" onclick="togglePasswordVisibility('password', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; font-size: 1.1em; opacity: 0.7;">👁️‍🗨️</button>
+            </div><br><br>
 
             <button type="submit">Login</button>
         </form>
 
         <script>
+            function togglePasswordVisibility(inputId, btn) {
+                let input = document.getElementById(inputId);
+                input.type = "text";
+                btn.innerText = "👁️";
+                setTimeout(() => {
+                    input.type = "password";
+                    btn.innerText = "👁️‍🗨️";
+                }, 5000);
+            }
+
             document.getElementById('loginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 fetch('http://localhost:8000/api/auth/login', {
