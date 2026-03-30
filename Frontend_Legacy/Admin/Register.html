@@ -148,6 +148,27 @@ function validateForm() {
         return false;
     }
 
+    // Phone validation (10 digits)
+    let phone = document.querySelector('input[name="phone"]').value;
+    if (!/^\d{10}$/.test(phone)) {
+        error.innerText = "Phone number must be exactly 10 digits.";
+        return false;
+    }
+
+    // Email validation
+    let email = document.querySelector('input[name="email"]').value;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        error.innerText = "Please enter a valid email address.";
+        return false;
+    }
+
+    // Password validation (min 8 characters, uppercase, lowercase, number, special character)
+    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(pass)) {
+        error.innerText = "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.";
+        return false;
+    }
+
     if (!document.getElementById("acceptTerms").checked) {
         error.innerText = "You must accept the Privacy Policy and Terms of Services to register.";
         return false;

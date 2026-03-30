@@ -25,6 +25,27 @@ function Register() {
       return;
     }
 
+    // Phone validation (10 digits)
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // Password validation (min 8 characters, uppercase, lowercase, number, special character)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setError("Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.");
+      return;
+    }
+
     if (!acceptedTerms) {
       setError("You must accept the Privacy Policy and Terms of Services to register.");
       return;
