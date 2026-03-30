@@ -96,6 +96,13 @@
         <p id="error" style="color:red;"></p>
 
         <!-- BUTTON -->
+        <div style="display: flex; gap: 10px; align-items: flex-start; margin: 15px 0;">
+            <input type="checkbox" id="acceptTerms" required style="width: auto; margin-top: 5px;">
+            <label for="acceptTerms" style="font-size: 0.9em; color: #666;">
+                I have read <a href="Privacy.html">Privacy Policy</a> and <a href="Terms.html">Terms of Services</a> and accept all the policies and Terms
+            </label>
+        </div>
+
         <button type="submit">Register</button>
 
     </form>
@@ -138,6 +145,11 @@ function validateForm() {
 
     if (pass !== confirm) {
         error.innerText = "Passwords do not match!";
+        return false;
+    }
+
+    if (!document.getElementById("acceptTerms").checked) {
+        error.innerText = "You must accept the Privacy Policy and Terms of Services to register.";
         return false;
     }
 

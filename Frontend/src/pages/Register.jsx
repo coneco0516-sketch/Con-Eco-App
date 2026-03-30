@@ -7,6 +7,7 @@ function Register() {
     company: '', gst: '', address: '', vendorCity: '', vendorState: '',
     customerCity: '', customerState: ''
   });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -21,6 +22,11 @@ function Register() {
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setError("You must accept the Privacy Policy and Terms of Services to register.");
       return;
     }
 
@@ -140,7 +146,21 @@ function Register() {
           </div>
         </div>
 
-        <button type="submit" className="btn" disabled={loading} style={{ marginTop: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start', marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+          <input 
+            type="checkbox" 
+            id="acceptTerms" 
+            checked={acceptedTerms} 
+            onChange={(e) => setAcceptedTerms(e.target.checked)} 
+            required 
+            style={{ width: 'auto', marginTop: '0.3rem', cursor: 'pointer' }}
+          />
+          <label htmlFor="acceptTerms" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', cursor: 'pointer', lineHeight: '1.4' }}>
+            I have read <Link to="/privacy" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Privacy Policy</Link> and <Link to="/terms" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Terms of Services</Link> and accept all the policies and Terms
+          </label>
+        </div>
+
+        <button type="submit" className="btn" disabled={loading} style={{ marginTop: '0.5rem' }}>
           {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
