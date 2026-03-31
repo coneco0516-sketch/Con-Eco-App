@@ -26,6 +26,7 @@ import Home from './pages/Home';
 import CustomerDashboard from './pages/CustomerDashboard';
 import Products from './pages/Products';
 import Services from './pages/Services';
+import CustomerItemDetail from './pages/CustomerItemDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import CardPayment from './pages/CardPayment';
@@ -88,6 +89,7 @@ function AppContent() {
           <Route path="/customer" element={<CustomerDashboard />} />
           <Route path="/customer/products" element={<Products />} />
           <Route path="/customer/services" element={<Services />} />
+          <Route path="/customer/item/:type/:id" element={<CustomerItemDetail />} />
           <Route path="/customer/cart" element={<Cart />} />
           <Route path="/customer/checkout" element={<Checkout />} />
           <Route path="/customer/payment/card" element={<CardPayment />} />

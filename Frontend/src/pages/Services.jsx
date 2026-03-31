@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CustomerSidebar from '../components/CustomerSidebar';
 
 function Services() {
+  const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('');
@@ -92,7 +94,12 @@ function Services() {
                 return searchIn.includes(category.toLowerCase());
               })
               .map(s => (
-              <div key={s.item_id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
+              <div 
+                key={s.item_id} 
+                className="glass-panel" 
+                style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column', cursor: 'pointer', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.02)' } }}
+                onClick={() => navigate(`/customer/item/service/${s.item_id}`)}
+              >
                 {s.image_url ? (
                   <img 
                     src={s.image_url} 
@@ -114,7 +121,10 @@ function Services() {
                 </div>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'auto' }}>Provider: {s.vendor_name}</p>
                 <button 
-                  onClick={() => bookService(s.item_id, 'Service', 1)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    bookService(s.item_id, 'Service', 1);
+                  }}
                   className="btn"
                   style={{ background: '#238636', marginTop: '1rem', width: '100%', padding: '0.5rem' }}
                 >

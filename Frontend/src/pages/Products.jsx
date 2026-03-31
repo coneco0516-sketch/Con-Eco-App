@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CustomerSidebar from '../components/CustomerSidebar';
 
 function Products() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('');
@@ -94,7 +96,12 @@ function Products() {
                 return searchIn.includes(category.toLowerCase());
               })
               .map(p => (
-              <div key={p.item_id} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column' }}>
+              <div 
+                key={p.item_id} 
+                className="glass-panel" 
+                style={{ padding: '1.5rem', flex: '1 1 250px', display: 'flex', flexDirection: 'column', cursor: 'pointer', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.02)' } }}
+                onClick={() => navigate(`/customer/item/product/${p.item_id}`)}
+              >
                 {p.image_url ? (
                   <img 
                     src={p.image_url} 
@@ -116,7 +123,10 @@ function Products() {
                 </div>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'auto' }}>Vendor: {p.vendor_name}</p>
                 <button 
-                  onClick={() => addToCart(p.item_id, 'Product', 1)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(p.item_id, 'Product', 1);
+                  }}
                   className="btn"
                   style={{ background: '#238636', marginTop: '1rem', width: '100%', padding: '0.5rem' }}
                 >
