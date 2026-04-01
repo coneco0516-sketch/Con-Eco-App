@@ -222,22 +222,33 @@ function Checkout() {
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>₹{item.price} each</span>
                   </div>
                   
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid var(--surface-border)', overflow: 'hidden' }}>
+                  <div className="quantity-selector">
                     <button 
+                      className="quantity-btn"
                       onClick={() => updateQuantity(item.cart_id, item.quantity - 1)}
-                      style={{ background: 'transparent', border: 'none', color: 'white', padding: '0.2rem 0.6rem', cursor: 'pointer' }}
-                    > - </button>
+                    >
+                      −
+                    </button>
                     <input 
+                      className="quantity-input"
                       type="number" 
                       min="1" 
                       value={item.quantity} 
-                      onChange={(e) => updateQuantity(item.cart_id, Math.max(1, parseInt(e.target.value) || 1))}
-                      style={{ width: '40px', textAlign: 'center', border: 'none', background: 'transparent', color: 'white', padding: '0.2rem 0', outline: 'none' }}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val)) updateQuantity(item.cart_id, Math.max(1, val));
+                      }}
+                      onBlur={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (isNaN(val) || val < 1) updateQuantity(item.cart_id, 1);
+                      }}
                     />
                     <button 
+                      className="quantity-btn"
                       onClick={() => updateQuantity(item.cart_id, item.quantity + 1)}
-                      style={{ background: 'transparent', border: 'none', color: 'white', padding: '0.2rem 0.6rem', cursor: 'pointer' }}
-                    > + </button>
+                    >
+                      +
+                    </button>
                   </div>
 
                   <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' }}>₹{(item.price * item.quantity).toFixed(2)}</span>

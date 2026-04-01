@@ -96,28 +96,30 @@ function Cart() {
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                     {/* Quantity Selector */}
-                    <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', border: '1px solid var(--surface-border)', overflow: 'hidden' }}>
+                    <div className="quantity-selector">
                       <button 
+                        className="quantity-btn"
                         onClick={() => updateQuantity(item.cart_id, item.quantity - 1)}
-                        style={{ background: 'transparent', border: 'none', color: 'white', padding: '0.4rem 0.6rem', cursor: 'pointer', fontSize: '1rem' }}
-                        onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
-                        onMouseOut={(e) => e.target.style.background = 'transparent'}
                       >
-                        -
+                        −
                       </button>
                       <input 
+                        className="quantity-input"
                         type="number" 
                         min="1" 
                         value={item.quantity} 
-                        onChange={(e) => updateQuantity(item.cart_id, Math.max(1, parseInt(e.target.value) || 1))}
-                        className="input-field"
-                        style={{ width: '50px', textAlign: 'center', border: 'none', borderRadius: 0, margin: 0, padding: '0.4rem 0', background: 'transparent', fontSize: '0.9rem' }}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val)) updateQuantity(item.cart_id, Math.max(1, val));
+                        }}
+                        onBlur={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (isNaN(val) || val < 1) updateQuantity(item.cart_id, 1);
+                        }}
                       />
                       <button 
+                        className="quantity-btn"
                         onClick={() => updateQuantity(item.cart_id, item.quantity + 1)}
-                        style={{ background: 'transparent', border: 'none', color: 'white', padding: '0.4rem 0.6rem', cursor: 'pointer', fontSize: '1rem' }}
-                        onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
-                        onMouseOut={(e) => e.target.style.background = 'transparent'}
                       >
                         +
                       </button>

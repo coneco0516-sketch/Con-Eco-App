@@ -200,17 +200,37 @@ function CustomerItemDetail() {
 
                 <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', alignItems: 'flex-end' }}>
                   {isProduct && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <label style={{ color: 'var(--text-secondary)' }}>Quantity</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="input-field"
-                        style={{ width: '80px', textAlign: 'center' }}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    <label className="input-label" style={{ marginBottom: 0 }}>Quantity</label>
+                    <div className="quantity-selector" style={{ width: '130px' }}>
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => setQuantity(Math.max(1, (parseInt(quantity) || 1) - 1))}
+                      >
+                        −
+                      </button>
+                      <input 
+                        className="quantity-input"
+                        type="number" 
+                        min="1" 
+                        value={quantity} 
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val)) setQuantity(Math.max(1, val));
+                          else if (e.target.value === '') setQuantity('');
+                        }}
+                        onBlur={() => {
+                          if (quantity === '' || quantity < 1) setQuantity(1);
+                        }}
                       />
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => setQuantity((parseInt(quantity) || 0) + 1)}
+                      >
+                        +
+                      </button>
                     </div>
+                  </div>
                   )}
                   <button
                     onClick={handleAction}
