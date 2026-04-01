@@ -144,8 +144,17 @@ function MyBookedServices() {
   const handleDownloadInvoice = async (orderId) => {
     try {
       const response = await fetch(`/api/invoice/download/${orderId}`, { credentials: 'include' });
-      if (!response.ok) throw new Error('Invoice not available');
       
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Server Error' }));
+        throw new Error(errorData.detail || 'Download failed');
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/pdf')) {
+        throw new Error("Invoice generation failed on server. Special characters in names might be the cause.");
+      }
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -156,7 +165,7 @@ function MyBookedServices() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
-      alert("Failed to download invoice. Please try again later.");
+      alert("Error: " + err.message);
     }
   };
 
