@@ -11,7 +11,7 @@ class InvoicePDF(FPDF):
         
         self.set_font('helvetica', '', 10)
         self.set_text_color(100, 100, 100)
-        self.cell(0, 5, 'Connectivity & Ecology Marketplace', ln=True, align='L')
+        self.cell(0, 5, 'Unified Construction Ecommerce Platform', ln=True, align='L')
         
         self.set_y(10)
         self.set_font('helvetica', 'B', 16)
