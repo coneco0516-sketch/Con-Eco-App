@@ -171,6 +171,9 @@ def register(request: RegisterRequest):
             elif request.role == 'Vendor':
                 cursor.execute("INSERT INTO Vendors (vendor_id, company_name, gst_number, address, city, state) VALUES (%s, %s, %s, %s, %s, %s)", 
                                (user_id, request.company_name or request.full_name, request.gst_number, request.address, request.city, request.state))
+            elif request.role == 'Admin':
+                cursor.execute("INSERT INTO Admins (admin_id, city, state, verification_status) VALUES (%s, %s, %s, 'Verified')", 
+                               (user_id, request.city, request.state))
             
             # Try to initialize notification preferences (if table exists)
             try:
@@ -241,6 +244,10 @@ def get_profile(request: Request):
             cursor.execute("SELECT company_name, gst_number, address, city, state, verification_status, qc_score FROM Vendors WHERE vendor_id=%s", (user['user_id'],))
             extra = cursor.fetchone()
             if extra: user.update(extra)
+        elif user['role'] == 'Admin':
+            cursor.execute("SELECT city, state, verification_status FROM Admins WHERE admin_id=%s", (user['user_id'],))
+            extra = cursor.fetchone()
+            if extra: user.update(extra)
             
         return {"status": "success", "profile": user}
     finally:
@@ -303,6 +310,14 @@ def update_profile(request: Request, data: UpdateProfileRequest):
                 if data.state: updates.append("state=%s"); params.append(data.state)
                 params.append(user_info['user_id'])
                 cursor.execute(f"UPDATE Vendors SET {', '.join(updates)} WHERE vendor_id=%s", tuple(params))
+        elif user_info['role'] == 'Admin':
+            if data.city or data.state:
+                updates = []
+                params = []
+                if data.city: updates.append("city=%s"); params.append(data.city)
+                if data.state: updates.append("state=%s"); params.append(data.state)
+                params.append(user_info['user_id'])
+                cursor.execute(f"UPDATE Admins SET {', '.join(updates)} WHERE admin_id=%s", tuple(params))
                 
         conn.commit()
         
