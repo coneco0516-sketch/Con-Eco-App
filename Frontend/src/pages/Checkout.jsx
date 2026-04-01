@@ -171,6 +171,21 @@ function Checkout() {
 
   const updateQuantity = async (cartId, newQuantity) => {
     if (newQuantity < 0) return;
+    
+    // Optimistic UI: Update local state immediately
+    const prevCart = [...cart];
+    const prevTotal = total;
+    
+    setCart(prev => {
+      const next = prev.map(item => 
+        item.cart_id === cartId ? { ...item, quantity: newQuantity } : item
+      );
+      // Recalculate total locally: sum(price * qty) * 1.05
+      const newBaseTotal = next.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      setTotal(newBaseTotal * 1.05);
+      return next;
+    });
+
     try {
       const resp = await fetch('/api/customer/cart', {
         method: 'PUT',
@@ -179,13 +194,14 @@ function Checkout() {
         credentials: 'include'
       });
       const data = await resp.json();
-      if (data.status === 'success') {
-        const fetchCart = await fetch('/api/customer/cart', { credentials: 'include' });
-        const cartData = await fetchCart.json();
-        if (cartData.items) setCart(cartData.items);
-        if (cartData.total) setTotal(cartData.total);
+      if (data.status !== 'success') {
+        // Revert on failure
+        setCart(prevCart);
+        setTotal(prevTotal);
       }
     } catch (err) {
+      setCart(prevCart);
+      setTotal(prevTotal);
       console.error('Update quantity error:', err);
     }
   };

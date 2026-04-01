@@ -6,8 +6,8 @@ function Cart() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  const loadCart = () => {
-    setLoading(true);
+  const loadCart = (isInitial = false) => {
+    if (isInitial) setLoading(true);
     fetch('/api/customer/cart', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
@@ -18,10 +18,14 @@ function Cart() {
   };
 
   useEffect(() => {
-    loadCart();
+    loadCart(true);
   }, []);
 
   const removeFromCart = async (cartId) => {
+    // Optimistic UI: Remove from local state immediately
+    const previousItems = [...cartItems];
+    setCartItems(cartItems.filter(item => item.cart_id !== cartId));
+
     try {
       const resp = await fetch('/api/customer/cart', {
         method: 'DELETE',
@@ -32,18 +36,26 @@ function Cart() {
       const data = await resp.json();
       if (data.status === 'success') {
         setMessage({ type: 'success', text: 'Item removed from cart' });
-        loadCart();
         setTimeout(() => setMessage({ type: '', text: '' }), 2000);
       } else {
+        setCartItems(previousItems); // Revert on failure
         setMessage({ type: 'error', text: 'Failed to remove item' });
       }
     } catch (err) {
+      setCartItems(previousItems);
       setMessage({ type: 'error', text: 'Network error' });
     }
   };
 
   const updateQuantity = async (cartId, newQuantity) => {
     if (newQuantity < 0) return;
+    
+    // Optimistic UI: Update quantity in local state immediately
+    const previousItems = [...cartItems];
+    setCartItems(prev => prev.map(item => 
+      item.cart_id === cartId ? { ...item, quantity: newQuantity } : item
+    ));
+
     try {
       const resp = await fetch('/api/customer/cart', {
         method: 'PUT',
@@ -52,10 +64,11 @@ function Cart() {
         credentials: 'include'
       });
       const data = await resp.json();
-      if (data.status === 'success') {
-        loadCart();
+      if (data.status !== 'success') {
+        setCartItems(previousItems); // Revert on failure
       }
     } catch (err) {
+      setCartItems(previousItems);
       console.error('Update quantity error:', err);
     }
   };
