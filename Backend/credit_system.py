@@ -25,7 +25,8 @@ def ensure_credit_tables():
     """Create credit_scores table and add pay later columns to orders if they don't exist."""
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()
+        # Use buffered cursor to avoid 'Unread result found' when doing check-then-act operations
+        cursor = conn.cursor(buffered=True)
         
         # Create credit_scores table
         cursor.execute("""
