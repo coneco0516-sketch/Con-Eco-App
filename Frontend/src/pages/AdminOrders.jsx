@@ -34,12 +34,13 @@ function AdminOrders() {
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Status</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Review</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Date</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan="8" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>No orders found.</td>
+                  <td colSpan="9" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>No orders found.</td>
                 </tr>
               ) : (
                 orders.map((order, idx) => (
@@ -80,15 +81,6 @@ function AdminOrders() {
                           }}>
                             {order.payment_status}
                           </span>
-                          {order.payment_method === 'Pay Later' && order.pay_later_stage && (order.status === 'Delivered' || order.status === 'Completed') && (
-                            <span style={{ 
-                              fontSize: '0.65rem', 
-                              color: order.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6',
-                              fontWeight: 'bold'
-                            }}>
-                              {order.pay_later_stage}
-                            </span>
-                          )}
                         </div>
                     </td>
                     <td style={{ padding: '15px' }}>
@@ -107,10 +99,26 @@ function AdminOrders() {
                     </td>
                     <td style={{ padding: '15px', fontSize: '0.8rem' }}>
                       <div>{order.date}</div>
-                      {order.payment_method === 'Pay Later' && (order.status === 'Delivered' || order.status === 'Completed') && order.pay_later_due_date && (
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
-                           Due: {order.pay_later_due_date}
-                        </div>
+                    </td>
+                    <td style={{ padding: '15px' }}>
+                      {(order.status === 'Delivered' || order.status === 'Completed') && (
+                        <a 
+                          href={`/api/invoice/${order.order_id}`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          title="Download Invoice"
+                          style={{ 
+                            color: 'var(--primary-color)', 
+                            textDecoration: 'none', 
+                            background: 'rgba(57, 185, 80, 0.1)', 
+                            padding: '5px 10px', 
+                            borderRadius: '4px',
+                            fontSize: '0.8rem',
+                            border: '1px solid var(--primary-color)'
+                          }}
+                        >
+                          📄 Invoice
+                        </a>
                       )}
                     </td>
                   </tr>

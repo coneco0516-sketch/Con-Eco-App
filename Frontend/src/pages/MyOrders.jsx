@@ -227,6 +227,27 @@ function MyOrders() {
                     </button>
                   )}
 
+                  {(o.status === 'Delivered' || o.status === 'Completed') && (
+                    <a 
+                      href={`/api/invoice/${o.order_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn"
+                      style={{ 
+                        padding: '6px 15px', 
+                        fontSize: '0.85rem', 
+                        background: 'rgba(35, 134, 54, 0.2)', 
+                        color: '#3fb950', 
+                        border: '1px solid #3fb950',
+                        textDecoration: 'none',
+                        display: 'inline-block',
+                        textAlign: 'center'
+                      }}
+                    >
+                      📄 Download Invoice
+                    </a>
+                  )}
+
                   {o.status === 'Pending' ? (
                     <button 
                       onClick={() => handleCancelOrder(o.order_id)}
