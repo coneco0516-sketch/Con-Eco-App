@@ -16,6 +16,10 @@ function CustomerItemDetail() {
   const isProduct = type.toLowerCase() === 'product';
   const endpoint = isProduct ? '/api/customer/products' : '/api/customer/services';
 
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkData, setBulkData] = useState({ address: '', city: '', state: '', message: '' });
+  const [submittingBulk, setSubmittingBulk] = useState(false);
+
   const fetchReviews = () => {
     // Reviews are fetched optionally from public or authenticated.
     fetch(`/api/customer/reviews/${type.toLowerCase()}/${id}`)
@@ -65,6 +69,42 @@ function CustomerItemDetail() {
     } catch (err) {
       setMessage({ type: 'error', text: 'Network error' });
     }
+  };
+
+  const sendBulkRequest = async (e) => {
+    e.preventDefault();
+    if (!bulkData.address || !bulkData.city || !bulkData.state) {
+      setMessage({ type: 'error', text: 'Please fill all address fields.' });
+      return;
+    }
+    setSubmittingBulk(true);
+    try {
+      const resp = await fetch('/api/customer/bulk-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_type: isProduct ? 'Product' : 'Service',
+          item_id: item.item_id,
+          quantity: Math.max(1, parseInt(quantity) || 1),
+          message: bulkData.message,
+          address: bulkData.address,
+          city: bulkData.city,
+          state: bulkData.state
+        }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        setMessage({ type: 'success', text: 'Bulk request sent! Check your orders for updates.' });
+        setShowBulkModal(false);
+        setBulkData({ address: '', city: '', state: '', message: '' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Failed to send request' });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Network error sending bulk request' });
+    }
+    setSubmittingBulk(false);
   };
 
   const submitReview = async (e) => {
@@ -198,8 +238,7 @@ function CustomerItemDetail() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', alignItems: 'flex-end' }}>
-                  {isProduct && (
+                <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                     <label className="input-label" style={{ marginBottom: 0 }}>Quantity</label>
                     <div className="quantity-selector" style={{ width: '130px' }}>
@@ -243,17 +282,89 @@ function CustomerItemDetail() {
                       </button>
                     </div>
                   </div>
-                  )}
-                  <button
-                    onClick={handleAction}
-                    className="btn"
-                    style={{ background: '#238636', flex: 1, padding: '1rem', fontSize: '1.1rem' }}
-                  >
-                    {isProduct ? 'Add to Cart' : 'Book Service'}
-                  </button>
+                  <div style={{ flex: 1, display: 'flex', gap: '1rem' }}>
+                    <button
+                      onClick={handleAction}
+                      className="btn"
+                      style={{ background: '#238636', flex: 1, padding: '1rem', fontSize: '1.1rem' }}
+                    >
+                      {isProduct ? 'Add to Cart' : 'Book Service'}
+                    </button>
+                    {isProduct && (
+                      <button
+                        onClick={() => setShowBulkModal(true)}
+                        className="btn"
+                        style={{ background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', flex: 1, padding: '1rem', fontSize: '1.1rem' }}
+                      >
+                        Request Bulk Price
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Bulk Modal */}
+            {showBulkModal && (
+              <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(10px)' }}>
+                <div className="glass-panel" style={{ width: '90%', maxWidth: '500px', padding: '2.5rem', position: 'relative' }}>
+                  <button onClick={() => setShowBulkModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
+                  <h2 style={{ color: 'white', marginTop: 0, marginBottom: '1rem' }}>Bulk Negotiation</h2>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Send a request to the vendor for a customized bulk price for {quantity} units.</p>
+                  
+                  <form onSubmit={sendBulkRequest} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                    <div>
+                      <label className="input-label">Delivery Address</label>
+                      <input 
+                        type="text" 
+                        className="input-field" 
+                        placeholder="Site location / Street" 
+                        value={bulkData.address} 
+                        onChange={e => setBulkData({...bulkData, address: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <label className="input-label">City</label>
+                        <input 
+                          type="text" 
+                          className="input-field" 
+                          placeholder="City" 
+                          value={bulkData.city} 
+                          onChange={e => setBulkData({...bulkData, city: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label className="input-label">State</label>
+                        <input 
+                          type="text" 
+                          className="input-field" 
+                          placeholder="State" 
+                          value={bulkData.state} 
+                          onChange={e => setBulkData({...bulkData, state: e.target.value})}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="input-label">Meassage (Optional)</label>
+                      <textarea 
+                        className="input-field" 
+                        placeholder="Mention your target price or requirements..." 
+                        rows="3"
+                        value={bulkData.message}
+                        onChange={e => setBulkData({...bulkData, message: e.target.value})}
+                      ></textarea>
+                    </div>
+                    <button type="submit" disabled={submittingBulk} className="btn" style={{ background: 'var(--primary-color)', padding: '1rem', fontSize: '1.1rem', marginTop: '1rem' }}>
+                      {submittingBulk ? 'Sending Request...' : 'Send Request to Vendor'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
 
             {/* Reviews Section */}
             <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>

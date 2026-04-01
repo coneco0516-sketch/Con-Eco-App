@@ -240,7 +240,8 @@ def vendor_orders(user = Depends(check_vendor)):
                    DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
                    DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
                    COALESCE(cs.credit_score, 100) as customer_credit_score,
-                   DATE_FORMAT(o.created_at, '%d %b %Y') as date 
+                   DATE_FORMAT(o.created_at, '%d %b %Y') as date,
+                   o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price, o.quantity
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
             JOIN Users u ON c.customer_id = u.user_id
@@ -304,6 +305,60 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
         return {"status": "error", "message": str(e)}
     finally:
         conn.close()
+
+class BulkAction(BaseModel):
+    order_id: int
+    action: str # 'Accept' or 'Reject'
+    negotiated_price: Optional[float] = None
+    vendor_message: Optional[str] = None
+
+@router.post("/orders/bulk_action")
+def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        vendor_id = user['user_id']
+        
+        if data.action == 'Reject':
+            cursor.execute("UPDATE Orders SET status='Cancelled', vendor_message=%s WHERE order_id=%s AND vendor_id=%s", (data.vendor_message, data.order_id, vendor_id))
+            cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
+        else:
+            # Accept with a new price
+            if data.negotiated_price is None:
+                 return {"status": "error", "message": "Price is required to accept bulk request."}
+            
+            # Recalculate amounts
+            cursor.execute("SELECT quantity FROM Orders WHERE order_id=%s", (data.order_id,))
+            res = cursor.fetchone()
+            qty = res['quantity'] if res else 1
+            
+            base_amount = float(data.negotiated_price) * qty
+            commission_amount = round(base_amount * 0.05, 2)
+            total_amount = round(base_amount + commission_amount, 2)
+            
+            cursor.execute("""
+                UPDATE Orders 
+                SET status='Pending', 
+                    negotiated_price=%s, 
+                    vendor_message=%s,
+                    amount=%s,
+                    base_amount=%s,
+                    commission_amount=%s
+                WHERE order_id=%s AND vendor_id=%s
+            """, (data.negotiated_price, data.vendor_message, total_amount, base_amount, commission_amount, data.order_id, vendor_id))
+            
+            # Also update the payment record
+            cursor.execute("UPDATE Payments SET amount=%s WHERE order_id=%s", (total_amount, data.order_id))
+            
+        conn.commit()
+        cursor.close()
+        return {"status": "success"}
+    except Exception as e:
+        conn.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
 
 
 class PaymentStatusUpdate(BaseModel):

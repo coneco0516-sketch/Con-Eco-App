@@ -9,65 +9,27 @@ function VendorOrders() {
     fetchOrders();
   }, []);
 
-  const fetchOrders = () => {
-    setLoading(true);
-    fetch('/api/vendor/orders', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        if (data.orders) setOrders(data.orders);
-        setLoading(false);
-      })
-      .catch(err => setLoading(false));
-  };
-
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleBulkAction = async (orderId, action, price = null, message = '') => {
     try {
-      const resp = await fetch('/api/vendor/orders/update_status', {
+      const resp = await fetch('/api/vendor/orders/bulk_action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderId, status: newStatus }),
-        credentials: 'include'
-      });
-
-      const contentType = resp.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        const data = await resp.json();
-        if (data.status === 'success') {
-          alert("Order status updated to " + (newStatus === 'Processing' ? 'Accepted' : newStatus));
-          fetchOrders();
-        } else {
-          alert("Error: " + data.message);
-        }
-      } else {
-        const text = await resp.text();
-        console.error("Server returned non-JSON response:", text);
-        alert(`Server error (${resp.status}). See console for details.`);
-      }
-    } catch (err) {
-      console.error("Status update failed:", err);
-      alert("Network error updating status.");
-    }
-  };
-
-  const handlePaymentStatusChange = async (orderId, newStatus) => {
-    try {
-      const resp = await fetch('/api/vendor/orders/update_payment_status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderId, status: newStatus }),
+        body: JSON.stringify({ order_id: orderId, action, negotiated_price: price, vendor_message: message }),
         credentials: 'include'
       });
       const data = await resp.json();
       if (data.status === 'success') {
-        alert("Payment status updated to " + newStatus);
+        alert("Bulk request " + (action === 'Accept' ? 'Accepted' : 'Rejected'));
         fetchOrders();
       } else {
         alert("Error: " + data.message);
       }
     } catch (err) {
-      alert("Network error updating payment status.");
+      alert("Network error processing bulk action.");
     }
   };
+
+  const [bulkNegotiation, setBulkNegotiation] = useState({ orderId: null, price: '', message: '' });
 
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
@@ -88,19 +50,36 @@ function VendorOrders() {
         ) : orders.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {orders.map(o => (
-              <div key={o.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>Order #{o.order_id} - {o.customer_name}</h4>
+              <div key={o.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem' }}>
+                <div style={{ flex: '1 1 300px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
+                    <h4 style={{ color: 'white', margin: 0 }}>Order #{o.order_id} - {o.customer_name}</h4>
+                    {o.status === 'Bulk Requested' && (
+                      <span style={{ background: 'rgba(52, 152, 219, 0.2)', color: '#3498db', padding: '2px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid #3498db' }}>
+                        BULK PRICE REQUESTED
+                      </span>
+                    )}
+                  </div>
+                  
                   {o.status !== 'Pending' && o.customer_phone && (
                     <p style={{ color: '#3fb950', fontSize: '0.9rem', margin: '0 0 0.5rem 0', fontWeight: 'bold' }}>
                       📞 {o.customer_phone}
                     </p>
                   )}
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Ordered on: {o.date}</p>
-                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)', marginBottom: '0.5rem' }}>
+                  
+                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)', marginBottom: '0.8rem' }}>
                     <p style={{ color: 'white', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Delivery Address:</p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{o.delivery_address || 'No address provided'}</p>
                   </div>
+
+                  {o.customer_message && (
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '0.8rem' }}>
+                      <p style={{ color: 'var(--primary-color)', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Customer Request:</p>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, fontStyle: 'italic' }}>"{o.customer_message}"</p>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
                     <p style={{ color: 'white', fontSize: '0.9rem', margin: 0 }}>
                       Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method || 'N/A'}</span> 
@@ -108,13 +87,6 @@ function VendorOrders() {
                         {o.payment_status || 'Pending'}
                       </span>
                     </p>
-                    {['COD', 'Pay Later (Cash)'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
-                      <button 
-                        onClick={() => handlePaymentStatusChange(o.order_id, 'Completed')}
-                        style={{ fontSize: '0.75rem', padding: '3px 8px', background: 'transparent', border: '1px solid #22c55e', color: '#22c55e', borderRadius: '4px', cursor: 'pointer' }}>
-                        Mark as Paid
-                      </button>
-                    )}
                   </div>
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
@@ -129,59 +101,68 @@ function VendorOrders() {
                     }}>
                       Customer Credit: {o.customer_credit_score}
                     </span>
-
-                    {o.payment_method === 'Pay Later' && o.pay_later_stage && (o.status === 'Delivered' || o.status === 'Completed' || o.status === 'Shipped' || o.status === 'Out for Delivery' ? false : false) ? null : 
-                     o.payment_method === 'Pay Later' && o.pay_later_stage && (o.status === 'Delivered' || o.status === 'Completed') && (
-                      <>
-                        <span style={{
-                          fontSize: '0.75rem',
-                          padding: '3px 10px',
-                          borderRadius: '20px',
-                          background: o.pay_later_stage === 'Stage3' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-                          color: o.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6',
-                          border: `1px solid ${o.pay_later_stage === 'Stage3' ? '#ef4444' : '#3b82f6'}`,
-                          fontWeight: 'bold'
-                        }}>
-                          {o.pay_later_stage === 'Stage1' ? 'Stage 1 (30 Days)' :
-                            o.pay_later_stage === 'Stage2' ? 'Stage 2 (Grace)' :
-                              o.pay_later_stage === 'Stage3' ? 'Stage 3 (FINAL DAY)' : 'Defaulted'}
-                        </span>
-
-                        {o.pay_later_stage === 'Stage1' && o.pay_later_due_date && (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                            Due: {new Date(o.pay_later_due_date).toLocaleDateString()}
-                          </span>
-                        )}
-                        {o.pay_later_stage === 'Stage2' && o.pay_later_stage2_due && (
-                          <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>
-                            Grace Due: {new Date(o.pay_later_stage2_due).toLocaleDateString()}
-                          </span>
-                        )}
-                        {o.pay_later_stage === 'Stage3' && o.pay_later_stage3_due && (
-                          <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 'bold' }}>
-                            FINAL DEADLINE TODAY
-                          </span>
-                        )}
-                      </>
-                    )}
+                    {o.quantity && <span style={{ color: 'white', fontSize: '0.8rem' }}>| Qty: <strong>{o.quantity}</strong></span>}
                   </div>
                 </div>
-                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '180px' }}>
+
+                <div style={{ flex: '0 0 250px', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0 0 4px 0', fontSize: '1.2rem' }}>
-                      ₹{['COD', 'Pay Later (Cash)'].includes(o.payment_method) ? o.amount : o.base_amount}
+                    <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0 0 4px 0', fontSize: '1.4rem' }}>
+                      ₹{['COD', 'Pay Later (Cash)'].includes(o.payment_method) ? o.amount.toFixed(2) : o.base_amount.toFixed(2)}
                     </p>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
-                    {['COD', 'Pay Later (Cash)'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
-                  </p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
+                      {['COD', 'Pay Later (Cash)'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
+                    </p>
                     {!['COD', 'Pay Later (Cash)'].includes(o.payment_method) && (
                       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', margin: '4px 0 0 0' }}>
-                        Gross: ₹{o.amount}
+                        Gross: ₹{o.amount.toFixed(2)}
                       </p>
                     )}
                   </div>
 
-                  {o.payment_method === 'Pay Later' && o.status === 'Pending' ? (
+                  {o.status === 'Bulk Requested' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {bulkNegotiation.orderId === o.order_id ? (
+                        <div style={{ textAlign: 'left', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
+                          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Bulk Price (Per Unit)</label>
+                          <input 
+                            type="number" 
+                            className="input-field" 
+                            style={{ margin: '5px 0 10px 0', padding: '6px' }}
+                            placeholder="New Unit Price" 
+                            value={bulkNegotiation.price}
+                            onChange={e => setBulkNegotiation({...bulkNegotiation, price: e.target.value})}
+                          />
+                          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Note to Customer</label>
+                          <textarea 
+                             className="input-field" 
+                             style={{ margin: '5px 0 10px 0', padding: '6px' }}
+                             placeholder="Msg (Optional)" 
+                             rows="2"
+                             value={bulkNegotiation.message}
+                             onChange={e => setBulkNegotiation({...bulkNegotiation, message: e.target.value})}
+                          ></textarea>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                              onClick={() => handleBulkAction(o.order_id, 'Accept', bulkNegotiation.price, bulkNegotiation.message)}
+                              className="btn" style={{ flex: 1, padding: '5px', fontSize: '0.8rem', background: '#238636' }}>Confirm</button>
+                            <button 
+                              onClick={() => setBulkNegotiation({ orderId: null, price: '', message: '' })}
+                              className="btn danger" style={{ padding: '5px', fontSize: '0.8rem' }}>Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button 
+                            onClick={() => setBulkNegotiation({ orderId: o.order_id, price: '', message: '' })}
+                            className="btn" style={{ flex: 1, background: 'var(--primary-color)', fontSize: '0.85rem' }}>Accept & Price</button>
+                          <button 
+                            onClick={() => handleBulkAction(o.order_id, 'Reject')}
+                            className="btn danger" style={{ flex: 1, fontSize: '0.85rem' }}>Reject</button>
+                        </div>
+                      )}
+                    </div>
+                  ) : o.payment_method === 'Pay Later' && o.status === 'Pending' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <p style={{ color: '#ffd700', fontSize: '0.8rem', margin: 0, fontWeight: 'bold' }}>CREDIT REQUEST</p>
                       <div style={{ display: 'flex', gap: '8px' }}>
@@ -201,15 +182,16 @@ function VendorOrders() {
                     </div>
                   ) : (
                     <select
-                      defaultValue={o.status}
+                      value={o.status}
                       onChange={(e) => handleStatusChange(o.order_id, e.target.value)}
                       style={{
                         background: 'rgba(0,0,0,0.3)',
                         color: 'white',
                         border: '1px solid var(--surface-border)',
-                        padding: '8px',
+                        padding: '10px',
                         borderRadius: '4px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontSize: '0.9rem'
                       }}
                     >
                       <option value="Pending">Pending</option>
@@ -219,6 +201,14 @@ function VendorOrders() {
                       <option value="Delivered">Delivered</option>
                       <option value="Cancelled">Cancelled</option>
                     </select>
+                  )}
+                  {['COD', 'Pay Later (Cash)'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
+                    <button 
+                      onClick={() => handlePaymentStatusChange(o.order_id, 'Completed')}
+                      className="btn"
+                      style={{ background: 'transparent', border: '1px solid #22c55e', color: '#22c55e', fontSize: '0.8rem', padding: '8px' }}>
+                      Mark as Paid
+                    </button>
                   )}
                 </div>
               </div>

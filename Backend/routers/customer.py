@@ -216,7 +216,8 @@ def get_my_orders(user = Depends(check_customer)):
                u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
                o.pay_later_stage, DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due,
                DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due,
-               DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due
+               DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
+               o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price
         FROM Orders o
         JOIN Products p ON o.item_id = p.product_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
@@ -389,6 +390,66 @@ def get_reviews(item_type: str, item_id: int):
             "reviews": reviews
         }
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+class BulkRequestData(BaseModel):
+    item_type: str
+    item_id: int
+    quantity: int
+    message: Optional[str] = None
+    address: str
+    city: str
+    state: str
+
+@router.post("/bulk-request")
+def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+            raise HTTPException(status_code=404, detail="Customer not found")
+        cust_id = cust['customer_id']
+        
+        # Get item details (price, vendor_id)
+        if data.item_type.capitalize() == 'Product':
+            cursor.execute("SELECT vendor_id, price FROM Products WHERE product_id=%s", (data.item_id,))
+        else:
+            cursor.execute("SELECT vendor_id, price FROM Services WHERE service_id=%s", (data.item_id,))
+        
+        item = cursor.fetchone()
+        if not item:
+            raise HTTPException(status_code=404, detail="Item not found")
+        
+        # Calculate initial estimated amount (standard price)
+        base_amount = float(item['price']) * data.quantity
+        commission_amount = round(base_amount * 0.05, 2)
+        total_amount = round(base_amount + commission_amount, 2)
+        
+        full_address = f"{data.address}, {data.city}, {data.state}"
+        
+        cursor.execute("""
+            INSERT INTO Orders (
+                customer_id, vendor_id, order_type, item_id, quantity, 
+                amount, status, delivery_address, payment_method, 
+                is_bulk_request, customer_message
+            ) VALUES (%s, %s, %s, %s, %s, %s, 'Bulk Requested', %s, 'Negotiable', 1, %s)
+        """, (cust_id, item['vendor_id'], data.item_type.capitalize(), data.item_id, data.quantity, total_amount, full_address, data.message))
+        
+        order_id = cursor.lastrowid
+        
+        # Create a placeholder payment
+        txn_id = 'BULK-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        cursor.execute("INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s, %s, %s, 'Pending')",
+                       (txn_id, order_id, total_amount))
+        
+        conn.commit()
+        return {"status": "success", "message": "Bulk price request sent to vendor!"}
+    except Exception as e:
+        conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()

@@ -166,6 +166,27 @@ function MyOrders() {
                     <span>📞 {o.vendor_phone}</span>
                   </p>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Ordered on: {o.date}</p>
+                  
+                  {o.is_bulk_request ? (
+                    <div style={{ marginBottom: '1rem' }}>
+                      <span style={{ background: 'rgba(52, 152, 219, 0.2)', color: '#3498db', padding: '2px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid #3498db', marginBottom: '0.5rem', display: 'inline-block' }}>
+                        BULK REQUEST
+                      </span>
+                      {o.customer_message && (
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0', borderLeft: '2px solid var(--surface-border)', paddingLeft: '8px', fontStyle: 'italic' }}>
+                          "You: {o.customer_message}"
+                        </p>
+                      )}
+                      {o.vendor_message && (
+                        <div style={{ background: 'rgba(35, 134, 54, 0.1)', padding: '0.5rem', borderRadius: '4px', marginTop: '0.5rem' }}>
+                           <p style={{ color: '#3fb950', fontSize: '0.8rem', fontWeight: 'bold', margin: '0 0 4px 0' }}>Vendor Reply:</p>
+                           <p style={{ color: 'white', fontSize: '0.8rem', margin: 0 }}>{o.vendor_message}</p>
+                           {o.negotiated_price && <p style={{ color: '#ffd700', fontSize: '0.85rem', fontWeight: 'bold', marginTop: '4px' }}>New Bulk Price: ₹{o.negotiated_price} / unit</p>}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.8rem', color: '#ffd700', border: '1px solid #ffd700', padding: '2px 6px', borderRadius: '4px' }}>
                       {o.payment_method}
