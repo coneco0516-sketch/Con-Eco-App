@@ -149,7 +149,7 @@ async def contact_us(form: ContactForm):
 
     return {"status": "success", "message": "Your message has been sent. You will receive a confirmation email shortly."}
 
-from routers import auth, admin, customer, vendor, payment
+from routers import auth, admin, customer, vendor, payment, invoice
 
 # Mount routers here
 app.include_router(auth.router,    prefix="/api/auth",    tags=["auth"])
@@ -157,6 +157,7 @@ app.include_router(admin.router,   prefix="/api/admin",   tags=["admin"])
 app.include_router(customer.router,prefix="/api/customer",tags=["customer"])
 app.include_router(vendor.router,  prefix="/api/vendor",  tags=["vendor"])
 app.include_router(payment.router, prefix="/api/payment", tags=["payment"])
+app.include_router(invoice.router, prefix="/api/invoice", tags=["invoice"])
 
 @app.get("/api/health")
 def api_health():
