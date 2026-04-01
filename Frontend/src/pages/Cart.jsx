@@ -43,7 +43,7 @@ function Cart() {
   };
 
   const updateQuantity = async (cartId, newQuantity) => {
-    if (newQuantity < 1) return;
+    if (newQuantity < 0) return;
     try {
       const resp = await fetch('/api/customer/cart', {
         method: 'PUT',
@@ -106,11 +106,16 @@ function Cart() {
                       <input 
                         className="quantity-input"
                         type="number" 
-                        min="1" 
+                        min="0" 
                         value={item.quantity} 
                         onChange={(e) => {
-                          const val = parseInt(e.target.value);
-                          if (!isNaN(val)) updateQuantity(item.cart_id, Math.max(1, val));
+                          const val = e.target.value;
+                          if (val === '') {
+                            updateQuantity(item.cart_id, 0);
+                          } else {
+                            const parsed = parseInt(val);
+                            if (!isNaN(parsed)) updateQuantity(item.cart_id, parsed);
+                          }
                         }}
                         onBlur={(e) => {
                           const val = parseInt(e.target.value);

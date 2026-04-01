@@ -51,7 +51,7 @@ function CustomerItemDetail() {
         body: JSON.stringify({
           item_type: isProduct ? 'Product' : 'Service',
           item_id: item.item_id,
-          quantity: quantity
+          quantity: Math.max(1, parseInt(quantity) || 1)
         }),
         credentials: 'include'
       });
@@ -205,27 +205,39 @@ function CustomerItemDetail() {
                     <div className="quantity-selector" style={{ width: '130px' }}>
                       <button 
                         className="quantity-btn"
-                        onClick={() => setQuantity(Math.max(1, (parseInt(quantity) || 1) - 1))}
+                        onClick={() => {
+                          const currentQty = parseInt(quantity) || 1;
+                          setQuantity(Math.max(1, currentQty - 1));
+                        }}
                       >
                         −
                       </button>
                       <input 
                         className="quantity-input"
                         type="number" 
-                        min="1" 
+                        min="0" 
                         value={quantity} 
                         onChange={(e) => {
-                          const val = parseInt(e.target.value);
-                          if (!isNaN(val)) setQuantity(Math.max(1, val));
-                          else if (e.target.value === '') setQuantity('');
+                          const val = e.target.value;
+                          if (val === '') {
+                            setQuantity(0);
+                          } else {
+                            const parsed = parseInt(val);
+                            if (!isNaN(parsed)) setQuantity(parsed);
+                          }
                         }}
                         onBlur={() => {
-                          if (quantity === '' || quantity < 1) setQuantity(1);
+                          if (quantity === '' || parseInt(quantity) < 1) {
+                            setQuantity(1);
+                          }
                         }}
                       />
                       <button 
                         className="quantity-btn"
-                        onClick={() => setQuantity((parseInt(quantity) || 0) + 1)}
+                        onClick={() => {
+                          const currentQty = parseInt(quantity) || 0;
+                          setQuantity(currentQty + 1);
+                        }}
                       >
                         +
                       </button>
