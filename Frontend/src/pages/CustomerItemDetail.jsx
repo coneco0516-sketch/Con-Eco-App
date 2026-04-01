@@ -48,10 +48,10 @@ function CustomerItemDetail() {
       const resp = await fetch('/api/customer/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          item_type: isProduct ? 'Product' : 'Service', 
-          item_id: item.item_id, 
-          quantity: quantity 
+        body: JSON.stringify({
+          item_type: isProduct ? 'Product' : 'Service',
+          item_id: item.item_id,
+          quantity: quantity
         }),
         credentials: 'include'
       });
@@ -101,9 +101,9 @@ function CustomerItemDetail() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
-        <button 
-          onClick={() => navigate(-1)} 
-          className="btn" 
+        <button
+          onClick={() => navigate(-1)}
+          className="btn"
           style={{ background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}
         >
           &larr; Back
@@ -119,108 +119,108 @@ function CustomerItemDetail() {
           <p>Loading details...</p>
         ) : item ? (
           <>
-          <div className="glass-panel" style={{ padding: '2rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-            {/* Image Section */}
-            <div style={{ flex: '1 1 400px' }}>
-              {item.image_url ? (
-                <img 
-                  src={item.image_url} 
-                  alt={item.name} 
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "https://placehold.co/800x600?text=" + encodeURIComponent(item.name);
-                  }}
-                  style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }} 
-                />
-              ) : (
-                <div style={{ width: '100%', height: '300px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                  No Image Available
-                </div>
-              )}
-            </div>
-
-            {/* Details Section */}
-            <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column' }}>
-              <h1 style={{ color: 'white', marginTop: 0, marginBottom: '0.5rem', fontSize: '2.5rem' }}>{item.name}</h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                <p style={{ color: 'var(--primary-color)', fontSize: '1.2rem', margin: 0 }}>
-                  Provider: <span style={{ color: 'white' }}>{item.vendor_name}</span>
-                </p>
-                {reviewsData.stats.total_reviews > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,215,0,0.1)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
-                    <span style={{ color: '#ffd700', fontSize: '1.1rem', marginRight: '0.3rem' }}>★</span>
-                    <span style={{ color: 'white', fontWeight: 'bold' }}>{reviewsData.stats.average_rating}</span>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginLeft: '0.4rem' }}>({reviewsData.stats.total_reviews} reviews)</span>
+            <div className="glass-panel" style={{ padding: '2rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+              {/* Image Section */}
+              <div style={{ flex: '1 1 400px' }}>
+                {item.image_url ? (
+                  <img
+                    src={item.image_url}
+                    alt={item.name}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/800x600?text=" + encodeURIComponent(item.name);
+                    }}
+                    style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div style={{ width: '100%', height: '300px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                    No Image Available
                   </div>
                 )}
               </div>
-              
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-                <h3 style={{ color: 'var(--text-secondary)', marginTop: 0 }}>Pricing Details</h3>
-                <p style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>Base: ₹{item.price} {item.unit ? `/ ${item.unit}` : ''}</p>
-                <p style={{ color: '#ffd700', margin: '0.5rem 0' }}>Commission (5%): ₹{(item.price * 0.05).toFixed(2)}</p>
-                <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.5rem', margin: '1rem 0 0 0', borderTop: '1px solid var(--surface-border)', paddingTop: '1rem' }}>
-                  Total: ₹{(parseFloat(item.price) + parseFloat(item.price) * 0.05).toFixed(2)}
-                </p>
-              </div>
 
-              <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Description</h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                  {item.description || 'No description provided.'}
-                </p>
-                
-                {item.specifications && (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Specifications / Features</h3>
-                    <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                      {item.specifications}
-                    </p>
-                  </div>
-                )}
-                
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-                  {item.category && (
-                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                      <strong>Category:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.category}</span>
-                    </p>
-                  )}
-                  {item.brand && (
-                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                      <strong>Brand:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.brand}</span>
-                    </p>
-                  )}
-                  {item.delivery_time && (
-                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                      <strong>Delivery / Availability:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.delivery_time}</span>
-                    </p>
+              {/* Details Section */}
+              <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column' }}>
+                <h1 style={{ color: 'white', marginTop: 0, marginBottom: '0.5rem', fontSize: '2.5rem' }}>{item.name}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <p style={{ color: 'var(--primary-color)', fontSize: '1.2rem', margin: 0 }}>
+                    Provider: <span style={{ color: 'white' }}>{item.vendor_name}</span>
+                  </p>
+                  {reviewsData.stats.total_reviews > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,215,0,0.1)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
+                      <span style={{ color: '#ffd700', fontSize: '1.1rem', marginRight: '0.3rem' }}>★</span>
+                      <span style={{ color: 'white', fontWeight: 'bold' }}>{reviewsData.stats.average_rating}</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginLeft: '0.4rem' }}>({reviewsData.stats.total_reviews} reviews)</span>
+                    </div>
                   )}
                 </div>
-              </div>
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', alignItems: 'flex-end' }}>
-                {isProduct && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ color: 'var(--text-secondary)' }}>Quantity</label>
-                    <input 
-                      type="number" 
-                      min="1" 
-                      value={quantity} 
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="input-field"
-                      style={{ width: '80px', textAlign: 'center' }}
-                    />
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                  <h3 style={{ color: 'var(--text-secondary)', marginTop: 0 }}>Pricing Details</h3>
+                  <p style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>Base: ₹{item.price} {item.unit ? `/ ${item.unit}` : ''}</p>
+                  <p style={{ color: '#ffd700', margin: '0.5rem 0' }}>Commission (5%): ₹{(item.price * 0.05).toFixed(2)}</p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.5rem', margin: '1rem 0 0 0', borderTop: '1px solid var(--surface-border)', paddingTop: '1rem' }}>
+                    Total: ₹{(parseFloat(item.price) + parseFloat(item.price) * 0.05).toFixed(2)}
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: '2rem' }}>
+                  <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Description</h3>
+                  <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                    {item.description || 'No description provided.'}
+                  </p>
+
+                  {item.specifications && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Specifications / Features</h3>
+                      <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                        {item.specifications}
+                      </p>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+                    {item.category && (
+                      <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                        <strong>Category:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.category}</span>
+                      </p>
+                    )}
+                    {item.brand && (
+                      <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                        <strong>Brand:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.brand}</span>
+                      </p>
+                    )}
+                    {item.delivery_time && (
+                      <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                        <strong>Delivery / Availability:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.delivery_time}</span>
+                      </p>
+                    )}
                   </div>
-                )}
-                <button 
-                  onClick={handleAction}
-                  className="btn"
-                  style={{ background: '#238636', flex: 1, padding: '1rem', fontSize: '1.1rem' }}
-                >
-                  {isProduct ? 'Add to Cart' : 'Book Service'}
-                </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', alignItems: 'flex-end' }}>
+                  {isProduct && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <label style={{ color: 'var(--text-secondary)' }}>Quantity</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="input-field"
+                        style={{ width: '80px', textAlign: 'center' }}
+                      />
+                    </div>
+                  )}
+                  <button
+                    onClick={handleAction}
+                    className="btn"
+                    style={{ background: '#238636', flex: 1, padding: '1rem', fontSize: '1.1rem' }}
+                  >
+                    {isProduct ? 'Add to Cart' : 'Book Service'}
+                  </button>
+                </div>
               </div>
-            </div>
             </div>
 
             {/* Reviews Section */}
@@ -228,7 +228,7 @@ function CustomerItemDetail() {
               <h2 style={{ color: 'white', marginTop: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '1rem' }}>
                 Customer Reviews
               </h2>
-              
+
               {reviewsData.reviews.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
                   {reviewsData.reviews.map(review => (
@@ -258,9 +258,9 @@ function CustomerItemDetail() {
                 <form onSubmit={submitReview} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <label style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>Rating:</label>
-                    <select 
-                      className="input-field" 
-                      value={reviewForm.rating} 
+                    <select
+                      className="input-field"
+                      value={reviewForm.rating}
                       onChange={e => setReviewForm({ ...reviewForm, rating: e.target.value })}
                       style={{ width: '150px' }}
                     >
@@ -273,9 +273,9 @@ function CustomerItemDetail() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <label style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>Your Experience:</label>
-                    <textarea 
-                      className="input-field" 
-                      placeholder="Share your thoughts about this item..." 
+                    <textarea
+                      className="input-field"
+                      placeholder="Share your thoughts about this item..."
                       rows="4"
                       value={reviewForm.comment}
                       onChange={e => setReviewForm({ ...reviewForm, comment: e.target.value })}
@@ -288,11 +288,11 @@ function CustomerItemDetail() {
                 </form>
               </div>
             </div>
-            </>
-          ) : (
-            <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-              <h3 style={{ color: 'var(--text-secondary)' }}>Item not found.</h3>
-            </div>
+          </>
+        ) : (
+          <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+            <h3 style={{ color: 'var(--text-secondary)' }}>Item not found.</h3>
+          </div>
         )}
       </main>
     </div>

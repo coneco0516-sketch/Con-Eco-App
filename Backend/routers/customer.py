@@ -131,6 +131,27 @@ def remove_from_cart(data: DeleteCartItem, user = Depends(check_customer)):
     finally:
         conn.close()
 
+class UpdateCartItem(BaseModel):
+    cart_id: int
+    quantity: int
+
+@router.put("/cart")
+def update_cart_quantity(data: UpdateCartItem, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust_id = cursor.fetchone()[0]
+        
+        cursor.execute("UPDATE Cart SET quantity = %s WHERE cart_id = %s AND customer_id = %s",
+                       (data.quantity, data.cart_id, cust_id))
+        conn.commit()
+        cursor.close()
+        return {"status": "success"}
+    finally:
+        conn.close()
+
+
 class CheckoutData(BaseModel):
     address: str
     city: str

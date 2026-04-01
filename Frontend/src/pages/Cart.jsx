@@ -42,6 +42,24 @@ function Cart() {
     }
   };
 
+  const updateQuantity = async (cartId, newQuantity) => {
+    if (newQuantity < 1) return;
+    try {
+      const resp = await fetch('/api/customer/cart', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart_id: cartId, quantity: newQuantity }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        loadCart();
+      }
+    } catch (err) {
+      console.error('Update quantity error:', err);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
@@ -66,23 +84,57 @@ function Cart() {
                 const commissionSubtotal = baseSubtotal * 0.05;
                 const totalSubtotal = baseSubtotal + commissionSubtotal;
                 return (
-                <li key={item.cart_id} style={{ padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <li key={item.cart_id} style={{ padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem' }}>
                   <div style={{ flex: 1 }}>
-                    <p style={{ margin: 0, color: 'white' }}>{item.name} (x{item.quantity})</p>
-                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Type: {item.item_type}</p>
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                      <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0' }}>Base: ₹{baseSubtotal.toFixed(2)}</p>
-                      <p style={{ color: '#ffd700', margin: '0.25rem 0' }}>+ Commission (5%): ₹{commissionSubtotal.toFixed(2)}</p>
+                    <p style={{ margin: 0, color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{item.name}</p>
+                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Type: {item.item_type}</p>
+                    <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
+                      <p style={{ color: 'var(--text-secondary)', margin: '0 0 0.25rem 0', fontSize: '0.8rem' }}>Base: ₹{baseSubtotal.toFixed(2)}</p>
+                      <p style={{ color: '#ffd700', margin: 0, fontSize: '0.8rem' }}>+ Platform Commission (5%): ₹{commissionSubtotal.toFixed(2)}</p>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', minWidth: '100px', textAlign: 'right' }}>₹{totalSubtotal.toFixed(2)}</span>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                    {/* Quantity Selector */}
+                    <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', border: '1px solid var(--surface-border)', overflow: 'hidden' }}>
+                      <button 
+                        onClick={() => updateQuantity(item.cart_id, item.quantity - 1)}
+                        style={{ background: 'transparent', border: 'none', color: 'white', padding: '0.4rem 0.6rem', cursor: 'pointer', fontSize: '1rem' }}
+                        onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+                        onMouseOut={(e) => e.target.style.background = 'transparent'}
+                      >
+                        -
+                      </button>
+                      <input 
+                        type="number" 
+                        min="1" 
+                        value={item.quantity} 
+                        onChange={(e) => updateQuantity(item.cart_id, Math.max(1, parseInt(e.target.value) || 1))}
+                        className="input-field"
+                        style={{ width: '50px', textAlign: 'center', border: 'none', borderRadius: 0, margin: 0, padding: '0.4rem 0', background: 'transparent', fontSize: '0.9rem' }}
+                      />
+                      <button 
+                        onClick={() => updateQuantity(item.cart_id, item.quantity + 1)}
+                        style={{ background: 'transparent', border: 'none', color: 'white', padding: '0.4rem 0.6rem', cursor: 'pointer', fontSize: '1rem' }}
+                        onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+                        onMouseOut={(e) => e.target.style.background = 'transparent'}
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <div style={{ minWidth: '110px', textAlign: 'right' }}>
+                      <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.2rem' }}>₹{totalSubtotal.toFixed(2)}</span>
+                    </div>
+
                     <button 
                       onClick={() => removeFromCart(item.cart_id)}
                       className="btn danger"
-                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                      style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem', background: 'transparent', color: '#f85149', border: '1px solid #f85149' }}
+                      onMouseOver={(e) => { e.target.style.background = 'rgba(248, 81, 73, 0.1)' }}
+                      onMouseOut={(e) => { e.target.style.background = 'transparent' }}
                     >
-                      Remove
+                      🗑️
                     </button>
                   </div>
                 </li>

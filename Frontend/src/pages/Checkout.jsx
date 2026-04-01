@@ -169,13 +169,31 @@ function Checkout() {
     rzp.open();
   };
 
+  const updateQuantity = async (cartId, newQuantity) => {
+    if (newQuantity < 1) return;
+    try {
+      const resp = await fetch('/api/customer/cart', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart_id: cartId, quantity: newQuantity }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        const fetchCart = await fetch('/api/customer/cart', { credentials: 'include' });
+        const cartData = await fetchCart.json();
+        if (cartData.items) setCart(cartData.items);
+        if (cartData.total) setTotal(cartData.total);
+      }
+    } catch (err) {
+      console.error('Update quantity error:', err);
+    }
+  };
+
   const isPayLaterBlocked = creditInfo && !creditInfo.eligible;
 
   const paymentOptions = [
-    // { id: 'UPI', label: 'UPI (PhonePe, GPay)', icon: '📱' },
-    // { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
-    // { id: 'Pay Later (Online)', label: 'Pay Later (Online)', icon: '📅', disabled: isPayLaterBlocked },
     { id: 'Pay Later (Cash)', label: 'Pay Later (Cash)', icon: '📅', disabled: isPayLaterBlocked },
   ];
 
@@ -198,9 +216,31 @@ function Checkout() {
             <h3 style={{ color: 'white', marginBottom: '1rem' }}>Order Summary</h3>
             <ul style={{ listStyle: 'none', padding: 0, marginBottom: '1.5rem' }}>
               {cart.map((item, idx) => (
-                <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--surface-border)' }}>
-                  <span>{item.name} × {item.quantity}</span>
-                  <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>₹{(item.price * item.quantity).toFixed(2)}</span>
+                <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', gap: '1rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ color: 'white', display: 'block' }}>{item.name}</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>₹{item.price} each</span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid var(--surface-border)', overflow: 'hidden' }}>
+                    <button 
+                      onClick={() => updateQuantity(item.cart_id, item.quantity - 1)}
+                      style={{ background: 'transparent', border: 'none', color: 'white', padding: '0.2rem 0.6rem', cursor: 'pointer' }}
+                    > - </button>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      value={item.quantity} 
+                      onChange={(e) => updateQuantity(item.cart_id, Math.max(1, parseInt(e.target.value) || 1))}
+                      style={{ width: '40px', textAlign: 'center', border: 'none', background: 'transparent', color: 'white', padding: '0.2rem 0', outline: 'none' }}
+                    />
+                    <button 
+                      onClick={() => updateQuantity(item.cart_id, item.quantity + 1)}
+                      style={{ background: 'transparent', border: 'none', color: 'white', padding: '0.2rem 0.6rem', cursor: 'pointer' }}
+                    > + </button>
+                  </div>
+
+                  <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' }}>₹{(item.price * item.quantity).toFixed(2)}</span>
                 </li>
               ))}
             </ul>
