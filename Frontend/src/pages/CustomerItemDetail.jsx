@@ -112,11 +112,33 @@ function CustomerItemDetail() {
                 <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
                   {item.description || 'No description provided.'}
                 </p>
-                {item.category && (
-                  <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>
-                    <strong>Category:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{item.category}</span>
-                  </p>
+                
+                {item.specifications && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Specifications / Features</h3>
+                    <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                      {item.specifications}
+                    </p>
+                  </div>
                 )}
+                
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+                  {item.category && (
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                      <strong>Category:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.category}</span>
+                    </p>
+                  )}
+                  {item.brand && (
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                      <strong>Brand:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.brand}</span>
+                    </p>
+                  )}
+                  {item.delivery_time && (
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                      <strong>Delivery / Availability:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.delivery_time}</span>
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', alignItems: 'flex-end' }}>

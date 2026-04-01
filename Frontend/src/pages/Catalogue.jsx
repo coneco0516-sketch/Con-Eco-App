@@ -6,7 +6,7 @@ function Catalogue() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [newItem, setNewItem] = useState({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '' });
+  const [newItem, setNewItem] = useState({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '', brand: '', specifications: '', delivery_time: '' });
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -28,7 +28,7 @@ function Catalogue() {
 
   const openAddModal = () => {
     setEditingItem(null);
-    setNewItem({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '' });
+    setNewItem({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '', brand: '', specifications: '', delivery_time: '' });
     setImageFile(null);
     setShowModal(true);
   };
@@ -42,7 +42,10 @@ function Catalogue() {
       price: item.price,
       category: item.category || 'General',
       image_url: item.image_url || '',
-      unit: item.unit || ''
+      unit: item.unit || '',
+      brand: item.brand || '',
+      specifications: item.specifications || '',
+      delivery_time: item.delivery_time || ''
     });
     setImageFile(null);
     setShowModal(true);
@@ -86,6 +89,9 @@ function Catalogue() {
     formData.append('category', newItem.category);
     formData.append('image_url', finalImageUrl || '');
     formData.append('unit', newItem.unit || '');
+    formData.append('brand', newItem.brand || '');
+    formData.append('specifications', newItem.specifications || '');
+    formData.append('delivery_time', newItem.delivery_time || '');
 
     // If editing, add item_id and use PUT
     if (editingItem) {
@@ -107,7 +113,7 @@ function Catalogue() {
       if (data.status === 'success') {
         setShowModal(false);
         setEditingItem(null);
-        setNewItem({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '' });
+        setNewItem({ type: 'product', name: '', description: '', price: '', category: 'General', image_url: '', unit: '', brand: '', specifications: '', delivery_time: '' });
         setImageFile(null);
         fetchCatalogue();
       } else {
@@ -224,6 +230,20 @@ function Catalogue() {
                 <div>
                   <label className="input-label">Unit</label>
                   <input type="text" placeholder="e.g. per bag, per ton, per sq.ft" className="input-field" required value={newItem.unit} onChange={(e) => setNewItem({...newItem, unit: e.target.value})} />
+                </div>
+                {newItem.type === 'product' && (
+                  <div>
+                    <label className="input-label">Brand (Optional)</label>
+                    <input type="text" placeholder="e.g. UltraTech, Tata" className="input-field" value={newItem.brand} onChange={(e) => setNewItem({...newItem, brand: e.target.value})} />
+                  </div>
+                )}
+                <div>
+                  <label className="input-label">Specifications / Features (Optional)</label>
+                  <textarea placeholder="e.g. 50kg bag, ISI mark, highly durable..." className="input-field" value={newItem.specifications} onChange={(e) => setNewItem({...newItem, specifications: e.target.value})} />
+                </div>
+                <div>
+                  <label className="input-label">Delivery Time / Availability (Optional)</label>
+                  <input type="text" placeholder="e.g. 2-3 business days, Same Day" className="input-field" value={newItem.delivery_time} onChange={(e) => setNewItem({...newItem, delivery_time: e.target.value})} />
                 </div>
                 <div>
                   <label className="input-label">Image URL (Optional)</label>

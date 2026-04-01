@@ -18,7 +18,7 @@ def get_products(user = Depends(check_customer)):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT p.product_id as item_id, p.name, p.description, p.price, p.image_url, p.unit, p.category, 'Product' as type, v.company_name as vendor_name "
+        "SELECT p.product_id as item_id, p.name, p.description, p.price, p.image_url, p.unit, p.brand, p.specifications, p.delivery_time, p.category, 'Product' as type, v.company_name as vendor_name "
         "FROM Products p JOIN Vendors v ON p.vendor_id = v.vendor_id "
         "WHERE v.verification_status='Verified'"
     )
@@ -32,7 +32,7 @@ def get_services(user = Depends(check_customer)):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT s.service_id as item_id, s.name, s.description, s.price, s.image_url, s.unit, s.category, 'Service' as type, v.company_name as vendor_name "
+        "SELECT s.service_id as item_id, s.name, s.description, s.price, s.image_url, s.unit, '' as brand, s.specifications, s.delivery_time, s.category, 'Service' as type, v.company_name as vendor_name "
         "FROM Services s JOIN Vendors v ON s.vendor_id = v.vendor_id "
         "WHERE v.verification_status='Verified'"
     )

@@ -82,11 +82,11 @@ def catalogue(user = Depends(check_vendor)):
         
         items = []
         
-        cursor.execute("SELECT product_id as id, 'product' as type, name, description, price, category, image_url, unit FROM Products WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT product_id as id, 'product' as type, name, description, price, category, image_url, unit, brand, specifications, delivery_time FROM Products WHERE vendor_id=%s", (vendor_id,))
         for row in cursor.fetchall():
             items.append(row)
             
-        cursor.execute("SELECT service_id as id, 'service' as type, name, description, price, category, image_url, unit FROM Services WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT service_id as id, 'service' as type, name, description, price, category, image_url, unit, '' as brand, specifications, delivery_time FROM Services WHERE vendor_id=%s", (vendor_id,))
         for row in cursor.fetchall():
             items.append(row)
             
@@ -126,6 +126,9 @@ def add_catalogue_item(
     category: str = Form("General"),
     image_url: str = Form(""),
     unit: str = Form(""),
+    brand: str = Form(""),
+    specifications: str = Form(""),
+    delivery_time: str = Form(""),
     user = Depends(check_vendor)
 ):
     conn = get_db_connection()
@@ -138,11 +141,11 @@ def add_catalogue_item(
             category = auto_categorize(name, description, item_type)
             
         if item_type == 'product':
-            cursor.execute("INSERT INTO Products (vendor_id, category, name, description, price, image_url, unit) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                           (vendor_id, category, name, description, price, image_url, unit))
+            cursor.execute("INSERT INTO Products (vendor_id, category, name, description, price, image_url, unit, brand, specifications, delivery_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                           (vendor_id, category, name, description, price, image_url, unit, brand, specifications, delivery_time))
         else:
-            cursor.execute("INSERT INTO Services (vendor_id, category, name, description, price, image_url, unit) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                           (vendor_id, category, name, description, price, image_url, unit))
+            cursor.execute("INSERT INTO Services (vendor_id, category, name, description, price, image_url, unit, specifications, delivery_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                           (vendor_id, category, name, description, price, image_url, unit, specifications, delivery_time))
                            
         conn.commit()
         cursor.close()
@@ -163,6 +166,9 @@ def update_catalogue_item(
     category: str = Form("General"),
     image_url: str = Form(""),
     unit: str = Form(""),
+    brand: str = Form(""),
+    specifications: str = Form(""),
+    delivery_time: str = Form(""),
     user = Depends(check_vendor)
 ):
     conn = get_db_connection()
@@ -176,13 +182,13 @@ def update_catalogue_item(
             
         if item_type == 'product':
             cursor.execute(
-                "UPDATE Products SET name=%s, description=%s, price=%s, category=%s, image_url=%s, unit=%s WHERE product_id=%s AND vendor_id=%s",
-                (name, description, price, category, image_url, unit, item_id, vendor_id)
+                "UPDATE Products SET name=%s, description=%s, price=%s, category=%s, image_url=%s, unit=%s, brand=%s, specifications=%s, delivery_time=%s WHERE product_id=%s AND vendor_id=%s",
+                (name, description, price, category, image_url, unit, brand, specifications, delivery_time, item_id, vendor_id)
             )
         else:
             cursor.execute(
-                "UPDATE Services SET name=%s, description=%s, price=%s, category=%s, image_url=%s, unit=%s WHERE service_id=%s AND vendor_id=%s",
-                (name, description, price, category, image_url, unit, item_id, vendor_id)
+                "UPDATE Services SET name=%s, description=%s, price=%s, category=%s, image_url=%s, unit=%s, specifications=%s, delivery_time=%s WHERE service_id=%s AND vendor_id=%s",
+                (name, description, price, category, image_url, unit, specifications, delivery_time, item_id, vendor_id)
             )
                            
         conn.commit()
