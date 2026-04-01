@@ -9,6 +9,66 @@ function VendorOrders() {
     fetchOrders();
   }, []);
 
+  const fetchOrders = () => {
+    setLoading(true);
+    fetch('/api/vendor/orders', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.orders) setOrders(data.orders);
+        setLoading(false);
+      })
+      .catch(err => setLoading(false));
+  };
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const resp = await fetch('/api/vendor/orders/update_status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, status: newStatus }),
+        credentials: 'include'
+      });
+
+      const contentType = resp.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await resp.json();
+        if (data.status === 'success') {
+          alert("Order status updated to " + (newStatus === 'Processing' ? 'Accepted' : newStatus));
+          fetchOrders();
+        } else {
+          alert("Error: " + data.message);
+        }
+      } else {
+        const text = await resp.text();
+        console.error("Server returned non-JSON response:", text);
+        alert(`Server error (${resp.status}). See console for details.`);
+      }
+    } catch (err) {
+      console.error("Status update failed:", err);
+      alert("Network error updating status.");
+    }
+  };
+
+  const handlePaymentStatusChange = async (orderId, newStatus) => {
+    try {
+      const resp = await fetch('/api/vendor/orders/update_payment_status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, status: newStatus }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert("Payment status updated to " + newStatus);
+        fetchOrders();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
+      alert("Network error updating payment status.");
+    }
+  };
+
   const handleBulkAction = async (orderId, action, price = null, message = '') => {
     try {
       const resp = await fetch('/api/vendor/orders/bulk_action', {
