@@ -301,3 +301,74 @@ def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
     finally:
         cursor.close()
         conn.close()
+
+class ReviewData(BaseModel):
+    item_type: str
+    item_id: int
+    rating: int
+    comment: str
+
+@router.post("/reviews")
+def add_review(data: ReviewData, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+            raise HTTPException(status_code=404, detail="Customer not found")
+            
+        cursor.execute(
+            "INSERT INTO ItemReviews (item_type, item_id, customer_id, rating, comment) VALUES (%s, %s, %s, %s, %s)",
+            (data.item_type, data.item_id, cust['customer_id'], data.rating, data.comment)
+        )
+        conn.commit()
+        return {"status": "success", "message": "Review added successfully!"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+@router.get("/reviews/{item_type}/{item_id}")
+def get_reviews(item_type: str, item_id: int):
+    # This route is optionally public or authenticated depending on needs, 
+    # but we'll leave it without Depends(check_customer) so anyone can view reviews,
+    # or with standard read access.
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        # Calculate average rating and count
+        cursor.execute(
+            "SELECT COALESCE(AVG(rating), 0) as average_rating, COUNT(*) as total_reviews "
+            "FROM ItemReviews WHERE item_type=%s AND item_id=%s",
+            (item_type.capitalize(), item_id)
+        )
+        stats = cursor.fetchone()
+        
+        # Get individual reviews
+        sql = """
+            SELECT r.review_id, r.rating, r.comment, DATE_FORMAT(r.created_at, '%d %b %Y') as date, u.name as customer_name
+            FROM ItemReviews r
+            JOIN Users u ON r.customer_id = u.user_id
+            WHERE r.item_type=%s AND r.item_id=%s
+            ORDER BY r.created_at DESC
+        """
+        cursor.execute(sql, (item_type.capitalize(), item_id))
+        reviews = cursor.fetchall()
+        
+        return {
+            "status": "success", 
+            "stats": {
+                "average_rating": round(float(stats['average_rating']), 1) if stats else 0,
+                "total_reviews": stats['total_reviews'] if stats else 0
+            },
+            "reviews": reviews
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()

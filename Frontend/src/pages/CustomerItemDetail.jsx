@@ -9,9 +9,24 @@ function CustomerItemDetail() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [quantity, setQuantity] = useState(1);
+  const [reviewsData, setReviewsData] = useState({ stats: { average_rating: 0, total_reviews: 0 }, reviews: [] });
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const isProduct = type.toLowerCase() === 'product';
   const endpoint = isProduct ? '/api/customer/products' : '/api/customer/services';
+
+  const fetchReviews = () => {
+    // Reviews are fetched optionally from public or authenticated.
+    fetch(`/api/customer/reviews/${type.toLowerCase()}/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          setReviewsData({ stats: data.stats, reviews: data.reviews });
+        }
+      })
+      .catch(err => console.error(err));
+  };
 
   useEffect(() => {
     fetch(endpoint, { credentials: 'include' })
@@ -24,7 +39,9 @@ function CustomerItemDetail() {
         setLoading(false);
       })
       .catch(err => setLoading(false));
-  }, [endpoint, id]);
+
+    fetchReviews();
+  }, [endpoint, id, type]);
 
   const handleAction = async () => {
     try {
@@ -50,6 +67,36 @@ function CustomerItemDetail() {
     }
   };
 
+  const submitReview = async (e) => {
+    e.preventDefault();
+    setSubmittingReview(true);
+    try {
+      const resp = await fetch('/api/customer/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_type: isProduct ? 'Product' : 'Service',
+          item_id: item.item_id,
+          rating: Number(reviewForm.rating),
+          comment: reviewForm.comment
+        }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (resp.ok && data.status === 'success') {
+        setMessage({ type: 'success', text: 'Review submitted successfully!' });
+        setReviewForm({ rating: 5, comment: '' });
+        fetchReviews();
+      } else {
+        setMessage({ type: 'error', text: data.detail || data.message || 'Failed to submit review. Please ensure you are logged in.' });
+      }
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch {
+      setMessage({ type: 'error', text: 'Network error submitting review' });
+    }
+    setSubmittingReview(false);
+  };
+
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
@@ -71,6 +118,7 @@ function CustomerItemDetail() {
         {loading ? (
           <p>Loading details...</p>
         ) : item ? (
+          <>
           <div className="glass-panel" style={{ padding: '2rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
             {/* Image Section */}
             <div style={{ flex: '1 1 400px' }}>
@@ -94,9 +142,18 @@ function CustomerItemDetail() {
             {/* Details Section */}
             <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column' }}>
               <h1 style={{ color: 'white', marginTop: 0, marginBottom: '0.5rem', fontSize: '2.5rem' }}>{item.name}</h1>
-              <p style={{ color: 'var(--primary-color)', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
-                Provider: <span style={{ color: 'white' }}>{item.vendor_name}</span>
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                <p style={{ color: 'var(--primary-color)', fontSize: '1.2rem', margin: 0 }}>
+                  Provider: <span style={{ color: 'white' }}>{item.vendor_name}</span>
+                </p>
+                {reviewsData.stats.total_reviews > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,215,0,0.1)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
+                    <span style={{ color: '#ffd700', fontSize: '1.1rem', marginRight: '0.3rem' }}>★</span>
+                    <span style={{ color: 'white', fontWeight: 'bold' }}>{reviewsData.stats.average_rating}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginLeft: '0.4rem' }}>({reviewsData.stats.total_reviews} reviews)</span>
+                  </div>
+                )}
+              </div>
               
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
                 <h3 style={{ color: 'var(--text-secondary)', marginTop: 0 }}>Pricing Details</h3>
@@ -164,11 +221,78 @@ function CustomerItemDetail() {
                 </button>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-            <h3 style={{ color: 'var(--text-secondary)' }}>Item not found.</h3>
-          </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
+              <h2 style={{ color: 'white', marginTop: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '1rem' }}>
+                Customer Reviews
+              </h2>
+              
+              {reviewsData.reviews.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
+                  {reviewsData.reviews.map(review => (
+                    <div key={review.review_id} style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                        <strong style={{ color: 'white' }}>{review.customer_name}</strong>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{review.date}</span>
+                      </div>
+                      <div style={{ color: '#ffd700', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
+                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                      </div>
+                      <p style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                        {review.comment}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontStyle: 'italic' }}>
+                  No reviews yet. Be the first to review this {item.type.toLowerCase()}!
+                </p>
+              )}
+
+              {/* Write a Review Form */}
+              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
+                <h3 style={{ color: 'white', marginTop: 0, marginBottom: '1rem' }}>Write a Review</h3>
+                <form onSubmit={submitReview} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <label style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>Rating:</label>
+                    <select 
+                      className="input-field" 
+                      value={reviewForm.rating} 
+                      onChange={e => setReviewForm({ ...reviewForm, rating: e.target.value })}
+                      style={{ width: '150px' }}
+                    >
+                      <option value="5">★★★★★ (5)</option>
+                      <option value="4">★★★★☆ (4)</option>
+                      <option value="3">★★★☆☆ (3)</option>
+                      <option value="2">★★☆☆☆ (2)</option>
+                      <option value="1">★☆☆☆☆ (1)</option>
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>Your Experience:</label>
+                    <textarea 
+                      className="input-field" 
+                      placeholder="Share your thoughts about this item..." 
+                      rows="4"
+                      value={reviewForm.comment}
+                      onChange={e => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                      required
+                    ></textarea>
+                  </div>
+                  <button type="submit" className="btn" disabled={submittingReview} style={{ background: 'var(--primary-color)', alignSelf: 'flex-start', padding: '0.8rem 2rem' }}>
+                    {submittingReview ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                </form>
+              </div>
+            </div>
+            </>
+          ) : (
+            <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+              <h3 style={{ color: 'var(--text-secondary)' }}>Item not found.</h3>
+            </div>
         )}
       </main>
     </div>
