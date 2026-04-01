@@ -3,6 +3,26 @@ import AdminSidebar from '../components/AdminSidebar';
 
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const handleDownloadInvoice = async (orderId) => {
+    try {
+      const response = await fetch(`/api/invoice/download/${orderId}`, { credentials: 'include' });
+      if (!response.ok) throw new Error('Invoice not available');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Invoice_ConEco_${orderId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert("Failed to download invoice. Please try again later.");
+    }
+  };
 
   useEffect(() => {
     fetch('/api/admin/orders', { credentials: 'include' })
@@ -102,14 +122,12 @@ function AdminOrders() {
                     </td>
                     <td style={{ padding: '15px' }}>
                       {(order.status === 'Delivered' || order.status === 'Completed') && (
-                        <a 
-                          href={`/api/invoice/${order.order_id}`}
-                          target="_blank" 
-                          rel="noopener noreferrer"
+                        <button 
+                          onClick={() => handleDownloadInvoice(order.order_id)}
                           title="Download Invoice"
                           style={{ 
                             color: 'var(--primary-color)', 
-                            textDecoration: 'none', 
+                            cursor: 'pointer', 
                             background: 'rgba(57, 185, 80, 0.1)', 
                             padding: '5px 10px', 
                             borderRadius: '4px',
@@ -118,7 +136,7 @@ function AdminOrders() {
                           }}
                         >
                           📄 Invoice
-                        </a>
+                        </button>
                       )}
                     </td>
                   </tr>

@@ -142,6 +142,25 @@ function MyOrders() {
         )}
       </div>
     );
+  }
+
+  const handleDownloadInvoice = async (orderId) => {
+    try {
+      const response = await fetch(`/api/invoice/download/${orderId}`, { credentials: 'include' });
+      if (!response.ok) throw new Error('Invoice not available');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Invoice_ConEco_${orderId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert("Failed to download invoice. Please try again later.");
+    }
   };
 
   return (
@@ -228,10 +247,8 @@ function MyOrders() {
                   )}
 
                   {(o.status === 'Delivered' || o.status === 'Completed') && (
-                    <a 
-                      href={`/api/invoice/${o.order_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button 
+                      onClick={() => handleDownloadInvoice(o.order_id)}
                       className="btn"
                       style={{ 
                         padding: '6px 15px', 
@@ -239,13 +256,11 @@ function MyOrders() {
                         background: 'rgba(35, 134, 54, 0.2)', 
                         color: '#3fb950', 
                         border: '1px solid #3fb950',
-                        textDecoration: 'none',
-                        display: 'inline-block',
-                        textAlign: 'center'
+                        cursor: 'pointer'
                       }}
                     >
                       📄 Download Invoice
-                    </a>
+                    </button>
                   )}
 
                   {o.status === 'Pending' ? (
