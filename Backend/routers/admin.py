@@ -186,13 +186,17 @@ def get_orders(user = Depends(check_admin)):
                DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
                DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
                COALESCE(cs.credit_score, 100) as customer_credit_score,
-               DATE_FORMAT(o.created_at, '%d %M %Y') as date
+               DATE_FORMAT(o.created_at, '%d %M %Y') as date,
+               ir.comment as review_message, ir.rating as review_rating
         FROM Orders o
         JOIN Customers c ON o.customer_id = c.customer_id
         JOIN Users u_cust ON c.customer_id = u_cust.user_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
         JOIN Payments pvt ON o.order_id = pvt.order_id
         LEFT JOIN credit_scores cs ON o.customer_id = cs.customer_id
+        LEFT JOIN ItemReviews ir ON o.customer_id = ir.customer_id 
+             AND o.item_id = ir.item_id 
+             AND o.order_type = ir.item_type
         ORDER BY o.created_at DESC
         """
         cursor.execute(sql)

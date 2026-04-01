@@ -32,13 +32,14 @@ function AdminOrders() {
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Type</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Amount</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Status</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Review</th>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Date</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>No orders found.</td>
+                  <td colSpan="8" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>No orders found.</td>
                 </tr>
               ) : (
                 orders.map((order, idx) => (
@@ -89,6 +90,20 @@ function AdminOrders() {
                             </span>
                           )}
                         </div>
+                    </td>
+                    <td style={{ padding: '15px' }}>
+                      {order.review_message ? (
+                        <div style={{ maxWidth: '200px' }}>
+                          <div style={{ color: '#ffd700', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                            {'★'.repeat(order.review_rating)}{'☆'.repeat(5 - order.review_rating)}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic', wordBreak: 'break-word' }}>
+                            "{order.review_message}"
+                          </div>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)' }}>No reviews yet</span>
+                      )}
                     </td>
                     <td style={{ padding: '15px', fontSize: '0.8rem' }}>
                       <div>{order.date}</div>
