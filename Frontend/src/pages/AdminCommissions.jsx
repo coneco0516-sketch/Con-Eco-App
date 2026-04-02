@@ -142,7 +142,7 @@ function AdminCommissions() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h3 style={{ color: 'white', margin: 0 }}>Weekly Commission Invoices</h3>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-              5% Commission + 18% GST | Vendors can claim ITC on paid invoices
+              3% Commission + 18% GST | Vendors can claim ITC on paid invoices
             </span>
           </div>
 
@@ -225,7 +225,7 @@ function AdminCommissions() {
         }}>
           <p style={{ color: '#3498db', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>🧾 GST Note</p>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: '1.6' }}>
-            Platform charges <strong style={{ color: 'white' }}>5% commission</strong> on all COD order amounts.
+            Platform charges <strong style={{ color: 'white' }}>3% commission</strong> on all COD order amounts.
             <strong style={{ color: '#f1c40f' }}> 18% GST</strong> (SAC 998314 — Online Marketplace Services) is applicable
             on this commission under Indian GST law. All vendors are required to be GST-registered and can claim
             <strong style={{ color: 'white' }}> Input Tax Credit (ITC)</strong> on the GST paid to ConEco by downloading

@@ -145,10 +145,10 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             return False, "Cart is empty"
 
         for item in cart_items:
-            # Calculate pricing with 18% GST and 5% platform commission
+            # Calculate pricing with 18% GST and 3% platform commission
             base_amount = float(item["price"]) * item["quantity"]
             gst_amount = round(base_amount * 0.18, 2)
-            commission_rate = 5.0  # 5% platform commission
+            commission_rate = 3.0  # 3% platform commission
             commission_amount = round(base_amount * commission_rate / 100, 2)
             total_amount = round(base_amount + gst_amount + commission_amount, 2)
             

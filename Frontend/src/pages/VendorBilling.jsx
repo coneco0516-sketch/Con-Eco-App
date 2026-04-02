@@ -178,7 +178,7 @@ function VendorBilling() {
             </p>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem', lineHeight: '1.5' }}>
               As all vendors on ConEco are GST-registered, <strong style={{ color: 'white' }}>18% GST (CGST 9% + SGST 9%)</strong> is
-              charged on the 5% platform commission. After you pay, a proper <strong style={{ color: 'white' }}>GST Tax Invoice</strong> is
+              charged on the 3% platform commission. After you pay, a proper <strong style={{ color: 'white' }}>GST Tax Invoice</strong> is
               generated which you can use to claim <strong style={{ color: 'white' }}>Input Tax Credit (ITC)</strong> in your GST returns.
             </p>
           </div>
@@ -277,7 +277,7 @@ function VendorBilling() {
         }}>
           <h4 style={{ color: '#ffd700', marginBottom: '10px' }}>Commission &amp; GST Policy</h4>
           <ul style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.8', margin: 0, paddingLeft: '1.2rem' }}>
-            <li>Platform charges a <strong style={{ color: 'white' }}>5% commission</strong> on all completed COD orders, calculated weekly.</li>
+            <li>Platform charges a <strong style={{ color: 'white' }}>3% commission</strong> on all completed COD orders, calculated weekly.</li>
             <li><strong style={{ color: 'white' }}>18% GST</strong> (CGST 9% + SGST 9%) is levied on the commission as per Indian tax law.</li>
             <li>A proper <strong style={{ color: 'white' }}>GST Tax Invoice</strong> (SAC 998314) is provided after payment for ITC claims.</li>
             <li>Commission invoices must be paid within <strong style={{ color: 'white' }}>3 days</strong> of generation to avoid penalties.</li>

@@ -334,8 +334,9 @@ def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor)):
             qty = res['quantity'] if res else 1
             
             base_amount = float(data.negotiated_price) * qty
-            commission_amount = round(base_amount * 0.05, 2)
-            total_amount = round(base_amount + commission_amount, 2)
+            gst_amount = round(base_amount * 0.18, 2)
+            commission_amount = round(base_amount * 0.03, 2)
+            total_amount = round(base_amount + gst_amount + commission_amount, 2)
             
             cursor.execute("""
                 UPDATE Orders 
@@ -344,10 +345,11 @@ def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor)):
                     vendor_message=%s,
                     amount=%s,
                     base_amount=%s,
+                    gst_amount=%s,
                     commission_amount=%s,
                     total_amount=%s
                 WHERE order_id=%s AND vendor_id=%s
-            """, (data.negotiated_price, data.vendor_message, total_amount, base_amount, commission_amount, total_amount, data.order_id, vendor_id))
+            """, (data.negotiated_price, data.vendor_message, total_amount, base_amount, gst_amount, commission_amount, total_amount, data.order_id, vendor_id))
             
             # Also update the payment record
             cursor.execute("UPDATE Payments SET amount=%s WHERE order_id=%s", (total_amount, data.order_id))

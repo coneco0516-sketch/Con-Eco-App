@@ -142,7 +142,7 @@ def generate_order_summary_pdf(order_data, output_path):
     pdf.cell(30, 7, f"INR {gst_amount:.2f}", align='R', ln=True)
 
     pdf.set_x(130)
-    pdf.cell(30, 7, 'Platform Fee (5%):', align='L')
+    pdf.cell(30, 7, 'Platform Fee (3%):', align='L')
     pdf.cell(30, 7, f"INR {commission_amt:.2f}", align='R', ln=True)
 
     pdf.set_x(130)

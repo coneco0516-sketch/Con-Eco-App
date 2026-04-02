@@ -180,9 +180,9 @@ function Checkout() {
       const next = prev.map(item => 
         item.cart_id === cartId ? { ...item, quantity: newQuantity } : item
       );
-      // Recalculate total locally: sum(price * qty), + 18% GST, + 5% comm
+      // Recalculate total locally: sum(price * qty), + 18% GST, + 3% comm
       const newBaseTotal = next.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      setTotal(newBaseTotal * 1.23); // 1.0 (base) + 0.18 (gst) + 0.05 (comm)
+      setTotal(newBaseTotal * 1.21); // 1.0 (base) + 0.18 (gst) + 0.03 (comm)
       return next;
     });
 
@@ -278,15 +278,15 @@ function Checkout() {
             </ul>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 'bold' }}>
               <span style={{ color: 'white' }}>Subtotal (Base Prices)</span>
-              <span style={{ color: 'var(--text-secondary)' }}>₹{(total / 1.23).toFixed(2)}</span>
+              <span style={{ color: 'var(--text-secondary)' }}>₹{(total / 1.21).toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '1rem' }}>
               <span style={{ color: '#3498db' }}>GST (18%)</span>
-              <span style={{ color: '#3498db' }}>₹{((total / 1.23) * 0.18).toFixed(2)}</span>
+              <span style={{ color: '#3498db' }}>₹{((total / 1.21) * 0.18).toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1rem' }}>
-              <span style={{ color: '#ffd700' }}>Platform Commission (5%)</span>
-              <span style={{ color: '#ffd700' }}>₹{((total / 1.23) * 0.05).toFixed(2)}</span>
+              <span style={{ color: '#ffd700' }}>Platform Commission (3%)</span>
+              <span style={{ color: '#ffd700' }}>₹{((total / 1.21) * 0.03).toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 'bold', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
               <span style={{ color: 'white' }}>Total Amount</span>
