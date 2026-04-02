@@ -19,11 +19,7 @@ function MyBookedServices() {
   useEffect(() => {
     fetchServices();
 
-    // Load Razorpay script
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
+
   }, []);
 
   const handlePayNow = async (service) => {
@@ -141,7 +137,7 @@ function MyBookedServices() {
     );
   }
 
-  const handleDownloadInvoice = async (orderId) => {
+  const handleDownloadSummary = async (orderId) => {
     try {
       const response = await fetch(`/api/invoice/download/${orderId}`, { credentials: 'include' });
       
@@ -152,14 +148,14 @@ function MyBookedServices() {
       
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/pdf')) {
-        throw new Error("Invoice generation failed on server. Special characters in names might be the cause.");
+        throw new Error("Order summary generation failed. Please contact ConEco support.");
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Invoice_ConEco_${orderId}.pdf`;
+      a.download = `OrderSummary_ConEco_${orderId}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -223,7 +219,7 @@ function MyBookedServices() {
 
                   {(s.status === 'Delivered' || s.status === 'Completed') && (
                     <button 
-                      onClick={() => handleDownloadInvoice(s.order_id)}
+                      onClick={() => handleDownloadSummary(s.order_id)}
                       className="btn"
                       style={{ 
                         padding: '6px 15px', 
@@ -234,17 +230,7 @@ function MyBookedServices() {
                         cursor: 'pointer'
                       }}
                     >
-                      📄 Download Invoice
-                    </button>
-                  )}
-
-                  {s.payment_method === 'Pay Later' && s.payment_status !== 'Completed' && s.status === 'Delivered' && (
-                    <button 
-                      onClick={() => handlePayNow(s)}
-                      className="primary-button"
-                      style={{ padding: '6px 15px', fontSize: '0.85rem' }}
-                    >
-                      Pay Now (Card/UPI)
+                      📋 Download Order Summary
                     </button>
                   )}
 

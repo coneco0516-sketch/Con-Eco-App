@@ -36,6 +36,9 @@ def generate_weekly_invoices():
         amount = res['total'] or 0.0
         
         if amount > 0:
+            gst_amount = round(float(amount) * 0.18, 2)
+            total_with_gst = round(float(amount) + gst_amount, 2)
+            
             # 3. Create invoice if not already exists for this period
             cursor.execute("""
                 SELECT invoice_id FROM weekly_invoices 
@@ -44,10 +47,10 @@ def generate_weekly_invoices():
             
             if not cursor.fetchone():
                 cursor.execute("""
-                    INSERT INTO weekly_invoices (vendor_id, amount, billing_period_start, billing_period_end, due_date)
-                    VALUES (%s, %s, %s, %s, %s)
-                """, (vendor_id, amount, start_date, end_date, due_date))
-                print(f"Issued invoice for Vendor {vendor_id}: ₹{amount}")
+                    INSERT INTO weekly_invoices (vendor_id, amount, gst_amount, total_with_gst, billing_period_start, billing_period_end, due_date)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (vendor_id, amount, gst_amount, total_with_gst, start_date, end_date, due_date))
+                print(f"Issued invoice for Vendor {vendor_id}: Base ₹{amount} + GST ₹{gst_amount} = Total ₹{total_with_gst}")
         
     conn.commit()
     cursor.close()

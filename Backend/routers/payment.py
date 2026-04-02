@@ -145,11 +145,12 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             return False, "Cart is empty"
 
         for item in cart_items:
-            # Calculate pricing with 5% platform commission
+            # Calculate pricing with 18% GST and 5% platform commission
             base_amount = float(item["price"]) * item["quantity"]
+            gst_amount = round(base_amount * 0.18, 2)
             commission_rate = 5.0  # 5% platform commission
             commission_amount = round(base_amount * commission_rate / 100, 2)
-            total_amount = round(base_amount + commission_amount, 2)
+            total_amount = round(base_amount + gst_amount + commission_amount, 2)
             
             # Insert order with commission breakdown, delivery address and payment method
             order_status = 'Pending' if payment_method == 'COD' or payment_method.startswith('Pay Later') else 'Processing'
@@ -158,10 +159,10 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
 
             cursor.execute(
                 """INSERT INTO Orders 
-                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"], 
-                 total_amount, base_amount, commission_amount, total_amount, order_status, delivery_address, payment_method)
+                 total_amount, base_amount, gst_amount, commission_amount, total_amount, order_status, delivery_address, payment_method)
             )
             order_db_id = cursor.lastrowid
             

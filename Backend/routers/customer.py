@@ -75,17 +75,19 @@ def get_cart(user = Depends(check_customer)):
         cursor.execute(sql, (cust_id,))
         items = cursor.fetchall()
         
-        # Calculate totals with 5% platform commission
+        # Calculate totals with 18% GST and 5% platform commission
         base_total = sum([(float(i['price']) * i['quantity']) for i in items])
+        gst_total = round(base_total * 0.18, 2)
         commission_rate = 5.0  # 5% platform commission
         commission_total = round(base_total * commission_rate / 100, 2)
-        total = round(base_total + commission_total, 2)
+        total = round(base_total + gst_total + commission_total, 2)
         
         cursor.close()
         return {
             "status": "success", 
             "items": items, 
             "base_total": round(base_total, 2),
+            "gst_total": gst_total,
             "commission_total": commission_total,
             "total": total,
             "commission_rate": commission_rate
@@ -182,13 +184,14 @@ def checkout(data: CheckoutData, user = Depends(check_customer)):
             
         for item in cart_items:
             base_amount = float(item['price']) * item['quantity']
+            gst_amount = round(base_amount * 0.18, 2)
             commission_amount = round(base_amount * 0.05, 2)
-            total_amount = round(base_amount + commission_amount, 2)
+            total_amount = round(base_amount + gst_amount + commission_amount, 2)
             
             cursor.execute("""
-                INSERT INTO Orders (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending', %s, %s)
-            """, (cust_id, item['vendor_id'], item['item_type'], item['item_id'], item['quantity'], total_amount, base_amount, commission_amount, total_amount, f"{data.address}, {data.city}, {data.state}", data.payment_method))
+                INSERT INTO Orders (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending', %s, %s)
+            """, (cust_id, item['vendor_id'], item['item_type'], item['item_id'], item['quantity'], total_amount, base_amount, gst_amount, commission_amount, total_amount, f"{data.address}, {data.city}, {data.state}", data.payment_method))
             order_id = cursor.lastrowid
             
             txn_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -426,8 +429,9 @@ def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
         
         # Calculate initial estimated amount (standard price)
         base_amount = float(item['price']) * data.quantity
+        gst_amount = round(base_amount * 0.18, 2)
         commission_amount = round(base_amount * 0.05, 2)
-        total_amount = round(base_amount + commission_amount, 2)
+        total_amount = round(base_amount + gst_amount + commission_amount, 2)
         
         full_address = f"{data.address}, {data.city}, {data.state}"
         
@@ -439,12 +443,12 @@ def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
         cursor.execute("""
             INSERT INTO Orders (
                 customer_id, vendor_id, order_type, item_id, quantity, 
-                amount, base_amount, commission_amount, total_amount,
+                amount, base_amount, gst_amount, commission_amount, total_amount,
                 status, delivery_address, payment_method, 
                 is_bulk_request, customer_message
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'Bulk Requested', %s, 'Negotiable', 1, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Bulk Requested', %s, 'Negotiable', 1, %s)
         """, (cust_id, item['vendor_id'], item_type, data.item_id, data.quantity, 
-              total_amount, base_amount, commission_amount, total_amount, full_address, data.message))
+              total_amount, base_amount, gst_amount, commission_amount, total_amount, full_address, data.message))
         
         order_id = cursor.lastrowid
         

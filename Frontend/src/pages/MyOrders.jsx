@@ -19,11 +19,7 @@ function MyOrders() {
   useEffect(() => {
     fetchOrders();
     
-    // Load Razorpay script
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
+
   }, []);
 
   const handlePayNow = async (order) => {
@@ -144,7 +140,7 @@ function MyOrders() {
     );
   }
 
-  const handleDownloadInvoice = async (orderId) => {
+  const handleDownloadSummary = async (orderId) => {
     try {
       const response = await fetch(`/api/invoice/download/${orderId}`, { credentials: 'include' });
       
@@ -162,7 +158,7 @@ function MyOrders() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Invoice_ConEco_${orderId}.pdf`;
+      a.download = `OrderSummary_ConEco_${orderId}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -245,19 +241,9 @@ function MyOrders() {
                     {o.status}
                   </span>
                   
-                  {o.payment_method === 'Pay Later' && o.payment_status !== 'Completed' && o.status === 'Delivered' && (
-                    <button 
-                      onClick={() => handlePayNow(o)}
-                      className="primary-button"
-                      style={{ padding: '6px 15px', fontSize: '0.85rem' }}
-                    >
-                      Pay Now (Card/UPI)
-                    </button>
-                  )}
-
                   {(o.status === 'Delivered' || o.status === 'Completed') && (
                     <button 
-                      onClick={() => handleDownloadInvoice(o.order_id)}
+                      onClick={() => handleDownloadSummary(o.order_id)}
                       className="btn"
                       style={{ 
                         padding: '6px 15px', 
@@ -268,7 +254,7 @@ function MyOrders() {
                         cursor: 'pointer'
                       }}
                     >
-                      📄 Download Invoice
+                      📋 Download Order Summary
                     </button>
                   )}
 

@@ -5,7 +5,7 @@ function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const handleDownloadInvoice = async (orderId) => {
+  const handleDownloadSummary = async (orderId) => {
     try {
       const response = await fetch(`/api/invoice/download/${orderId}`, { credentials: 'include' });
       
@@ -23,7 +23,7 @@ function AdminOrders() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Invoice_ConEco_${orderId}.pdf`;
+      a.download = `OrderSummary_ConEco_${orderId}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -132,8 +132,8 @@ function AdminOrders() {
                     <td style={{ padding: '15px' }}>
                       {(order.status === 'Delivered' || order.status === 'Completed') && (
                         <button 
-                          onClick={() => handleDownloadInvoice(order.order_id)}
-                          title="Download Invoice"
+                          onClick={() => handleDownloadSummary(order.order_id)}
+                          title="Download Order Summary"
                           style={{ 
                             color: 'var(--primary-color)', 
                             cursor: 'pointer', 
@@ -144,7 +144,7 @@ function AdminOrders() {
                             border: '1px solid var(--primary-color)'
                           }}
                         >
-                          📄 Invoice
+                          📋 Summary
                         </button>
                       )}
                     </td>
