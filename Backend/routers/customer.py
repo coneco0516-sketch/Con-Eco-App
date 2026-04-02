@@ -431,15 +431,29 @@ def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
         
         full_address = f"{data.address}, {data.city}, {data.state}"
         
+        item_type = data.item_type
+        if item_type.lower().endswith('s'):
+            item_type = item_type[:-1]
+        item_type = item_type.capitalize()
+
         cursor.execute("""
             INSERT INTO Orders (
                 customer_id, vendor_id, order_type, item_id, quantity, 
-                amount, status, delivery_address, payment_method, 
+                amount, base_amount, commission_amount, total_amount,
+                status, delivery_address, payment_method, 
                 is_bulk_request, customer_message
-            ) VALUES (%s, %s, %s, %s, %s, %s, 'Bulk Requested', %s, 'Negotiable', 1, %s)
-        """, (cust_id, item['vendor_id'], data.item_type.capitalize(), data.item_id, data.quantity, total_amount, full_address, data.message))
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'Bulk Requested', %s, 'Negotiable', 1, %s)
+        """, (cust_id, item['vendor_id'], item_type, data.item_id, data.quantity, 
+              total_amount, base_amount, commission_amount, total_amount, full_address, data.message))
         
         order_id = cursor.lastrowid
+        
+        # Track commission for financial reporting
+        cursor.execute(
+            """INSERT INTO commissions (order_id, vendor_id, commission_amount, commission_rate, status) 
+               VALUES (%s,%s,%s,%s,'Pending')""",
+            (order_id, item['vendor_id'], commission_amount, 5.0)
+        )
         
         # Create a placeholder payment
         txn_id = 'BULK-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -449,8 +463,12 @@ def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
         conn.commit()
         return {"status": "success", "message": "Bulk price request sent to vendor!"}
     except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        print(f"ERROR in request_bulk_price: {str(e)}")
+        traceback.print_exc()
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
         cursor.close()
         conn.close()
