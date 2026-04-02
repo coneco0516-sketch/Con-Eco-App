@@ -168,12 +168,12 @@ function VendorOrders() {
                 <div style={{ flex: '0 0 250px', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0 0 4px 0', fontSize: '1.4rem' }}>
-                      ₹{['COD', 'Pay Later (Cash)'].includes(o.payment_method) ? o.amount.toFixed(2) : o.base_amount.toFixed(2)}
+                      ₹{['COD', 'Pay Later (Cash)', 'Negotiable'].includes(o.payment_method) ? o.amount.toFixed(2) : o.base_amount.toFixed(2)}
                     </p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
-                      {['COD', 'Pay Later (Cash)'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
+                      {['COD', 'Pay Later (Cash)', 'Negotiable'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
                     </p>
-                    {!['COD', 'Pay Later (Cash)'].includes(o.payment_method) && (
+                    {!['COD', 'Pay Later (Cash)', 'Negotiable'].includes(o.payment_method) && (
                       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', margin: '4px 0 0 0' }}>
                         Gross: ₹{o.amount.toFixed(2)}
                       </p>
@@ -262,7 +262,7 @@ function VendorOrders() {
                       <option value="Cancelled">Cancelled</option>
                     </select>
                   )}
-                  {['COD', 'Pay Later (Cash)'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
+                  {['COD', 'Pay Later (Cash)', 'Negotiable'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
                     <button 
                       onClick={() => handlePaymentStatusChange(o.order_id, 'Completed')}
                       className="btn"

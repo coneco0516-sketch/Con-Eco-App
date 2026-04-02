@@ -344,9 +344,10 @@ def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor)):
                     vendor_message=%s,
                     amount=%s,
                     base_amount=%s,
-                    commission_amount=%s
+                    commission_amount=%s,
+                    total_amount=%s
                 WHERE order_id=%s AND vendor_id=%s
-            """, (data.negotiated_price, data.vendor_message, total_amount, base_amount, commission_amount, data.order_id, vendor_id))
+            """, (data.negotiated_price, data.vendor_message, total_amount, base_amount, commission_amount, total_amount, data.order_id, vendor_id))
             
             # Also update the payment record
             cursor.execute("UPDATE Payments SET amount=%s WHERE order_id=%s", (total_amount, data.order_id))
@@ -379,7 +380,7 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
         if not order:
             return {"status": "error", "message": "Order not found or no permission"}
             
-        if order['payment_method'] not in ['COD', 'Pay Later (Cash)']:
+        if order['payment_method'] not in ['COD', 'Pay Later (Cash)', 'Negotiable']:
             return {"status": "error", "message": "Only Cash/Offline orders can have their payment status updated manually."}
             
         cursor.execute("UPDATE Payments SET status=%s WHERE order_id=%s", (data.status, data.order_id))
@@ -504,7 +505,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status NOT IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+            WHERE o.vendor_id=%s AND p.status NOT IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)', 'Negotiable')
         """, (vendor_id,))
         pcod = cursor.fetchone()
         stats['pending_cod'] = float(pcod['s']) if pcod and pcod['s'] else 0
@@ -514,7 +515,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(o.base_amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)', 'Negotiable')
         """, (vendor_id,))
         cod_net_res = cursor.fetchone()
         stats['cod_net'] = float(cod_net_res['s']) if cod_net_res and cod_net_res['s'] else 0
@@ -552,7 +553,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             FROM Payments p
             JOIN Orders o ON p.order_id = o.order_id
             WHERE o.vendor_id=%s 
-              AND (o.payment_method IN ('COD', 'Pay Later (Cash)') OR COALESCE(o.vendor_credited, False) = True)
+              AND (o.payment_method IN ('COD', 'Pay Later (Cash)', 'Negotiable') OR COALESCE(o.vendor_credited, False) = True)
         """
         
         sql_payouts = """
