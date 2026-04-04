@@ -3,13 +3,13 @@ import hmac
 import hashlib
 import razorpay
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from database import get_db_connection
 from routers.auth import get_current_user_from_cookie
 
-from email_service import send_order_confirmation, get_notification_preferences
+from email_service import send_order_confirmation, send_vendor_notification_email, get_notification_preferences
 
 load_dotenv()
 
@@ -112,18 +112,20 @@ def check_customer(user=Depends(get_current_user_from_cookie)):
     return user
 
 
-def finalize_order(cust_id, delivery_address, payment_method, payment_status, txn_id):
+def finalize_order(cust_id, delivery_address, payment_method, payment_status, txn_id,
+                   background_tasks=None):
     """
     Common logic to move items from cart to orders and record payments.
+    Accepts optional BackgroundTasks for async email sending.
     """
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
-        # Pull the cart
         cursor.execute(
             """
             SELECT c.*, COALESCE(p.vendor_id, s.vendor_id) as vendor_id,
-                         COALESCE(p.price,     s.price)     as price
+                         COALESCE(p.price,     s.price)     as price,
+                         COALESCE(p.name,      s.name)      as item_name
             FROM Cart c
             LEFT JOIN Products p ON c.item_type='Product' AND c.item_id=p.product_id
             LEFT JOIN Services s ON c.item_type='Service' AND c.item_id=s.service_id
@@ -137,64 +139,61 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             return False, "Cart is empty"
 
         for item in cart_items:
-            # Calculate pricing with 18% GST and 3% platform commission
             base_amount = float(item["price"]) * item["quantity"]
             gst_amount = round(base_amount * 0.18, 2)
-            commission_rate = 3.0  # 3% platform commission
+            commission_rate = 3.0
             commission_amount = round(base_amount * commission_rate / 100, 2)
             total_amount = round(base_amount + gst_amount + commission_amount, 2)
             
-            # Insert order with commission breakdown, delivery address and payment method
             order_status = 'Pending' if payment_method == 'COD' else 'Processing'
 
             cursor.execute(
                 """INSERT INTO Orders 
                    (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"], 
-                 total_amount, base_amount, gst_amount, commission_amount, total_amount, order_status, delivery_address, payment_method)
+                (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"],
+                 total_amount, base_amount, gst_amount, commission_amount, total_amount,
+                 order_status, delivery_address, payment_method)
             )
             order_db_id = cursor.lastrowid
             
-            # Record payment with total amount
             cursor.execute(
                 "INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,%s)",
                 (txn_id, order_db_id, total_amount, payment_status)
             )
-            
-            # Track commission for financial reporting
             cursor.execute(
                 """INSERT INTO commissions (order_id, vendor_id, commission_amount, commission_rate, status) 
                    VALUES (%s,%s,%s,%s,'Pending')""",
                 (order_db_id, item["vendor_id"], commission_amount, commission_rate)
             )
 
-        # Clear the cart
         cursor.execute("DELETE FROM Cart WHERE customer_id=%s", (cust_id,))
-        
-        # ── SEND ORDER CONFIRMATION EMAIL ─────────────────────────────────────
+        conn.commit()
+
+        # ── SEND EMAILS (non-blocking via BackgroundTasks if available) ──
         try:
             cursor.execute("SELECT name, email FROM Users WHERE user_id=%s", (cust_id,))
             user_data = cursor.fetchone()
             if user_data:
-                # Prepare details for the email
-                # For simplified email, we'll just send a summary of the transaction
-                order_summary = {
-                    "order_id": txn_id,
-                    "total_amount": "Total Calculated in DB",
-                    "status": "Confirmed",
-                    "date": datetime.now().strftime("%d %b %Y %H:%M")
-                }
-                
-                # Check preferences
                 prefs = get_notification_preferences(cust_id)
                 if prefs.get('order_alerts', True):
-                    send_order_confirmation(user_data['email'], user_data['name'], order_summary)
-                    print(f"DEBUG: Order confirmation sent to {user_data['email']}")
+                    order_summary = {
+                        "order_id": txn_id,
+                        "total_amount": sum(float(i["price"]) * i["quantity"] * 1.21 for i in cart_items),
+                        "status": "Confirmed",
+                        "customer_name": user_data['name'],
+                        "date": datetime.now().strftime("%d %b %Y %H:%M")
+                    }
+                    if background_tasks:
+                        background_tasks.add_task(
+                            send_order_confirmation,
+                            user_data['email'], user_data['name'], order_summary
+                        )
+                    else:
+                        send_order_confirmation(user_data['email'], user_data['name'], order_summary)
         except Exception as email_err:
-            print(f"ERROR: Could not send order confirmation: {email_err}")
+            print(f"[payment] Could not queue order confirmation: {email_err}")
 
-        conn.commit()
         cursor.close()
         return True, "Orders placed successfully"
     except Exception as e:
@@ -213,13 +212,10 @@ class VerifyPaymentRequest(BaseModel):
     payment_method:      str = "Card"
 
 @router.post("/verify")
-def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_customer)):
-    """
-    Called after Razorpay popup completes.
-    """
-    # Signature verification
-    body        = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
-    expected_sig= hmac.new(
+def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_customer),
+                            background_tasks: BackgroundTasks = None):
+    body         = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
+    expected_sig = hmac.new(
         RAZORPAY_KEY_SECRET.encode("utf-8"),
         body.encode("utf-8"),
         hashlib.sha256
@@ -228,25 +224,25 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
     if expected_sig != data.razorpay_signature:
         raise HTTPException(status_code=400, detail="Payment signature verification failed.")
 
-    # Get customer_id
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user["user_id"],))
     row = cursor.fetchone()
     cursor.close()
     conn.close()
-    
+
     if not row:
         raise HTTPException(status_code=404, detail="Customer not found")
-    
+
     success, message = finalize_order(
-        row["customer_id"], 
-        data.delivery_address, 
-        data.payment_method, 
-        'Completed', 
-        data.razorpay_payment_id
+        row["customer_id"],
+        data.delivery_address,
+        data.payment_method,
+        'Completed',
+        data.razorpay_payment_id,
+        background_tasks=background_tasks
     )
-    
+
     if success:
         return {"status": "success", "message": message}
     else:
@@ -259,10 +255,8 @@ class OfflineOrderRequest(BaseModel):
     payment_method:   str # 'COD'
 
 @router.post("/place_order_offline")
-def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer)):
-    """
-    Handles COD and Pay Later (Request Credit) orders.
-    """
+def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer),
+                        background_tasks: BackgroundTasks = None):
     if data.payment_method != 'COD':
         raise HTTPException(status_code=400, detail="Invalid offline payment method.")
 
@@ -272,23 +266,22 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer))
     row = cursor.fetchone()
     cursor.close()
     conn.close()
-    
+
     if not row:
         raise HTTPException(status_code=404, detail="Customer not found")
 
+    import random, string
+    txn_id = f"COD-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
 
-    import random
-    import string
-    txn_id = f"{data.payment_method.upper().replace(' ', '_')}-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-    
     success, message = finalize_order(
-        row["customer_id"], 
-        data.delivery_address, 
-        data.payment_method, 
-        'Pending', 
-        txn_id
+        row["customer_id"],
+        data.delivery_address,
+        data.payment_method,
+        'Pending',
+        txn_id,
+        background_tasks=background_tasks
     )
-    
+
     if success:
         return {"status": "success", "message": message}
     else:

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response, Request
+from fastapi import APIRouter, HTTPException, Response, Request, BackgroundTasks
 from pydantic import BaseModel
 import jwt
 from datetime import datetime, timedelta
@@ -11,7 +11,8 @@ from email_service import (
     send_email_verification,
     send_profile_update_notification,
     save_notification_preference,
-    get_notification_preferences
+    get_notification_preferences,
+    send_email_background
 )
 
 def hash_password(password: str) -> str:
@@ -67,7 +68,8 @@ class LoginRequest(BaseModel):
     password: str
 
 @router.post("/login")
-def login(request: LoginRequest, response: Response, http_request: Request):
+def login(request: LoginRequest, response: Response, http_request: Request,
+          background_tasks: BackgroundTasks):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -76,27 +78,24 @@ def login(request: LoginRequest, response: Response, http_request: Request):
         user = cursor.fetchone()
         cursor.close()
         
-        # Verify the raw login password string against the stored bcrypt hash:
         if not user or not verify_password(request.password, user['password_hash']):
             return {"status": "error", "message": "Invalid credentials or User not found."}
         
-        # Check if email is verified (if email_verified column exists)
         try:
             if hasattr(user, 'email_verified') or 'email_verified' in user:
                 if user.get('email_verified') == False:
                     return {
-                        "status": "error", 
+                        "status": "error",
                         "message": "Please verify your email before logging in.",
                         "pending_verification": True,
                         "email": user['email']
                     }
         except:
-            pass  # If column doesn't exist, skip check
+            pass
             
         token = create_access_token({"user_id": user['user_id'], "role": user['role']})
         response.set_cookie(key="session_token", value=token, httponly=True, samesite="Lax")
         
-        # Record login activity
         cursor = conn.cursor()
         ip_address = http_request.client.host if http_request.client else "unknown"
         user_agent = http_request.headers.get("user-agent", "")
@@ -110,23 +109,20 @@ def login(request: LoginRequest, response: Response, http_request: Request):
         except Exception as e:
             print(f"Error recording login activity: {str(e)}")
         
-        # Send login notification email if preferences allow
+        # Send login notification via BackgroundTask (non-blocking)
         try:
             prefs = get_notification_preferences(user['user_id'])
             if prefs.get('login_alerts', True):
-                send_login_notification(
-                    user['email'],
-                    user['role'].lower(),
-                    user['name'],
+                background_tasks.add_task(
+                    send_login_notification,
+                    user['email'], user['role'].lower(), user['name'],
                     ip_address=ip_address,
                     browser_info=user_agent[:100] if user_agent else None
                 )
         except Exception as e:
-            print(f"Error sending login notification: {str(e)}")
+            print(f"Error queuing login notification: {str(e)}")
         
         cursor.close()
-        
-        # The token is securely sent via the HttpOnly cookie. We do not expose it to JavaScript.
         return {"status": "success", "role": user['role']}
     finally:
         conn.close()
@@ -144,7 +140,7 @@ class RegisterRequest(BaseModel):
     state: Optional[str] = None
 
 @router.post("/register")
-def register(request: RegisterRequest):
+def register(request: RegisterRequest, background_tasks: BackgroundTasks):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -154,31 +150,26 @@ def register(request: RegisterRequest):
             cursor.close()
             return {"status": "error", "message": "Email already exists"}
             
-        # The database columns are name, email, phone, password_hash, role
         try:
-            # Securely hash the password before saving it to the database:
             hashed_password = hash_password(request.password)
-            
-            # Insert user without email verification fields initially
             cursor.execute("""INSERT INTO Users (name, email, phone, password_hash, role) 
-                           VALUES (%s, %s, %s, %s, %s)""", 
+                           VALUES (%s, %s, %s, %s, %s)""",
                            (request.full_name, request.email, request.phone_number, hashed_password, request.role))
             user_id = cursor.lastrowid
             
             if request.role == 'Customer':
-                cursor.execute("INSERT INTO Customers (customer_id, city, state) VALUES (%s, %s, %s)", 
+                cursor.execute("INSERT INTO Customers (customer_id, city, state) VALUES (%s, %s, %s)",
                                (user_id, request.city, request.state))
             elif request.role == 'Vendor':
-                cursor.execute("INSERT INTO Vendors (vendor_id, company_name, gst_number, address, city, state) VALUES (%s, %s, %s, %s, %s, %s)", 
+                cursor.execute("INSERT INTO Vendors (vendor_id, company_name, gst_number, address, city, state) VALUES (%s, %s, %s, %s, %s, %s)",
                                (user_id, request.company_name or request.full_name, request.gst_number, request.address, request.city, request.state))
             elif request.role == 'Admin':
-                cursor.execute("INSERT INTO Admins (admin_id, city, state, verification_status) VALUES (%s, %s, %s, 'Verified')", 
+                cursor.execute("INSERT INTO Admins (admin_id, city, state, verification_status) VALUES (%s, %s, %s, 'Verified')",
                                (user_id, request.city, request.state))
             
-            # Try to initialize notification preferences (if table exists)
             try:
                 cursor.execute("""
-                    INSERT INTO notification_preferences (user_id, user_type, login_alerts, password_change_alerts, 
+                    INSERT INTO notification_preferences (user_id, user_type, login_alerts, password_change_alerts,
                                                          profile_update_alerts, product_update_alerts, order_alerts, qc_status_alerts)
                     VALUES (%s, %s, TRUE, TRUE, TRUE, TRUE, TRUE, %s)
                 """, (user_id, request.role.lower(), request.role.lower() == 'vendor'))
@@ -186,26 +177,24 @@ def register(request: RegisterRequest):
                 print(f"Note: Could not initialize notification preferences: {str(e)}")
                 
             conn.commit()
-            cursor.close()
             
-            # Send email verification (if possible)
+            # Store verification token
+            verification_token = secrets.token_urlsafe(32)
             try:
-                verification_token = secrets.token_urlsafe(32)
-                # Try to update email verification fields if they exist
-                try:
-                    cursor = conn.cursor()
-                    cursor.execute("""
-                        UPDATE Users SET email_verification_token = %s, email_verification_sent_at = NOW(), email_verified = FALSE
-                        WHERE user_id = %s
-                    """, (verification_token, user_id))
-                    conn.commit()
-                except:
-                    # Fields don't exist yet, use the token without storing
-                    verification_token = verification_token
-                
-                send_email_verification(request.email, request.full_name, verification_token)
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE Users SET email_verification_token = %s, email_verification_sent_at = NOW(), email_verified = FALSE
+                    WHERE user_id = %s
+                """, (verification_token, user_id))
+                conn.commit()
             except Exception as e:
-                print(f"Error sending verification email: {str(e)}")
+                print(f"Could not store verification token: {e}")
+            
+            # Queue verification email as background task (non-blocking)
+            background_tasks.add_task(
+                send_email_verification,
+                request.email, request.full_name, verification_token
+            )
             
             return {"status": "success", "message": "Registration successful. Please check your email to verify your account."}
         except Exception as db_err:
