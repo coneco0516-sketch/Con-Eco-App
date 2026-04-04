@@ -39,7 +39,7 @@ function Checkout() {
 
   }, []);
 
-  const [paymentMethod, setPaymentMethod] = useState('UPI');
+  const [paymentMethod, setPaymentMethod] = useState('COD');
 
   const handlePayment = async () => {
     if (cart.length === 0) return;
@@ -344,11 +344,6 @@ function Checkout() {
                   >
                     <span style={{ fontSize: '1.5rem' }}>{opt.icon}</span>
                     <span style={{ color: opt.disabled ? '#e74c3c' : paymentMethod === opt.id ? 'white' : 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>{opt.label}</span>
-                    {opt.disabled && (
-                      <span style={{ fontSize: '0.7rem', color: '#e74c3c' }}>
-                        {creditInfo?.reason || 'Not available'}
-                      </span>
-                    )}
                   </div>
                 ))}
               </div>
@@ -364,8 +359,7 @@ function Checkout() {
             >
               {paying ? 'Processing...' : (
                 paymentMethod === 'COD' ? 'Place Order (COD)' :
-                  paymentMethod.startsWith('Pay Later') ? 'Request Credit' :
-                    `Pay ₹${total.toFixed(2)} via Razorpay`
+                  `Pay ₹${total.toFixed(2)} via Razorpay`
               )}
             </button>
 
