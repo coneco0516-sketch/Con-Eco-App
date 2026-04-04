@@ -135,7 +135,6 @@ function Register() {
             <option value="">Select a role</option>
             <option value="customer">Customer</option>
             <option value="vendor">Vendor</option>
-            <option value="admin">Admin</option>
           </select>
         </div>
 
@@ -161,17 +160,6 @@ function Register() {
         {formData.role === 'customer' && (
           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
             <h3 style={{ marginTop: 0, marginBottom: '1rem', color: 'var(--primary-color)' }}>Customer Details</h3>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <div style={{ flex: 1 }}><label className="input-label">City</label><input type="text" name="customerCity" onChange={handleChange} required className="input-field" /></div>
-              <div style={{ flex: 1 }}><label className="input-label">State</label><input type="text" name="customerState" onChange={handleChange} required className="input-field" /></div>
-            </div>
-          </div>
-        )}
-
-        {/* ADMIN SECTION */}
-        {formData.role === 'admin' && (
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '1rem', color: 'var(--primary-color)' }}>Admin Details</h3>
             <div style={{ display: 'flex', gap: '1rem' }}>
               <div style={{ flex: 1 }}><label className="input-label">City</label><input type="text" name="customerCity" onChange={handleChange} required className="input-field" /></div>
               <div style={{ flex: 1 }}><label className="input-label">State</label><input type="text" name="customerState" onChange={handleChange} required className="input-field" /></div>
