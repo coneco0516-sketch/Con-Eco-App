@@ -85,19 +85,29 @@ def send_email(to_email, subject, html_content, plain_text=None):
             msg.attach(MIMEText("<p>No content</p>", 'html'))
 
         # Create connection and send
-        with smtplib.SMTP(GMAIL_SMTP_SERVER, GMAIL_SMTP_PORT) as server:
-            server.set_debuglevel(0) # Set to 1 to see SMTP conversation
-            server.starttls() # Enable security
+        print(f"DEBUG SMTP: Connecting to {GMAIL_SMTP_SERVER}:{GMAIL_SMTP_PORT} for {to_email}...")
+        with smtplib.SMTP(GMAIL_SMTP_SERVER, GMAIL_SMTP_PORT, timeout=15) as server:
+            server.set_debuglevel(1)  # ENABLED: shows full SMTP conversation in Railway logs
+            server.starttls()
+            print(f"DEBUG SMTP: Logging in as {GMAIL_SMTP_USER}...")
             server.login(GMAIL_SMTP_USER, GMAIL_APP_PASSWORD)
+            print("DEBUG SMTP: Login OK, sending message...")
             server.send_message(msg)
-            
+
         print(f"SUCCESS: Gmail email sent to {to_email}")
         log_email_attempt(to_email, subject, "Success")
         return True
 
+    except smtplib.SMTPAuthenticationError as auth_err:
+        error_msg = f"AUTH FAILED: {str(auth_err)}"
+        print(f"CRITICAL: Gmail authentication failed for {GMAIL_SMTP_USER}. Check App Password. {error_msg}")
+        log_email_attempt(to_email, subject, "AuthError", error_msg)
+        return False
     except Exception as e:
+        import traceback
         error_msg = str(e)
-        print(f"Error sending Gmail email to {to_email}: {error_msg}")
+        print(f"SMTP ERROR sending to {to_email}: {error_msg}")
+        traceback.print_exc()
         log_email_attempt(to_email, subject, "Error", error_msg)
         return False
 
