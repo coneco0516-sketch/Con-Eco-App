@@ -1,18 +1,18 @@
 """
 ConEco Email Service - Production Ready
 ==========================================
-Async email service using fastapi-mail (SMTP-based).
-- Uses FastAPI BackgroundTasks for non-blocking sends
-- Supports Gmail App Password (MAIL_PASSWORD)
+- Primary:  Brevo HTTP REST API (HTTPS, works on Railway)
+- Fallback: Gmail SMTP (works locally)
 - Retry logic (3 attempts)
+- BackgroundTasks support (non-blocking)
 - DB logging of all attempts
-- Provider-agnostic: swap SMTP for API later without touching callers
 """
 
 import os
 import asyncio
 import smtplib
 import traceback
+import requests as http_requests
 from typing import Optional
 from datetime import datetime
 from email.mime.text import MIMEText
@@ -23,16 +23,19 @@ from database import get_db_connection
 load_dotenv()
 
 # ─── CONFIGURATION ────────────────────────────────────────────────────────────
-# Supports both new MAIL_* variables and legacy GMAIL_* variables
-MAIL_USERNAME   = os.environ.get("MAIL_USERNAME")  or os.environ.get("GMAIL_SMTP_USER", "")
-MAIL_PASSWORD   = os.environ.get("MAIL_PASSWORD")  or os.environ.get("GMAIL_APP_PASSWORD", "")
-MAIL_FROM       = os.environ.get("MAIL_FROM")      or os.environ.get("FROM_EMAIL", MAIL_USERNAME)
-MAIL_FROM_NAME  = os.environ.get("MAIL_FROM_NAME") or os.environ.get("FROM_NAME", "ConEco")
-MAIL_PORT       = int(os.environ.get("MAIL_PORT", "587"))
-MAIL_SERVER     = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+# Brevo (primary — HTTPS, works on Railway)
+BREVO_API_KEY  = os.environ.get("BREVO_API_KEY", "")
 
-# Backwards-compatibility aliases used by existing callers
-GMAIL_SMTP_USER   = MAIL_USERNAME
+# Gmail SMTP (fallback — works locally, blocked on Railway free tier)
+MAIL_USERNAME  = os.environ.get("MAIL_USERNAME")  or os.environ.get("GMAIL_SMTP_USER", "")
+MAIL_PASSWORD  = os.environ.get("MAIL_PASSWORD")  or os.environ.get("GMAIL_APP_PASSWORD", "")
+MAIL_FROM      = os.environ.get("MAIL_FROM")      or os.environ.get("FROM_EMAIL", MAIL_USERNAME)
+MAIL_FROM_NAME = os.environ.get("MAIL_FROM_NAME") or os.environ.get("FROM_NAME", "ConEco")
+MAIL_PORT      = int(os.environ.get("MAIL_PORT", "587"))
+MAIL_SERVER    = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+
+# Backwards-compatibility aliases
+GMAIL_SMTP_USER    = MAIL_USERNAME
 GMAIL_APP_PASSWORD = MAIL_PASSWORD
 FROM_EMAIL         = MAIL_FROM
 FROM_NAME          = MAIL_FROM_NAME
@@ -40,12 +43,14 @@ FROM_NAME          = MAIL_FROM_NAME
 APP_NAME = "ConEco"
 APP_URL  = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.app")
 
-EMAIL_CONFIGURED = bool(MAIL_USERNAME and MAIL_PASSWORD)
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
-if not EMAIL_CONFIGURED:
-    print("WARNING: Email credentials not configured. Emails will be skipped.")
+if BREVO_API_KEY:
+    print(f"INFO: Email → Brevo HTTP API (production mode)")
+elif MAIL_USERNAME and MAIL_PASSWORD:
+    print(f"INFO: Email → Gmail SMTP fallback ({MAIL_USERNAME})")
 else:
-    print(f"INFO: Email service ready → {MAIL_USERNAME} via {MAIL_SERVER}:{MAIL_PORT}")
+    print("WARNING: No email provider configured. Emails will be skipped.")
 
 
 # ─── DB LOGGING ───────────────────────────────────────────────────────────────
@@ -76,63 +81,93 @@ def log_email_attempt(to_email: str, subject: str, status: str, error: str = Non
         print(f"[email_log] Could not write log: {e}")
 
 
-# ─── CORE SEND (SYNC, WITH RETRY) ────────────────────────────────────────────
+# ─── CORE SEND (BREVO HTTP → GMAIL SMTP FALLBACK) ────────────────────────────
 def send_email(to_email: str, subject: str, html_content: str,
                plain_text: str = None, max_retries: int = 3) -> bool:
     """
-    Core email send function.
-    - Uses SMTP via smtplib (STARTTLS on port 587)
-    - Retries up to max_retries times on transient errors
-    - Logs every attempt to the DB
-    - Never raises — returns True on success, False on failure
+    Send email via:
+      1. Brevo HTTP REST API (if BREVO_API_KEY is set) → works on Railway
+      2. Gmail SMTP fallback (if MAIL_USERNAME/PASSWORD set) → works locally
+    Retries up to max_retries times. Logs every attempt to DB.
+    Never raises — returns True on success, False on failure.
     """
-    if not EMAIL_CONFIGURED:
-        print(f"[email] SKIP (not configured) → {to_email} | {subject}")
-        return False
-
-    # Validate recipient
+    # Validate
     if not to_email or "@" not in to_email:
         print(f"[email] INVALID recipient: {to_email}")
         return False
 
-    # Build MIME message
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"]    = f"{MAIL_FROM_NAME} <{MAIL_FROM}>"
-    msg["To"]      = to_email
-    msg["Reply-To"] = MAIL_FROM
+    # ── Try Brevo HTTP API first ──────────────────────────────────────────────
+    if BREVO_API_KEY:
+        for attempt in range(1, max_retries + 1):
+            try:
+                print(f"[email/brevo] Attempt {attempt} → {to_email}")
+                payload = {
+                    "sender": {"name": MAIL_FROM_NAME, "email": MAIL_FROM or MAIL_USERNAME},
+                    "to": [{"email": to_email}],
+                    "subject": subject,
+                    "htmlContent": html_content,
+                    "textContent": plain_text or "This email requires an HTML-compatible client."
+                }
+                headers = {
+                    "api-key": BREVO_API_KEY,
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                }
+                resp = http_requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=15)
 
-    msg.attach(MIMEText(plain_text or "This email requires an HTML-compatible client.", "plain"))
-    msg.attach(MIMEText(html_content, "html"))
+                if resp.status_code in (200, 201):
+                    print(f"[email/brevo] SUCCESS → {to_email}")
+                    log_email_attempt(to_email, subject, "Success")
+                    return True
+                else:
+                    error_msg = f"HTTP {resp.status_code}: {resp.text}"
+                    print(f"[email/brevo] Attempt {attempt} failed: {error_msg}")
+                    if attempt < max_retries:
+                        import time; time.sleep(2 ** attempt)
+                    else:
+                        log_email_attempt(to_email, subject, "Failed", error_msg)
+                        return False
 
-    last_error = None
-    for attempt in range(1, max_retries + 1):
-        try:
-            print(f"[email] Attempt {attempt}/{max_retries} → {to_email}")
-            with smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=15) as server:
-                server.starttls()
-                server.login(MAIL_USERNAME, MAIL_PASSWORD)
-                server.send_message(msg)
+            except Exception as e:
+                print(f"[email/brevo] Attempt {attempt} error: {e}")
+                if attempt >= max_retries:
+                    log_email_attempt(to_email, subject, "Failed", str(e))
+                    return False
 
-            print(f"[email] SUCCESS → {to_email}")
-            log_email_attempt(to_email, subject, "Success")
-            return True
+    # ── Fallback: Gmail SMTP ──────────────────────────────────────────────────
+    elif MAIL_USERNAME and MAIL_PASSWORD:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"]  = subject
+        msg["From"]     = f"{MAIL_FROM_NAME} <{MAIL_FROM}>"
+        msg["To"]       = to_email
+        msg["Reply-To"] = MAIL_FROM
+        msg.attach(MIMEText(plain_text or "This email requires an HTML-compatible client.", "plain"))
+        msg.attach(MIMEText(html_content, "html"))
 
-        except smtplib.SMTPAuthenticationError as auth_err:
-            # Auth errors will never succeed on retry — fail fast
-            error_msg = f"AUTH FAILED: {auth_err}"
-            print(f"[email] CRITICAL AUTH ERROR for {MAIL_USERNAME}: {error_msg}")
-            log_email_attempt(to_email, subject, "AuthError", error_msg)
-            return False
+        for attempt in range(1, max_retries + 1):
+            try:
+                print(f"[email/smtp] Attempt {attempt} → {to_email}")
+                with smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=15) as server:
+                    server.starttls()
+                    server.login(MAIL_USERNAME, MAIL_PASSWORD)
+                    server.send_message(msg)
+                print(f"[email/smtp] SUCCESS → {to_email}")
+                log_email_attempt(to_email, subject, "Success")
+                return True
+            except smtplib.SMTPAuthenticationError:
+                print(f"[email/smtp] AUTH FAILED for {MAIL_USERNAME}")
+                log_email_attempt(to_email, subject, "AuthError", "SMTP Auth Failed")
+                return False
+            except Exception as e:
+                print(f"[email/smtp] Attempt {attempt} error: {e}")
+                if attempt >= max_retries:
+                    log_email_attempt(to_email, subject, "Failed", str(e))
+                    return False
+                import time; time.sleep(2 ** attempt)
+    else:
+        print(f"[email] SKIP (no provider configured) → {to_email}")
+        return False
 
-        except Exception as e:
-            last_error = str(e)
-            print(f"[email] Attempt {attempt} failed: {last_error}")
-            if attempt < max_retries:
-                import time; time.sleep(2 ** attempt)  # exponential back-off
-
-    traceback.print_exc()
-    log_email_attempt(to_email, subject, "Failed", last_error)
     return False
 
 
