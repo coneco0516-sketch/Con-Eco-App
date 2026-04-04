@@ -5,7 +5,9 @@ NOTE: Uses Resend (https://resend.com) via HTTPS — works on Railway, excellent
 """
 
 import os
-import requests
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 from database import get_db_connection
 from dotenv import load_dotenv
@@ -38,61 +40,64 @@ def log_email_attempt(to_email, subject, status, error=None):
     except Exception as e:
         print(f"DEBUG: Could not log email attempt: {str(e)}")
 
-# --- Resend Configuration ---
-RESEND_API_KEY   = os.environ.get("RESEND_API_KEY", "")
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")  # kept for reference
-FROM_EMAIL       = "onboarding@resend.dev"   # verified Resend sender (free plan)
-REPLY_TO_EMAIL   = os.environ.get("FROM_EMAIL", "coneco0516@gmail.com")
-GMAIL_USER       = REPLY_TO_EMAIL
-GMAIL_PASSWORD   = os.environ.get("GMAIL_APP_PASSWORD", "")  # kept for reference
-APP_NAME  = "ConEco"
-APP_URL   = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.app")
+# --- Gmail SMTP Configuration ---
+GMAIL_SMTP_SERVER = "smtp.gmail.com"
+GMAIL_SMTP_PORT   = 587
+GMAIL_SMTP_USER   = os.environ.get("GMAIL_SMTP_USER", "coneco0516@gmail.com")
+GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "lbzezfzzcfbcncsr")
+FROM_EMAIL        = os.environ.get("FROM_EMAIL", GMAIL_SMTP_USER)
+FROM_NAME         = os.environ.get("FROM_NAME", "ConEco")
+REPLY_TO_EMAIL    = os.environ.get("REPLY_TO_EMAIL", GMAIL_SMTP_USER)
+APP_NAME          = FROM_NAME
+APP_URL           = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.app")
 
-if not RESEND_API_KEY:
-    print("CRITICAL WARNING: RESEND_API_KEY environment variable is missing!")
+if not GMAIL_APP_PASSWORD:
+    print("CRITICAL WARNING: GMAIL_APP_PASSWORD (App Password) is missing!")
 else:
-    print("INFO: Resend API Key is configured.")
+    print(f"INFO: Gmail SMTP service configured for user: {GMAIL_SMTP_USER}")
 
 def send_email(to_email, subject, html_content, plain_text=None):
     """
-    Send email using Resend API (HTTPS — works on Railway, excellent Gmail deliverability).
+    Send email using Gmail SMTP (SSL/TLS).
+    Requires a Google App Password if 2FA is enabled.
     """
-    if not RESEND_API_KEY:
-        error_msg = "RESEND_API_KEY is missing from environment variables."
+    if not GMAIL_APP_PASSWORD:
+        error_msg = "GMAIL_APP_PASSWORD is missing from environment variables."
         print(f"WARNING: {error_msg} Email to {to_email} not sent.")
         log_email_attempt(to_email, subject, "ConfigError", error_msg)
         return False
 
     try:
-        payload = {
-            "from":     f"{APP_NAME} <{FROM_EMAIL}>",
-            "to":       [to_email],
-            "reply_to": REPLY_TO_EMAIL,
-            "subject":  subject,
-            "html":     html_content or "<p>No content</p>",
-        }
+        # Create message container
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = f"{FROM_NAME} <{FROM_EMAIL}>"
+        msg['To'] = to_email
+        msg['Reply-To'] = REPLY_TO_EMAIL
+
+        # Add body to email
         if plain_text:
-            payload["text"] = plain_text
+            msg.attach(MIMEText(plain_text, 'plain'))
+        
+        if html_content:
+            msg.attach(MIMEText(html_content, 'html'))
+        else:
+            msg.attach(MIMEText("<p>No content</p>", 'html'))
 
-        response = requests.post(
-            "https://api.resend.com/emails",
-            headers={
-                "Authorization": f"Bearer {RESEND_API_KEY}",
-                "Content-Type":  "application/json",
-            },
-            json=payload,
-            timeout=15
-        )
-
-        success = response.status_code in [200, 201, 202]
-        print(f"Resend email to {to_email} — HTTP {response.status_code}: {response.text}")
-        log_email_attempt(to_email, subject, "Success" if success else "Failed",
-                          f"HTTP {response.status_code}: {response.text}")
-        return success
+        # Create connection and send
+        with smtplib.SMTP(GMAIL_SMTP_SERVER, GMAIL_SMTP_PORT) as server:
+            server.set_debuglevel(0) # Set to 1 to see SMTP conversation
+            server.starttls() # Enable security
+            server.login(GMAIL_SMTP_USER, GMAIL_APP_PASSWORD)
+            server.send_message(msg)
+            
+        print(f"SUCCESS: Gmail email sent to {to_email}")
+        log_email_attempt(to_email, subject, "Success")
+        return True
 
     except Exception as e:
         error_msg = str(e)
-        print(f"Error sending email to {to_email}: {error_msg}")
+        print(f"Error sending Gmail email to {to_email}: {error_msg}")
         log_email_attempt(to_email, subject, "Error", error_msg)
         return False
 
@@ -592,77 +597,4 @@ def send_contact_reply(name, email, original_message, reply_message):
     
     return send_email(email, f"{APP_NAME} - Response to Your Enquiry", html_content)
 
-def send_pay_later_warning(email, name, order_id, stage_name, due_date, amount):
-    """
-    Send warning email for Pay Later deadlines
-    """
-    is_final = "Stage 3" in stage_name
-    header_color = "#e74c3c" if is_final else "#f39c12"
-    
-    html_content = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="color: {header_color};">{stage_name}: Payment Overdue Reminder</h2>
-                <p>Hello {name},</p>
-                
-                <p>This is a reminder regarding your payment for <strong>Order #{order_id}</strong>.</p>
-                
-                <div style="background-color: #fff9f0; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid {header_color};">
-                    <p><strong>Order ID:</strong> #{order_id}</p>
-                    <p><strong>Amount Due:</strong> ₹{amount}</p>
-                    <p><strong>DEADLINE:</strong> <span style="color: {header_color}; font-weight: bold;">{due_date}</span></p>
-                </div>
-                
-                {f'<p style="color: #e74c3c; font-weight: bold;">CRITICAL: This is your final day to pay. Failure to settle this today will result in a 3-month suspension from the Pay Later program and a significant credit score deduction.</p>' if is_final else '<p>Please settle this amount within the grace period to avoid further credit score deductions or account suspension.</p>'}
-                
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="{APP_URL}/customer/orders" style="background-color: {header_color}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Pay Now</a>
-                </div>
-                
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                    <p style="color: #888; font-size: 12px; margin: 0;">
-                        &copy; {datetime.now().year} {APP_NAME}. This is an automated billing notification.
-                    </p>
-                </div>
-            </div>
-        </body>
-    </html>
-    """
-    
-    return send_email(email, f"URGENT: {stage_name} Payment Reminder - Order #{order_id}", html_content)
-
-
-def send_pay_later_blocked_notification(email, name, order_id, blocked_until):
-    """
-    Notify user that they are blocked from Pay Later
-    """
-    html_content = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="color: #c0392b;">Pay Later Feature Suspended</h2>
-                <p>Hello {name},</p>
-                
-                <p>Because the payment for <strong>Order #{order_id}</strong> was not settled within the 41-day window, your access to the Pay Later feature has been suspended.</p>
-                
-                <div style="background-color: #fceae9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #c0392b;">
-                    <p><strong>Status:</strong> Suspended</p>
-                    <p><strong>Blocked Until:</strong> {blocked_until}</p>
-                </div>
-                
-                <p>Your credit score has also been affected. You can still make purchases using instant payment methods (UPI/Card).</p>
-                
-                <p>Once the suspension period ends, you may become eligible again based on your repayment track record.</p>
-                
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                    <p style="color: #888; font-size: 12px; margin: 0;">
-                        &copy; {datetime.now().year} {APP_NAME}. Internal Credit Risk Dept.
-                    </p>
-                </div>
-            </div>
-        </body>
-    </html>
-    """
-    
-    return send_email(email, "Account Update: Pay Later Suspension", html_content)
+    return send_email(email, f"{APP_NAME} - Response to Your Enquiry", html_content)

@@ -1,85 +1,67 @@
 #!/usr/bin/env python3
 """
-Email Configuration Diagnostic Tool
-Run this to test if SendGrid is properly configured
+Email Configuration Diagnostic Tool (Gmail SMTP Focus)
+Run this to test if Gmail SMTP is properly configured
 """
 
 import os
 import sys
+import smtplib
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 print("=" * 70)
-print("SENDGRID EMAIL CONFIGURATION DIAGNOSTIC")
+print("GMAIL SMTP EMAIL CONFIGURATION DIAGNOSTIC")
 print("=" * 70)
 
 # Check 1: Is .env file loaded?
-print("\n✓ STEP 1: Checking .env file...")
-sendgrid_key = os.environ.get("SENDGRID_API_KEY")
+print("\n✓ STEP 1: Checking .env file configuration...")
+gmail_user = os.environ.get("GMAIL_SMTP_USER", os.environ.get("FROM_EMAIL"))
+gmail_pass = os.environ.get("GMAIL_APP_PASSWORD")
 from_email = os.environ.get("FROM_EMAIL")
 app_url = os.environ.get("APP_URL")
 
-if sendgrid_key:
-    print(f"  ✓ SENDGRID_API_KEY found: {sendgrid_key[:10]}...{sendgrid_key[-5:]}")
+if gmail_user:
+    print(f"  ✓ GMAIL_SMTP_USER found: {gmail_user}")
 else:
-    print("  ✗ SENDGRID_API_KEY NOT FOUND in .env")
-    print("    → Add: SENDGRID_API_KEY=\"SG.your-key\" to Backend/.env")
+    print("  ✗ GMAIL_SMTP_USER NOT FOUND in .env")
+
+if gmail_pass:
+    print(f"  ✓ GMAIL_APP_PASSWORD found: {'*' * (len(gmail_pass)-4) + gmail_pass[-4:]}")
+else:
+    print("  ✗ GMAIL_APP_PASSWORD NOT FOUND in .env")
+    print("    → Add: GMAIL_APP_PASSWORD=\"your_app_password\" to Backend/.env")
 
 if from_email:
     print(f"  ✓ FROM_EMAIL: {from_email}")
 else:
-    print(f"  ✗ FROM_EMAIL NOT SET (using default: noreply@coneco.com)")
+    print("  ✗ FROM_EMAIL NOT SET")
 
 if app_url:
     print(f"  ✓ APP_URL: {app_url}")
 else:
-    print(f"  ✗ APP_URL NOT SET (using default: https://con-eco-app-production.up.railway.app)")
+    print("  ✗ APP_URL NOT SET")
 
-# Check 2: Is sendgrid package installed?
-print("\n✓ STEP 2: Checking SendGrid package...")
+# Check 2: Connection Test
+print("\n✓ STEP 2: Testing SMTP Connection to smtp.gmail.com:587...")
 try:
-    from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Mail, Email, To
-    print("  ✓ SendGrid package installed")
-    
-    # Check 3: Can we test the API key?
-    if sendgrid_key and sendgrid_key != "SG.test-key-placeholder":
-        print("\n✓ STEP 3: Testing SendGrid API connection...")
-        try:
-            sg = SendGridAPIClient(sendgrid_key)
-            print("  ✓ API key appears valid (no auth errors)")
-        except Exception as e:
-            print(f"  ⚠ API connection warning: {str(e)}")
-    else:
-        print("\n⚠ STEP 3: Skipping API test (placeholder key)")
-        print("  → Replace SG.test-key-placeholder with actual API key")
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
+        server.starttls()
+        print("  ✓ Connection to Gmail SMTP server succeeded (TLS enabled)")
         
-except ImportError as e:
-    print(f"  ✗ SendGrid package NOT installed: {str(e)}")
-    print("    → Run: pip install sendgrid")
-
-# Check 4: Database connection
-print("\n✓ STEP 4: Checking database configuration...")
-db_host = os.environ.get("DB_HOST")
-db_name = os.environ.get("DB_NAME")
-db_user = os.environ.get("DB_USER")
-
-if db_host:
-    print(f"  ✓ DB_HOST: {db_host}")
-else:
-    print("  ✗ DB_HOST not set")
-
-if db_name:
-    print(f"  ✓ DB_NAME: {db_name}")
-else:
-    print("  ✗ DB_NAME not set")
-
-if db_user:
-    print(f"  ✓ DB_USER: {db_user}")
-else:
-    print("  ✗ DB_USER not set")
+        if gmail_user and gmail_pass:
+            try:
+                server.login(gmail_user, gmail_pass)
+                print("  ✓ SMTP Authentication successful!")
+            except smtplib.SMTPAuthenticationError:
+                print("  ✗ Authentication failed. Please verify your App Password.")
+                print("    Note: If you have 2FA enabled, you MUST use an App Password.")
+            except Exception as e:
+                print(f"  ⚠ Login error: {str(e)}")
+except Exception as e:
+    print(f"  ✗ Connection failed: {str(e)}")
 
 # Summary
 print("\n" + "=" * 70)
@@ -87,34 +69,27 @@ print("DIAGNOSTIC SUMMARY")
 print("=" * 70)
 
 issues = []
-if not sendgrid_key or sendgrid_key == "SG.test-key-placeholder":
-    issues.append("SENDGRID_API_KEY not configured")
-    
-if sendgrid_key and not sendgrid_key.startswith("SG."):
-    issues.append("SENDGRID_API_KEY has invalid format (should start with SG.)")
+if not gmail_user:
+    issues.append("GMAIL_SMTP_USER not configured")
+if not gmail_pass:
+    issues.append("GMAIL_APP_PASSWORD not configured")
+if gmail_pass and len(gmail_pass) < 16:
+    issues.append("GMAIL_APP_PASSWORD seems too short (should be 16 characters for Google App Passwords)")
 
 if issues:
     print("\n⚠ ISSUES FOUND:")
     for i, issue in enumerate(issues, 1):
         print(f"  {i}. {issue}")
     print("\nFIX STEPS:")
-    print("  1. Go to https://sendgrid.com")
-    print("  2. Sign up for free account")
-    print("  3. Get API key from Settings → API Keys → Create API Key")
-    print("  4. Copy key and paste into Backend/.env:")
-    print('     SENDGRID_API_KEY="SG.your_actual_key_here"')
-    print("  5. Verify sender email in SendGrid dashboard")
-    print("  6. Restart backend: python Backend/main.py")
-    print("  7. Test registration at http://localhost:8000/register")
+    print("  1. Enable 2-Step Verification on your Google Account.")
+    print("  2. Go to https://myaccount.google.com/apppasswords")
+    print("  3. Create a new App Password (select 'Other' and name it 'ConEco').")
+    print("  4. Copy the 16-character code and paste into Backend/.env.")
+    print("  5. Run Backend/test_gmail.py to confirm.")
 else:
-    print("\n✓ EMAIL CONFIGURATION LOOKS GOOD!")
+    print("\n✓ GMAIL CONFIGURATION LOOKS GOOD!")
     print("\nYou can now:")
-    print("  1. Start backend: python Backend/main.py")
-    print("  2. Go to http://localhost:8000/register")
-    print("  3. Create account with test email")
-    print("  4. Check email for verification link")
-    print("  5. Click link to verify")
-    print("\nExpected backend log:")
-    print("  Email sent to test@example.com. Status: 202")
+    print("  1. Run Backend/test_gmail.py to send a real test email.")
+    print("  2. Restart backend: python Backend/main.py")
 
 print("\n" + "=" * 70)
