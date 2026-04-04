@@ -236,18 +236,12 @@ def vendor_orders(user = Depends(check_vendor)):
             
         sql = """
             SELECT o.order_id, u.name as customer_name, u.phone as customer_phone, o.order_type, o.amount, o.base_amount, o.status, 
-                   o.delivery_address, o.payment_method, o.pay_later_stage, pvt.status as payment_status,
-                   DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due_date, 
-                   DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
-                   DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
-                   COALESCE(cs.credit_score, 100) as customer_credit_score,
                    DATE_FORMAT(o.created_at, '%d %b %Y') as date,
                    o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price, o.quantity
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
             JOIN Users u ON c.customer_id = u.user_id
             JOIN Payments pvt ON o.order_id = pvt.order_id
-            LEFT JOIN credit_scores cs ON o.customer_id = cs.customer_id
             WHERE o.vendor_id=%s
             ORDER BY o.created_at DESC
         """
@@ -259,7 +253,6 @@ def vendor_orders(user = Depends(check_vendor)):
     finally:
         conn.close()
 
-from credit_system import set_pay_later_timeline
 
 class OrderStatusUpdate(BaseModel):
     order_id: int
@@ -278,21 +271,17 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
         cursor.execute("UPDATE Orders SET status=%s WHERE order_id=%s AND vendor_id=%s", (data.status, data.order_id, vendor_id))
         
         if data.status in ['Completed', 'Delivered']:
-            if data.status == 'Completed' and order and order['payment_method'] not in ['COD', 'Pay Later (Cash)']:
+            if data.status == 'Completed' and order and order['payment_method'] != 'COD':
                 # For non-cash orders, mark payment as Completed when order is Completed
                 cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
                 
-            if data.status == 'Delivered' and order and order['payment_method'].startswith('Pay Later') and order['delivered_at'] is None:
-                # Rule: Timeline triggers
-                conn.commit()
-                set_pay_later_timeline(data.order_id)
                 
         if data.status == 'Cancelled':
             cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
         elif data.status not in ['Completed', 'Delivered']:
             # If moved back to an active state (Pending, Processing, Shipped), 
             # and it's a cash order, allow the vendor to "Undo" a manual 'Paid' mark.
-            if order and order['payment_method'] in ['COD', 'Pay Later (Cash)']:
+            if order and order['payment_method'] == 'COD':
                 cursor.execute("UPDATE Payments SET status='Pending' WHERE order_id=%s", (data.order_id,))
             
             # Universal repair: If turning from Cancelled to anything else, reset payment status to Pending
@@ -382,14 +371,11 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
         if not order:
             return {"status": "error", "message": "Order not found or no permission"}
             
-        if order['payment_method'] not in ['COD', 'Pay Later (Cash)', 'Negotiable']:
+        if order['payment_method'] not in ['COD', 'Negotiable']:
             return {"status": "error", "message": "Only Cash/Offline orders can have their payment status updated manually."}
             
         cursor.execute("UPDATE Payments SET status=%s WHERE order_id=%s", (data.status, data.order_id))
         
-        # If it's a Pay Later order and marked as Completed/Paid, also update the order record
-        if data.status == 'Completed' and order['payment_method'] == 'Pay Later (Cash)':
-            cursor.execute("UPDATE Orders SET pay_later_stage='Completed' WHERE order_id=%s", (data.order_id,))
             
         conn.commit()
         return {"status": "success"}
@@ -487,7 +473,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method = 'COD'
         """, (vendor_id,))
         cod_res = cursor.fetchone()
         stats['cod_total'] = float(cod_res['s']) if cod_res and cod_res['s'] else 0
@@ -497,7 +483,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(o.base_amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id
-            WHERE o.vendor_id=%s AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)') AND COALESCE(o.vendor_credited, 0) = 0 AND p.status='Completed'
+            WHERE o.vendor_id=%s AND o.payment_method != 'COD' AND COALESCE(o.vendor_credited, 0) = 0 AND p.status='Completed'
         """, (vendor_id,))
         ponline = cursor.fetchone()
         stats['pending_online'] = float(ponline['s']) if ponline and ponline['s'] else 0
@@ -507,7 +493,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status NOT IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)', 'Negotiable')
+            WHERE o.vendor_id=%s AND p.status NOT IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable')
         """, (vendor_id,))
         pcod = cursor.fetchone()
         stats['pending_cod'] = float(pcod['s']) if pcod and pcod['s'] else 0
@@ -517,7 +503,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(o.base_amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)', 'Negotiable')
+            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable')
         """, (vendor_id,))
         cod_net_res = cursor.fetchone()
         stats['cod_net'] = float(cod_net_res['s']) if cod_net_res and cod_net_res['s'] else 0
@@ -555,7 +541,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             FROM Payments p
             JOIN Orders o ON p.order_id = o.order_id
             WHERE o.vendor_id=%s 
-              AND (o.payment_method IN ('COD', 'Pay Later (Cash)', 'Negotiable') OR COALESCE(o.vendor_credited, False) = True)
+              AND (o.payment_method IN ('COD', 'Negotiable') OR COALESCE(o.vendor_credited, False) = True)
         """
         
         sql_payouts = """

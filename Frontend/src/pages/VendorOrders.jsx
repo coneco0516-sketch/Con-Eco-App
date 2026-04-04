@@ -149,31 +149,18 @@ function VendorOrders() {
                     </p>
                   </div>
 
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-                    <span style={{
-                      fontSize: '0.75rem',
-                      padding: '3px 10px',
-                      borderRadius: '20px',
-                      background: o.customer_credit_score < 50 ? 'rgba(239, 68, 68, 0.1)' : o.customer_credit_score < 80 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(34, 197, 94, 0.1)',
-                      color: o.customer_credit_score < 50 ? '#ef4444' : o.customer_credit_score < 80 ? '#f59e0b' : '#22c55e',
-                      border: `1px solid ${o.customer_credit_score < 50 ? '#ef4444' : o.customer_credit_score < 80 ? '#f59e0b' : '#22c55e'}`,
-                      fontWeight: 'bold'
-                    }}>
-                      Customer Credit: {o.customer_credit_score}
-                    </span>
-                    {o.quantity && <span style={{ color: 'white', fontSize: '0.8rem' }}>| Qty: <strong>{o.quantity}</strong></span>}
-                  </div>
+
                 </div>
 
                 <div style={{ flex: '0 0 250px', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0 0 4px 0', fontSize: '1.4rem' }}>
-                      ₹{['COD', 'Pay Later (Cash)', 'Negotiable'].includes(o.payment_method) ? o.amount.toFixed(2) : o.base_amount.toFixed(2)}
+                      ₹{['COD', 'Negotiable'].includes(o.payment_method) ? o.amount.toFixed(2) : o.base_amount.toFixed(2)}
                     </p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
-                      {['COD', 'Pay Later (Cash)', 'Negotiable'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
+                      {['COD', 'Negotiable'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
                     </p>
-                    {!['COD', 'Pay Later (Cash)', 'Negotiable'].includes(o.payment_method) && (
+                    {!['COD', 'Negotiable'].includes(o.payment_method) && (
                       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', margin: '4px 0 0 0' }}>
                         Gross: ₹{o.amount.toFixed(2)}
                       </p>
@@ -222,24 +209,7 @@ function VendorOrders() {
                         </div>
                       )}
                     </div>
-                  ) : o.payment_method === 'Pay Later' && o.status === 'Pending' ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <p style={{ color: '#ffd700', fontSize: '0.8rem', margin: 0, fontWeight: 'bold' }}>CREDIT REQUEST</p>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                          onClick={() => handleStatusChange(o.order_id, 'Processing')}
-                          style={{ background: 'var(--primary-color)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', flex: 1 }}
-                        >
-                          Approve Credit
-                        </button>
-                        <button
-                          onClick={() => handleStatusChange(o.order_id, 'Cancelled')}
-                          style={{ background: 'var(--danger-color)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', flex: 1 }}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
+
                   ) : (
                     <select
                       value={o.status}
@@ -262,7 +232,7 @@ function VendorOrders() {
                       <option value="Cancelled">Cancelled</option>
                     </select>
                   )}
-                  {['COD', 'Pay Later (Cash)', 'Negotiable'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
+                  {['COD', 'Negotiable'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
                     <button 
                       onClick={() => handlePaymentStatusChange(o.order_id, 'Completed')}
                       className="btn"

@@ -74,7 +74,7 @@ function MyBookedServices() {
   };
 
   const handleCancelOrder = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel this booking? For pending online payments, a 100% refund will be initiated.")) return;
+    if (!window.confirm("Are you sure you want to cancel this booking? For online payments, a 100% refund will be initiated.")) return;
 
     try {
       const resp = await fetch('/api/customer/orders/cancel', {
@@ -95,47 +95,7 @@ function MyBookedServices() {
     }
   };
 
-  const getStageBadge = (order) => {
-    if (order.payment_method !== 'Pay Later' || order.payment_status === 'Completed' || (order.status !== 'Delivered' && order.status !== 'Completed')) return null;
-    
-    const stage = order.pay_later_stage;
-    const due = order.pay_later_due || order.pay_later_stage2_due || order.pay_later_stage3_due;
-    
-    let color = '#3fb950';
-    let bg = 'rgba(63, 185, 80, 0.1)';
-    let label = 'Stage 1: 30 Days';
 
-    if (stage === 'Stage2') {
-      color = '#f1c40f';
-      bg = 'rgba(241, 196, 15, 0.1)';
-      label = 'Stage 2: 10 Days Grace';
-    } else if (stage === 'Stage3') {
-      color = '#e74c3c';
-      bg = 'rgba(231, 76, 60, 0.1)';
-      label = 'Stage 3: FINAL DAY';
-    } else if (stage === 'Defaulted') {
-      color = '#e74c3c';
-      bg = 'rgba(231, 76, 60, 0.2)';
-      label = 'Payment Defaulted';
-    }
-
-    return (
-      <div style={{ 
-        marginTop: '10px', padding: '8px 12px', borderRadius: '6px', 
-        background: bg, border: `1px solid ${color}`, display: 'inline-flex',
-        flexDirection: 'column', gap: '4px'
-      }}>
-        <span style={{ color: color, fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
-          {label}
-        </span>
-        {due && stage !== 'Defaulted' && (
-          <span style={{ color: 'white', fontSize: '12px' }}>
-            Due by: <strong style={{color}}>{due}</strong>
-          </span>
-        )}
-      </div>
-    );
-  }
 
   const handleDownloadSummary = async (orderId) => {
     try {
@@ -201,7 +161,7 @@ function MyBookedServices() {
                       Payment: {s.payment_status}
                     </span>
                   </div>
-                  {getStageBadge(s)}
+
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
                   <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.2rem', margin: 0 }}>₹{s.amount}</p>

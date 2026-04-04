@@ -49,7 +49,7 @@ function AdminPayments() {
       <main style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Payments Overview</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-          Offline payment transactions (COD &amp; Pay Later) — Test phase only.
+          Offline payment transactions (COD) — Test phase only.
         </p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 

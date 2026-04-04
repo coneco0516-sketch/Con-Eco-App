@@ -89,21 +89,10 @@ function AdminDashboard() {
           <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
             <div style={{ flex: 1, minWidth: '300px' }}>
               <h3 style={{ color: '#ef4444', margin: '0 0 5px 0', fontSize: '1.1rem' }}>⚙️ System Maintenance</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>Manually trigger background tasks for credit scoring and billing.</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>Manually trigger background tasks for billing and invoicing.</p>
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                className="btn"
-                style={{ background: '#3b82f6', fontSize: '0.85rem' }}
-                onClick={async () => {
-                  if (!window.confirm("Run Pay Later Audit? This will advance stages for overdue orders.")) return;
-                  const res = await fetch('/api/admin/pay_later/check_overdue', { method: 'POST', credentials: 'include' });
-                  const data = await res.json();
-                  alert(data.message);
-                }}
-              >
-                Run Credit Audit
-              </button>
+
               <button
                 className="btn"
                 style={{ background: '#238636', fontSize: '0.85rem' }}

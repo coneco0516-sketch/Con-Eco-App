@@ -23,7 +23,7 @@ function Checkout() {
   const [error, setError] = useState('');
   const [address, setAddress] = useState('');
   const [ackDelivery, setAckDelivery] = useState(false);
-  const [creditInfo, setCreditInfo] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,13 +36,7 @@ function Checkout() {
       })
       .catch(() => setLoading(false));
 
-    // Fetch credit score
-    fetch('/api/payment/credit_score', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'success') setCreditInfo(data);
-      })
-      .catch(() => { });
+
   }, []);
 
   const [paymentMethod, setPaymentMethod] = useState('UPI');
@@ -59,16 +53,12 @@ function Checkout() {
       return;
     }
 
-    // Block if Pay Later is not eligible
-    if (paymentMethod.startsWith('Pay Later') && creditInfo && !creditInfo.eligible) {
-        setError(creditInfo.reason);
-        return;
-    }
+
 
     setPaying(true);
     setError('');
 
-    if (paymentMethod === 'COD' || paymentMethod.startsWith('Pay Later')) {
+    if (paymentMethod === 'COD') {
         try {
             const res = await fetch('/api/payment/place_order_offline', {
           method: 'POST',
@@ -206,11 +196,10 @@ function Checkout() {
     }
   };
 
-  const isPayLaterBlocked = creditInfo && !creditInfo.eligible;
+
 
   const paymentOptions = [
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
-    { id: 'Pay Later (Cash)', label: 'Pay Later (Cash)', icon: '📅', disabled: isPayLaterBlocked },
   ];
 
   return (
@@ -330,33 +319,7 @@ function Checkout() {
             <div style={{ marginBottom: '2rem' }}>
               <label style={{ color: 'white', display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>Select Payment Method</label>
 
-              {/* Credit Score Badge */}
-              {creditInfo && (
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: '0.75rem',
-                  marginBottom: '1rem', padding: '0.75rem 1rem',
-                  borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid var(--surface-border)'
-                }}>
-                  <span style={{ fontSize: '1.2rem' }}>📊</span>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Credit Score:</span>
-                  <span style={{
-                    fontWeight: 'bold', fontSize: '1.1rem',
-                    color: creditInfo.credit_score >= 80 ? '#2ecc71' : creditInfo.credit_score >= 50 ? '#f1c40f' : '#e74c3c'
-                  }}>
-                    {creditInfo.credit_score}/100
-                  </span>
-                  {!!creditInfo.blocked && (
-                    <span style={{
-                      fontSize: '0.75rem', color: '#e74c3c',
-                      background: 'rgba(231,76,60,0.15)', padding: '2px 8px',
-                      borderRadius: '4px', marginLeft: 'auto'
-                    }}>
-                      🚫 Blocked until {creditInfo.blocked_until}
-                    </span>
-                  )}
-                </div>
-              )}
+
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 {paymentOptions.map((opt) => (
@@ -408,7 +371,6 @@ function Checkout() {
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '1rem', textAlign: 'center' }}>
               {paymentMethod === 'COD' ? '💵 You will pay when the items are delivered.' :
-                paymentMethod.startsWith('Pay Later') ? '📅 Subject to vendor credit approval.' :
                   '🔒 Secured by Razorpay. Supports UPI, Cards, Net Banking & Wallets.'}
             </p>
           </div>

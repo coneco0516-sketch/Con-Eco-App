@@ -77,13 +77,6 @@ function AdminOrders() {
                     <td style={{ padding: '15px' }}>#{order.order_id}</td>
                     <td style={{ padding: '15px' }}>
                       <div style={{ color: 'white' }}>{order.customer_name}</div>
-                      <div style={{ 
-                        fontSize: '0.7rem', 
-                        color: order.customer_credit_score < 50 ? '#ef4444' : order.customer_credit_score < 80 ? '#f59e0b' : '#22c55e',
-                        fontWeight: 'bold'
-                      }}>
-                        Score: {order.customer_credit_score}
-                      </div>
                     </td>
                     <td style={{ padding: '15px', color: 'var(--primary-color)' }}>{order.vendor_name}</td>
                     <td style={{ padding: '15px' }}>{order.order_type}</td>

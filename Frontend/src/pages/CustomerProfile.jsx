@@ -84,32 +84,6 @@ function CustomerProfile() {
                 <p><strong>City:</strong> {profile.city || 'Not provided'}</p>
                 <p><strong>State:</strong> {profile.state || 'Not provided'}</p>
                 
-                <div style={{ 
-                  marginTop: '1rem', 
-                  padding: '1rem', 
-                  borderRadius: '10px', 
-                  background: 'rgba(255,255,255,0.05)', 
-                  border: '1px solid var(--surface-border)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <div>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Credit Standing</p>
-                    <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: profile.credit_score < 70 ? '#ef4444' : '#22c55e' }}>{profile.credit_score}</p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Pay Later Status</p>
-                    <p style={{ 
-                      margin: 0, 
-                      fontSize: '1.2rem', 
-                      fontWeight: 'bold', 
-                      color: profile.pay_later_blocked ? '#ef4444' : '#22c55e' 
-                    }}>
-                      {profile.pay_later_blocked ? 'Blocked' : 'Eligible'}
-                    </p>
-                  </div>
-                </div>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                   <button onClick={() => setEditMode(true)} className="btn">Edit Profile</button>
                   <button onClick={handleLogout} className="btn danger">Logout</button>

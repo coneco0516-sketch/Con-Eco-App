@@ -63,11 +63,9 @@ def get_customers(user = Depends(check_admin)):
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            "SELECT c.customer_id, u.name, u.email, u.phone, c.verification_status, "
-            "COALESCE(cs.credit_score, 100) as credit_score, cs.pay_later_blocked "
+            "SELECT c.customer_id, u.name, u.email, u.phone, c.verification_status "
             "FROM Customers c "
-            "JOIN Users u ON c.customer_id = u.user_id "
-            "LEFT JOIN credit_scores cs ON c.customer_id = cs.customer_id"
+            "JOIN Users u ON c.customer_id = u.user_id"
         )
         customers = cursor.fetchall()
         cursor.close()
@@ -181,11 +179,6 @@ def get_orders(user = Depends(check_admin)):
         sql = """
         SELECT o.order_id, u_cust.name as customer_name, v.company_name as vendor_name, 
                o.order_type, o.amount, o.status, o.payment_method, pvt.status as payment_status,
-               o.pay_later_stage, 
-               DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due_date, 
-               DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due, 
-               DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
-               COALESCE(cs.credit_score, 100) as customer_credit_score,
                DATE_FORMAT(o.created_at, '%d %M %Y') as date,
                ir.comment as review_message, ir.rating as review_rating
         FROM Orders o
@@ -193,7 +186,6 @@ def get_orders(user = Depends(check_admin)):
         JOIN Users u_cust ON c.customer_id = u_cust.user_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
         JOIN Payments pvt ON o.order_id = pvt.order_id
-        LEFT JOIN credit_scores cs ON o.customer_id = cs.customer_id
         LEFT JOIN ItemReviews ir ON o.customer_id = ir.customer_id 
              AND o.item_id = ir.item_id 
              AND o.order_type = ir.item_type
@@ -237,7 +229,7 @@ def get_payments(user = Depends(check_admin)):
             FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
             WHERE p.status='Completed' 
-              AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)') 
+              AND o.payment_method != 'COD' 
               AND COALESCE(o.vendor_credited, 0) = 0
         """)
         res = cursor.fetchone()
@@ -250,7 +242,7 @@ def get_payments(user = Depends(check_admin)):
             SELECT SUM(p.amount) as c 
             FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
-            WHERE p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Pay Later (Cash)')
+            WHERE p.status IN ('Completed', 'Paid') AND o.payment_method = 'COD'
         """)
         res = cursor.fetchone()
         stats['vendor_collected'] = float(res['c']) if res and res['c'] else 0
@@ -260,7 +252,7 @@ def get_payments(user = Depends(check_admin)):
             SELECT COUNT(*) as c 
             FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
-            WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Pay Later (Cash)')
+            WHERE p.status='Completed' AND o.payment_method != 'COD'
         """)
         res = cursor.fetchone()
         if res: stats['completed'] = res['c'] or 0
@@ -630,14 +622,5 @@ def run_invoice_generation(user = Depends(check_admin)):
     try:
         generate_weekly_invoices()
         return {"status": "success", "message": "Weekly invoices generated."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-@router.post("/pay_later/check_overdue")
-def run_pay_later_check(user = Depends(check_admin)):
-    """Manually trigger check for overdue pay later orders."""
-    from credit_system import check_overdue_orders
-    try:
-        actions = check_overdue_orders()
-        return {"status": "success", "message": f"Credit check complete. Actions taken: {len(actions)}", "actions": actions}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

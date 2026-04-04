@@ -217,9 +217,6 @@ def get_my_orders(user = Depends(check_customer)):
         SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, o.payment_method, pvt.status as payment_status, 
                DATE_FORMAT(o.created_at, '%d %b %Y') as date, p.name as item_name, v.company_name as vendor_name, 
                u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
-               o.pay_later_stage, DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due,
-               DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due,
-               DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due,
                o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price
         FROM Orders o
         JOIN Products p ON o.item_id = p.product_id
@@ -248,9 +245,6 @@ def get_my_services(user = Depends(check_customer)):
         SELECT o.order_id, o.order_type, o.amount, o.status, o.payment_method, pvt.status as payment_status,
                DATE_FORMAT(o.created_at, '%d %b %Y') as date, s.name as item_name, v.company_name as vendor_name, 
                u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
-               o.pay_later_stage, DATE_FORMAT(o.pay_later_due_date, '%d %b %Y') as pay_later_due,
-               DATE_FORMAT(o.pay_later_stage2_due, '%d %b %Y') as pay_later_stage2_due,
-               DATE_FORMAT(o.pay_later_stage3_due, '%d %b %Y') as pay_later_stage3_due
         FROM Orders o
         JOIN Services s ON o.item_id = s.service_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
@@ -307,7 +301,7 @@ def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
         cursor.execute("UPDATE Orders SET status='Cancelled' WHERE order_id=%s", (data.order_id,))
         
         # Handle payment status update
-        if order['payment_method'] in ['Card', 'UPI', 'Pay Later']:
+        if order['payment_method'] in ['Card', 'UPI']:
             cursor.execute("UPDATE Payments SET status='Refunded' WHERE order_id=%s", (data.order_id,))
             refund_msg = "Order cancelled successfully. 100% refund initiated."
         else:
