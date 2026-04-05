@@ -12,7 +12,8 @@ from email_service import (
     send_profile_update_notification,
     save_notification_preference,
     get_notification_preferences,
-    send_email_background
+    send_email_background,
+    send_password_reset_email
 )
 
 def hash_password(password: str) -> str:
@@ -66,6 +67,13 @@ def get_current_user_from_cookie(request: Request):
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 
 @router.post("/login")
 def login(request: LoginRequest, response: Response, http_request: Request,
@@ -528,5 +536,90 @@ def get_login_activity(request: Request):
         return {"status": "success", "activities": activities}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+
+# ==================== Password Reset Endpoints ====================
+
+@router.post("/forgot-password")
+def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+    """Generate password reset token and send email"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        # Ensure reset columns exist (best effort)
+        try:
+            cursor.execute("DESCRIBE Users")
+            cols = [c[0] for c in cursor.fetchall()]
+            if 'reset_password_token' not in cols:
+                cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_token VARCHAR(255) DEFAULT NULL")
+            if 'reset_password_sent_at' not in cols:
+                cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_sent_at TIMESTAMP DEFAULT NULL")
+            conn.commit()
+        except:
+            pass
+            
+        cursor.execute("SELECT user_id, name, email FROM Users WHERE email = %s", (request.email,))
+        user = cursor.fetchone()
+        
+        # Security: don't reveal if account exists
+        success_msg = {"status": "success", "message": "If the email is registered, you will receive a reset link shortly."}
+        
+        if not user:
+            return success_msg
+            
+        # Generate token
+        token = secrets.token_urlsafe(32)
+        cursor.execute("""
+            UPDATE Users SET reset_password_token = %s, reset_password_sent_at = NOW() 
+            WHERE user_id = %s
+        """, (token, user['user_id']))
+        
+        conn.commit()
+        cursor.close()
+        
+        # Queue email
+        try:
+            background_tasks.add_task(send_password_reset_email, user['email'], token)
+        except Exception as e:
+            print(f"Error queueing reset email: {e}")
+            
+        return success_msg
+    finally:
+        conn.close()
+
+
+@router.post("/reset-password")
+def reset_password(request: ResetPasswordRequest):
+    """Reset password using token"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT user_id, reset_password_sent_at FROM Users 
+            WHERE reset_password_token = %s
+        """, (request.token,))
+        
+        user = cursor.fetchone()
+        if not user:
+            return {"status": "error", "message": "Invalid or expired reset token"}
+            
+        # Valid for 1 hour
+        sent_at = user['reset_password_sent_at']
+        if sent_at and (datetime.utcnow() - sent_at).total_seconds() > 3600:
+            return {"status": "error", "message": "Reset token has expired"}
+            
+        hashed = hash_password(request.new_password)
+        cursor.execute("""
+            UPDATE Users SET password_hash = %s, reset_password_token = NULL, reset_password_sent_at = NULL 
+            WHERE user_id = %s
+        """, (hashed, user['user_id']))
+        
+        conn.commit()
+        cursor.close()
+        return {"status": "success", "message": "Password updated successfully. You can now login."}
     finally:
         conn.close()

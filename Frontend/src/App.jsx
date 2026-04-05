@@ -21,6 +21,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import VerifyEmailSent from './pages/VerifyEmailSent';
 import NotificationSettings from './pages/NotificationSettings';
+import ResetPassword from './pages/ResetPassword';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import CustomerDashboard from './pages/CustomerDashboard';
@@ -70,6 +71,7 @@ function AppContent() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/notifications" element={<NotificationSettings />} />
           
           {/* Admin Routes */}
