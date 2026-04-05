@@ -194,6 +194,13 @@ def checkout(data: CheckoutData, user = Depends(check_customer)):
             """, (cust_id, item['vendor_id'], item['item_type'], item['item_id'], item['quantity'], total_amount, base_amount, gst_amount, commission_amount, total_amount, f"{data.address}, {data.city}, {data.state}", data.payment_method))
             order_id = cursor.lastrowid
             
+            # Track commission for financial reporting
+            cursor.execute(
+                """INSERT INTO commissions (order_id, vendor_id, commission_amount, commission_rate, status) 
+                   VALUES (%s,%s,%s,%s,'Pending')""",
+                (order_id, item['vendor_id'], commission_amount, 3.0)
+            )
+            
             txn_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
             cursor.execute("INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s, %s, %s, 'Pending')",
                            (txn_id, order_id, total_amount))

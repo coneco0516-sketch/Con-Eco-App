@@ -8,10 +8,10 @@ def generate_weekly_invoices():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Define the period: Previous 7 days
-    end_date = datetime.now().date()
+    # Define the period: Previous 7 days up to now
+    end_date = datetime.now()
     start_date = end_date - timedelta(days=7)
-    due_date = end_date + timedelta(days=3) # Due in 3 days
+    due_date = end_date.date() + timedelta(days=3) # Due in 3 days
     
     # 1. Fetch all Vendors
     cursor.execute("SELECT vendor_id FROM Vendors")
@@ -27,7 +27,7 @@ def generate_weekly_invoices():
             FROM commissions c
             JOIN Orders o ON c.order_id = o.order_id
             WHERE c.vendor_id = %s 
-              AND o.payment_method = 'COD'
+              AND o.payment_method IN ('COD', 'Negotiable')
               AND c.status = 'Pending'
               AND c.created_at BETWEEN %s AND %s
         """, (vendor_id, start_date, end_date))

@@ -161,10 +161,11 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
                 "INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,%s)",
                 (txn_id, order_db_id, total_amount, payment_status)
             )
+            comm_status = 'Settled' if payment_status == 'Completed' else 'Pending'
             cursor.execute(
                 """INSERT INTO commissions (order_id, vendor_id, commission_amount, commission_rate, status) 
-                   VALUES (%s,%s,%s,%s,'Pending')""",
-                (order_db_id, item["vendor_id"], commission_amount, commission_rate)
+                   VALUES (%s,%s,%s,%s,%s)""",
+                (order_db_id, item["vendor_id"], commission_amount, commission_rate, comm_status)
             )
 
         cursor.execute("DELETE FROM Cart WHERE customer_id=%s", (cust_id,))
