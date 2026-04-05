@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from database import get_db_connection
 from routers.auth import get_current_user_from_cookie
 from pydantic import BaseModel
