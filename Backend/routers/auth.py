@@ -549,20 +549,27 @@ def forgot_password(request: ForgotPasswordRequest, background_tasks: Background
     try:
         cursor = conn.cursor(dictionary=True)
         
-        # Ensure reset columns exist
+        # Ensure reset columns exist (Migration)
+        migration_error = None
         try:
-            cursor.execute("DESCRIBE Users")
-            cols = [c[0] for c in cursor.fetchall()]
-            if 'reset_password_token' not in cols or 'reset_password_sent_at' not in cols:
-                print(f"[auth] Missing reset columns in Users table, attempting to add...")
-                if 'reset_password_token' not in cols:
-                    cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_token VARCHAR(255) DEFAULT NULL")
-                if 'reset_password_sent_at' not in cols:
-                    cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_sent_at DATETIME DEFAULT NULL")
+            # Try adding token column
+            try:
+                cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_token VARCHAR(255) DEFAULT NULL")
                 conn.commit()
-                print(f"[auth] Schema updated successfully.")
-        except Exception as e:
-            print(f"[auth] DB Schema Check Error: {e}")
+            except Exception as e:
+                if "Duplicate column name" not in str(e):
+                    print(f"[auth] Token column migration error: {e}")
+
+            # Try adding timestamp column
+            try:
+                cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_sent_at DATETIME DEFAULT NULL")
+                conn.commit()
+            except Exception as e:
+                if "Duplicate column name" not in str(e):
+                    print(f"[auth] Status column migration error: {e}")
+        except Exception as global_e:
+            migration_error = str(global_e)
+            print(f"[auth] Global Migration Error: {migration_error}")
             
         cursor.execute("SELECT user_id, name, email FROM Users WHERE email = %s", (request.email,))
         user = cursor.fetchone()
@@ -583,8 +590,10 @@ def forgot_password(request: ForgotPasswordRequest, background_tasks: Background
             conn.commit()
             cursor.close()
         except Exception as e:
-            print(f"[auth] Reset Password Update Error: {e}")
-            return {"status": "error", "message": "A database error occurred. Please contact the administrator."}
+            err_msg = str(e)
+            print(f"[auth] Reset Password Update Error: {err_msg}")
+            # If the migration failed, this is where it shows.
+            return {"status": "error", "message": f"Database error: {err_msg[:50]}..."}
         
         # Queue email
         try:
