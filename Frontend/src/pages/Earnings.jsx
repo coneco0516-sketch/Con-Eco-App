@@ -100,9 +100,10 @@ function Earnings() {
                       <tr>
                         <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Date</th>
                         <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Details</th>
-                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Gross</th>
-                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Commission</th>
-                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Net</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Gross (Collected)</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>GST (Product)</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Platform Commission</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Vendor Net</th>
                         <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Status</th>
                       </tr>
                     </thead>
@@ -111,7 +112,8 @@ function Earnings() {
                         <tr key={idx} style={{ borderBottom: idx !== earnings.breakdowns.length - 1 ? '1px solid var(--surface-border)' : 'none' }}>
                           <td style={{ padding: '12px', fontSize: '0.85rem' }}>{b.date}</td>
                           <td style={{ padding: '12px', color: 'white' }}>{b.description}</td>
-                          <td style={{ padding: '12px' }}>₹{b.gross}</td>
+                          <td style={{ padding: '12px', color: 'white', fontWeight: 'bold' }}>₹{b.gross}</td>
+                          <td style={{ padding: '12px', color: '#3498db' }}>₹{b.gst}</td>
                           <td style={{ padding: '12px', color: '#da3633' }}>-₹{b.commission}</td>
                           <td style={{ padding: '12px', color: b.net >= 0 ? '#3fb950' : '#da3633', fontWeight: 'bold' }}>
                             {b.net >= 0 ? '+' : ''}₹{b.net}

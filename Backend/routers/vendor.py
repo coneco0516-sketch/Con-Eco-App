@@ -550,7 +550,8 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT DATE_FORMAT(o.created_at, '%%d %%b %%Y') as date, 
                    CONCAT('Order #', o.order_id) as description, 
                    p.amount as gross,
-                   (o.amount - o.base_amount) as commission,
+                   o.gst_amount as gst,
+                   o.commission_amount as commission,
                    o.base_amount as net,
                    p.status,
                    o.created_at as raw_date
@@ -564,6 +565,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT DATE_FORMAT(created_at, '%%d %%b %%Y') as date,
                    'Bank Withdrawal' as description,
                    amount as gross,
+                   0 as gst,
                    0 as commission,
                    -amount as net,
                    status,
@@ -591,7 +593,8 @@ def vendor_earnings(user = Depends(check_vendor)):
                 'date': t['date'],
                 'description': t['description'],
                 'gross': float(t['gross'] or 0),
-                'commission': float(t['commission'] or 0),
+                'gst': float(t.get('gst') or 0),
+                'commission': float(t.get('commission') or 0),
                 'net': float(t['net'] or 0),
                 'status': t['status']
             })
