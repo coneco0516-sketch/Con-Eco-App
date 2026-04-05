@@ -549,17 +549,20 @@ def forgot_password(request: ForgotPasswordRequest, background_tasks: Background
     try:
         cursor = conn.cursor(dictionary=True)
         
-        # Ensure reset columns exist (best effort)
+        # Ensure reset columns exist
         try:
             cursor.execute("DESCRIBE Users")
             cols = [c[0] for c in cursor.fetchall()]
-            if 'reset_password_token' not in cols:
-                cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_token VARCHAR(255) DEFAULT NULL")
-            if 'reset_password_sent_at' not in cols:
-                cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_sent_at TIMESTAMP DEFAULT NULL")
-            conn.commit()
-        except:
-            pass
+            if 'reset_password_token' not in cols or 'reset_password_sent_at' not in cols:
+                print(f"[auth] Missing reset columns in Users table, attempting to add...")
+                if 'reset_password_token' not in cols:
+                    cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_token VARCHAR(255) DEFAULT NULL")
+                if 'reset_password_sent_at' not in cols:
+                    cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_sent_at DATETIME DEFAULT NULL")
+                conn.commit()
+                print(f"[auth] Schema updated successfully.")
+        except Exception as e:
+            print(f"[auth] DB Schema Check Error: {e}")
             
         cursor.execute("SELECT user_id, name, email FROM Users WHERE email = %s", (request.email,))
         user = cursor.fetchone()
@@ -572,13 +575,16 @@ def forgot_password(request: ForgotPasswordRequest, background_tasks: Background
             
         # Generate token
         token = secrets.token_urlsafe(32)
-        cursor.execute("""
-            UPDATE Users SET reset_password_token = %s, reset_password_sent_at = NOW() 
-            WHERE user_id = %s
-        """, (token, user['user_id']))
-        
-        conn.commit()
-        cursor.close()
+        try:
+            cursor.execute("""
+                UPDATE Users SET reset_password_token = %s, reset_password_sent_at = NOW() 
+                WHERE user_id = %s
+            """, (token, user['user_id']))
+            conn.commit()
+            cursor.close()
+        except Exception as e:
+            print(f"[auth] Reset Password Update Error: {e}")
+            return {"status": "error", "message": "A database error occurred. Please contact the administrator."}
         
         # Queue email
         try:

@@ -18,15 +18,25 @@ function ForgotPassword() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
+      
+      if (!resp.ok) {
+        const errorText = await resp.text();
+        console.error('Server error:', errorText);
+        setError(`Server error (${resp.status}). Please ensure backend is running.`);
+        setLoading(false);
+        return;
+      }
+
       const data = await resp.json();
       
       if (data.status === 'success') {
-        setMessage(data.message || 'If the email is verified, you will receive a password reset link shortly.');
+        setMessage(data.message || 'If the account exists, a reset link has been sent.');
       } else {
-        setError(data.message || 'Email not found or error occurred.');
+        setError(data.message || 'Error processing request. Please check the email.');
       }
     } catch (err) {
-      setError('Connection error. Please try again.');
+      console.error('Fetch error:', err);
+      setError('Connection error! Please ensure the backend is running on port 8000.');
     }
     setLoading(false);
   };
