@@ -173,6 +173,7 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
 
         # ── SEND EMAILS (non-blocking via BackgroundTasks if available) ──
         try:
+            # 1. Customer Confirmation
             cursor.execute("SELECT name, email FROM Users WHERE user_id=%s", (cust_id,))
             user_data = cursor.fetchone()
             if user_data:
@@ -180,20 +181,43 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
                 if prefs.get('order_alerts', True):
                     order_summary = {
                         "order_id": txn_id,
-                        "total_amount": sum(float(i["price"]) * i["quantity"] * 1.21 for i in cart_items),
+                        "total_amount": sum(float(i["price"]) * i["quantity"] for i in cart_items), # Simplified total
                         "status": "Confirmed",
                         "customer_name": user_data['name'],
                         "date": datetime.now().strftime("%d %b %Y %H:%M")
                     }
                     if background_tasks:
-                        background_tasks.add_task(
-                            send_order_confirmation,
-                            user_data['email'], user_data['name'], order_summary
-                        )
+                        background_tasks.add_task(send_order_confirmation, user_data['email'], user_data['name'], order_summary)
                     else:
                         send_order_confirmation(user_data['email'], user_data['name'], order_summary)
+
+            # 2. Vendor Notifications (One per vendor in the cart)
+            # Group items by vendor
+            from collections import defaultdict
+            vendor_groups = defaultdict(list)
+            for item in cart_items:
+                vendor_groups[item['vendor_id']].append(item)
+            
+            for v_id, v_items in vendor_groups.items():
+                cursor.execute("SELECT name, email FROM Users WHERE user_id=%s", (v_id,))
+                vendor_data = cursor.fetchone()
+                if vendor_data:
+                    # Notify vendor of this specific sub-order
+                    for vi in v_items:
+                        v_order_info = {
+                            "order_id": txn_id,
+                            "item_name": vi["name"],
+                            "quantity": vi["quantity"],
+                            "amount": vi["price"] * vi["quantity"],
+                            "vendor_name": vendor_data['name']
+                        }
+                        if background_tasks:
+                            background_tasks.add_task(send_vendor_notification_email, vendor_data['email'], v_order_info)
+                        else:
+                            send_vendor_notification_email(vendor_data['email'], v_order_info)
+
         except Exception as email_err:
-            print(f"[payment] Could not queue order confirmation: {email_err}")
+            print(f"[payment] Could not queue order notifications: {email_err}")
 
         cursor.close()
         return True, "Orders placed successfully"

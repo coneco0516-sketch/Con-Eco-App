@@ -275,7 +275,7 @@ class OrderStatusUpdate(BaseModel):
     status: str
 
 @router.post("/orders/update_status")
-def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
+def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor), background_tasks: BackgroundTasks = None):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -304,6 +304,26 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor)):
             cursor.execute("UPDATE Payments SET status='Pending' WHERE order_id=%s AND status IN ('Failed', 'Cancelled')", (data.order_id,))
             
         conn.commit()
+
+        # ── SEND STATUS UPDATE EMAIL (Non-blocking) ──
+        try:
+            # Re-fetch order row for customer info
+            cursor.execute("""
+                SELECT u.name, u.email 
+                FROM Orders o 
+                JOIN Users u ON o.customer_id = u.user_id 
+                WHERE o.order_id = %s
+            """, (data.order_id,))
+            cust_info = cursor.fetchone()
+            if cust_info:
+                from email_service import send_order_update
+                if background_tasks:
+                   background_tasks.add_task(send_order_update, cust_info['email'], cust_info['name'], data.order_id, data.status)
+                else:
+                   send_order_update(cust_info['email'], cust_info['name'], data.order_id, data.status)
+        except Exception as e:
+            print(f"[vendor/orders] Could not send status update email: {e}")
+
         cursor.close()
         return {"status": "success"}
     except Exception as e:
@@ -319,7 +339,7 @@ class BulkAction(BaseModel):
     vendor_message: Optional[str] = None
 
 @router.post("/orders/bulk_action")
-def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor)):
+def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor), background_tasks: BackgroundTasks = None):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -360,6 +380,21 @@ def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor)):
             cursor.execute("UPDATE Payments SET amount=%s WHERE order_id=%s", (total_amount, data.order_id))
             
         conn.commit()
+
+        # ── SEND NOTIFICATION (Non-blocking) ──
+        try:
+            cursor.execute("SELECT u.email, u.name FROM Orders o JOIN Users u ON o.customer_id = u.user_id WHERE o.order_id = %s", (data.order_id,))
+            cust = cursor.fetchone()
+            if cust:
+                from email_service import send_order_update
+                new_status = 'Pending' if data.action != 'Reject' else 'Cancelled'
+                if background_tasks:
+                   background_tasks.add_task(send_order_update, cust['email'], cust['name'], data.order_id, new_status)
+                else:
+                   send_order_update(cust['email'], cust['name'], data.order_id, new_status)
+        except Exception as e:
+            print(f"[vendor/bulk] Could not send notification: {e}")
+
         cursor.close()
         return {"status": "success"}
     except Exception as e:

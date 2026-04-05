@@ -114,7 +114,7 @@ class ContactForm(BaseModel):
     message: str
 
 @app.post("/api/contact")
-async def contact_us(form: ContactForm):
+async def contact_us(form: ContactForm, background_tasks: BackgroundTasks = None):
     # 1. Store in database
     try:
         conn = get_db_connection()
@@ -141,11 +141,14 @@ async def contact_us(form: ContactForm):
     except Exception as e:
         print(f"Error saving contact message to DB: {str(e)}")
 
-    # 2. Send to admin email
-    send_contact_form(form.name, form.email, form.message)
-
-    # 3. Send acknowledgment to user
-    send_contact_acknowledgment(form.name, form.email)
+    # 2. Send emails using background tasks (Non-blocking)
+    if background_tasks:
+        background_tasks.add_task(send_contact_form, form.name, form.email, form.message)
+        background_tasks.add_task(send_contact_acknowledgment, form.name, form.email)
+    else:
+        # Fallback if no background_tasks (though FastAPI usually always provides them if requested)
+        send_contact_form(form.name, form.email, form.message)
+        send_contact_acknowledgment(form.name, form.email)
 
     return {"status": "success", "message": "Your message has been sent. You will receive a confirmation email shortly."}
 
