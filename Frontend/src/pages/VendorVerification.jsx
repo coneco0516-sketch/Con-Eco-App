@@ -80,7 +80,7 @@ function VendorVerification() {
           {vendors.map(vendor => {
             const isPending = vendor.verification_status === 'Pending';
             const isEditing = editingVendor === vendor.vendor_id;
-            const qcScore = qcScores[vendor.vendor_id] || 0;
+            const qcScore = qcScores[vendor.vendor_id] ?? 0;
             
             return (
               <div key={vendor.vendor_id} className="vendor-card glass-panel" style={{ padding: '15px', width: '300px' }}>
@@ -106,7 +106,15 @@ function VendorVerification() {
                         min="0" 
                         max="100" 
                         value={qcScore}
-                        onChange={(e) => setQcScores({...qcScores, [vendor.vendor_id]: e.target.value})}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '') {
+                            setQcScores({...qcScores, [vendor.vendor_id]: ''});
+                          } else {
+                            const num = Math.min(100, Math.max(0, parseInt(val) || 0));
+                            setQcScores({...qcScores, [vendor.vendor_id]: num});
+                          }
+                        }}
                         style={{
                           marginLeft: '8px',
                           padding: '5px',

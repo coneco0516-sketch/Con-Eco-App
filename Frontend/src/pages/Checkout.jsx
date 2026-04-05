@@ -242,7 +242,9 @@ function Checkout() {
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '') {
-                          updateQuantity(item.cart_id, 0);
+                          setCart(prev => prev.map(i => 
+                            i.cart_id === item.cart_id ? { ...i, quantity: '' } : i
+                          ));
                         } else {
                           const parsed = parseInt(val);
                           if (!isNaN(parsed)) updateQuantity(item.cart_id, parsed);

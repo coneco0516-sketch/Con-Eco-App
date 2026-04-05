@@ -126,7 +126,11 @@ function Cart() {
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === '') {
-                            updateQuantity(item.cart_id, 0);
+                            // Don't call updateQuantity(..., 0) immediately, 
+                            // just update the local state to show an empty field
+                            setCartItems(prev => prev.map(i => 
+                              i.cart_id === item.cart_id ? { ...i, quantity: '' } : i
+                            ));
                           } else {
                             const parsed = parseInt(val);
                             if (!isNaN(parsed)) updateQuantity(item.cart_id, parsed);

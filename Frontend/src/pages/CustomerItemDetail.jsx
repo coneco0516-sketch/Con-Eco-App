@@ -259,7 +259,7 @@ function CustomerItemDetail() {
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === '') {
-                            setQuantity(0);
+                            setQuantity('');
                           } else {
                             const parsed = parseInt(val);
                             if (!isNaN(parsed)) setQuantity(parsed);
