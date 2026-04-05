@@ -248,13 +248,16 @@ def vendor_orders(user = Depends(check_vendor)):
             if st in stats: stats[st] = row['c']
             
         sql = """
-            SELECT o.order_id, u.name as customer_name, u.phone as customer_phone, o.order_type, o.amount, o.base_amount, o.status, 
+            SELECT o.order_id, u.name as customer_name, u.phone as customer_phone, o.order_type, 
+                   o.amount, o.base_amount, o.status, 
+                   o.payment_method, o.delivery_address, 
+                   pvt.status as payment_status,
                    DATE_FORMAT(o.created_at, '%d %b %Y') as date,
                    o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price, o.quantity
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
             JOIN Users u ON c.customer_id = u.user_id
-            JOIN Payments pvt ON o.order_id = pvt.order_id
+            LEFT JOIN Payments pvt ON o.order_id = pvt.order_id
             WHERE o.vendor_id=%s
             ORDER BY o.created_at DESC
         """
