@@ -48,14 +48,7 @@ function CustomerVerification() {
               <div key={cust.customer_id} className="customer-card glass-panel" style={{ padding: '15px', width: '250px' }}>
                 <h3 style={{ color: 'white', margin: '0 0 10px 0' }}>{cust.name}</h3>
                 <p><strong>Email:</strong> <span style={{ color: 'var(--text-primary)' }}>{cust.email}</span></p>
-                <p><strong>Credit Score:</strong> <span style={{ 
-                  color: cust.credit_score < 50 ? '#ef4444' : cust.credit_score < 80 ? '#f59e0b' : '#22c55e',
-                  fontWeight: 'bold'
-                }}>{cust.credit_score}</span></p>
                 <p><strong>Status:</strong> <span style={{ color: isPending ? '#d4a20b' : '#238636' }}>{cust.verification_status}</span></p>
-                {cust.pay_later_blocked && (
-                  <p style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold', margin: '5px 0' }}>⚠️ PAY LATER BLOCKED</p>
-                )}
                 <div className="actions" style={{ marginTop: '15px' }}>
                   {isPending ? (
                     <button className="btn" style={{ background: '#2ea043' }} onClick={() => updateStatus(cust.customer_id, 'Verified')}>Verify</button>
