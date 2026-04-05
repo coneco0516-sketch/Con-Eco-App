@@ -12,7 +12,20 @@ router = APIRouter()
 
 def check_vendor(user = Depends(get_current_user_from_cookie)):
     if user['role'] != 'Vendor':
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail=f"Access denied: {user['role']} role cannot manage catalogue.")
+    
+    # Optional: Check verification status if you want to restrict unverified vendors
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT verification_status FROM Vendors WHERE vendor_id = %s", (user['user_id'],))
+        vendor = cursor.fetchone()
+        if vendor and vendor['verification_status'] == 'Blocked':
+            raise HTTPException(status_code=403, detail="Forbidden: Your account has been blocked.")
+        # If Pending, we allow them to add items so admin can review them
+    finally:
+        conn.close()
+        
     return user
 
 def auto_categorize(name, description, item_type):
