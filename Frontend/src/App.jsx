@@ -55,6 +55,21 @@ function AppContent() {
 
   console.log("AppContent: isLoggedIn =", isLoggedIn);
 
+  // Role-based route protection
+  const ProtectedRoute = ({ children, allowedRoles }) => {
+    const isLoggedIn = !!localStorage.getItem('is_logged_in');
+    const userRole = localStorage.getItem('user_role');
+    
+    if (!isLoggedIn) return <Navigate to="/login" replace />;
+    if (allowedRoles && !allowedRoles.includes(userRole)) {
+      // Redirect to correct dashboard based on actual role
+      if (userRole === 'Admin') return <Navigate to="/admin" replace />;
+      if (userRole === 'Vendor') return <Navigate to="/vendor" replace />;
+      return <Navigate to="/customer" replace />;
+    }
+    return children;
+  };
+
   return (
     <div className="app-container">
       <Navbar />
@@ -75,40 +90,40 @@ function AppContent() {
           <Route path="/notifications" element={<NotificationSettings />} />
           
           {/* Admin Routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/vendors" element={<VendorVerification />} />
-          <Route path="/admin/customers" element={<CustomerVerification />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/payments" element={<AdminPayments />} />
-          <Route path="/admin/commissions" element={<AdminCommissions />} />
-          <Route path="/admin/analytics" element={<AdminAnalytics />} />
-          <Route path="/admin/profile" element={<AdminProfile />} />
-          <Route path="/admin/settings" element={<PlatformSettings />} />
-          <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/vendors" element={<ProtectedRoute allowedRoles={['Admin']}><VendorVerification /></ProtectedRoute>} />
+          <Route path="/admin/customers" element={<ProtectedRoute allowedRoles={['Admin']}><CustomerVerification /></ProtectedRoute>} />
+          <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={['Admin']}><AdminOrders /></ProtectedRoute>} />
+          <Route path="/admin/payments" element={<ProtectedRoute allowedRoles={['Admin']}><AdminPayments /></ProtectedRoute>} />
+          <Route path="/admin/commissions" element={<ProtectedRoute allowedRoles={['Admin']}><AdminCommissions /></ProtectedRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['Admin']}><AdminAnalytics /></ProtectedRoute>} />
+          <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={['Admin']}><AdminProfile /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['Admin']}><PlatformSettings /></ProtectedRoute>} />
+          <Route path="/admin/contact-messages" element={<ProtectedRoute allowedRoles={['Admin']}><AdminContactMessages /></ProtectedRoute>} />
           
           {/* Customer Routes */}
-          <Route path="/customer" element={<CustomerDashboard />} />
-          <Route path="/customer/products" element={<Products />} />
-          <Route path="/customer/services" element={<Services />} />
-          <Route path="/customer/item/:type/:id" element={<CustomerItemDetail />} />
-          <Route path="/customer/cart" element={<Cart />} />
-          <Route path="/customer/checkout" element={<Checkout />} />
-          <Route path="/customer/payment/card" element={<CardPayment />} />
-          <Route path="/customer/payment/upi" element={<UPIPayment />} />
-          <Route path="/customer/order-success" element={<OrderSuccess />} />
-          <Route path="/customer/orders" element={<MyOrders />} />
-          <Route path="/customer/booked-services" element={<MyBookedServices />} />
-          <Route path="/customer/profile" element={<CustomerProfile />} />
+          <Route path="/customer" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerDashboard /></ProtectedRoute>} />
+          <Route path="/customer/products" element={<ProtectedRoute allowedRoles={['Customer']}><Products /></ProtectedRoute>} />
+          <Route path="/customer/services" element={<ProtectedRoute allowedRoles={['Customer']}><Services /></ProtectedRoute>} />
+          <Route path="/customer/item/:type/:id" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerItemDetail /></ProtectedRoute>} />
+          <Route path="/customer/cart" element={<ProtectedRoute allowedRoles={['Customer']}><Cart /></ProtectedRoute>} />
+          <Route path="/customer/checkout" element={<ProtectedRoute allowedRoles={['Customer']}><Checkout /></ProtectedRoute>} />
+          <Route path="/customer/payment/card" element={<ProtectedRoute allowedRoles={['Customer']}><CardPayment /></ProtectedRoute>} />
+          <Route path="/customer/payment/upi" element={<ProtectedRoute allowedRoles={['Customer']}><UPIPayment /></ProtectedRoute>} />
+          <Route path="/customer/order-success" element={<ProtectedRoute allowedRoles={['Customer']}><OrderSuccess /></ProtectedRoute>} />
+          <Route path="/customer/orders" element={<ProtectedRoute allowedRoles={['Customer']}><MyOrders /></ProtectedRoute>} />
+          <Route path="/customer/booked-services" element={<ProtectedRoute allowedRoles={['Customer']}><MyBookedServices /></ProtectedRoute>} />
+          <Route path="/customer/profile" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerProfile /></ProtectedRoute>} />
 
           {/* Vendor Routes */}
-          <Route path="/vendor" element={<VendorDashboard />} />
-          <Route path="/vendor/catalogue" element={<Catalogue />} />
-          <Route path="/vendor/orders" element={<VendorOrders />} />
-          <Route path="/vendor/earnings" element={<Earnings />} />
-          <Route path="/vendor/billing" element={<VendorBilling />} />
-          <Route path="/vendor/analytics" element={<VendorAnalytics />} />
-          <Route path="/vendor/profile" element={<VendorProfile />} />
+          <Route path="/vendor" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorDashboard /></ProtectedRoute>} />
+          <Route path="/vendor/catalogue" element={<ProtectedRoute allowedRoles={['Vendor']}><Catalogue /></ProtectedRoute>} />
+          <Route path="/vendor/orders" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorOrders /></ProtectedRoute>} />
+          <Route path="/vendor/earnings" element={<ProtectedRoute allowedRoles={['Vendor']}><Earnings /></ProtectedRoute>} />
+          <Route path="/vendor/billing" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorBilling /></ProtectedRoute>} />
+          <Route path="/vendor/analytics" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorAnalytics /></ProtectedRoute>} />
+          <Route path="/vendor/profile" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorProfile /></ProtectedRoute>} />
 
           {/* Catch all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
