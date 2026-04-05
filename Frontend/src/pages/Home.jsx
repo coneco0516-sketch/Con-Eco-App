@@ -1,7 +1,20 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Home() {
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('is_logged_in');
+  const userRole = localStorage.getItem('user_role');
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      if (userRole === 'Admin') navigate('/admin');
+      else if (userRole === 'Vendor') navigate('/vendor');
+      else if (userRole === 'Customer') navigate('/customer');
+      else navigate('/login');
+    }
+  }, [isLoggedIn, userRole, navigate]);
+
   return (
     <div style={{ textAlign: 'center', marginTop: '10vh' }}>
       <h1 style={{ fontSize: '4rem', color: 'white', marginBottom: '1rem', background: 'linear-gradient(90deg, #2ea043, #7ee787)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>

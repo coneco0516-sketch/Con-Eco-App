@@ -45,6 +45,22 @@ import VendorProfile from './pages/VendorProfile';
 import VendorBilling from './pages/VendorBilling';
 import './index.css';
 
+// Role-based route protection component
+function ProtectedRoute({ children, allowedRoles }) {
+  const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+  const userRole = localStorage.getItem('user_role');
+  
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    console.log(`Protected: Role ${userRole} not in`, allowedRoles);
+    // Redirect to correct dashboard based on actual role
+    if (userRole === 'Admin') return <Navigate to="/admin" replace />;
+    if (userRole === 'Vendor') return <Navigate to="/vendor" replace />;
+    return <Navigate to="/customer" replace />;
+  }
+  return children;
+}
+
 function AppContent() {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('is_logged_in'));
@@ -52,23 +68,6 @@ function AppContent() {
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('is_logged_in'));
   }, [location]);
-
-  console.log("AppContent: isLoggedIn =", isLoggedIn);
-
-  // Role-based route protection
-  const ProtectedRoute = ({ children, allowedRoles }) => {
-    const isLoggedIn = !!localStorage.getItem('is_logged_in');
-    const userRole = localStorage.getItem('user_role');
-    
-    if (!isLoggedIn) return <Navigate to="/login" replace />;
-    if (allowedRoles && !allowedRoles.includes(userRole)) {
-      // Redirect to correct dashboard based on actual role
-      if (userRole === 'Admin') return <Navigate to="/admin" replace />;
-      if (userRole === 'Vendor') return <Navigate to="/vendor" replace />;
-      return <Navigate to="/customer" replace />;
-    }
-    return children;
-  };
 
   return (
     <div className="app-container">
