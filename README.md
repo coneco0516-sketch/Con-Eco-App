@@ -1,6 +1,6 @@
 # ConEco — B2B E-Commerce Platform
 
-A full-stack B2B marketplace connecting **Customers**, **Vendors**, and **Admins** for buying and selling products and services with modern payment, invoicing, and notification systems.
+A professional full-stack B2B marketplace designed to connect **Customers**, **Vendors**, and **Admins** through a streamlined commission-based model. Built for performance, legal compliance, and a premium user experience.
 
 ---
 
@@ -17,57 +17,37 @@ A full-stack B2B marketplace connecting **Customers**, **Vendors**, and **Admins
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
-- [API Overview](#-api-overview)
-- [User Roles](#-user-roles)
+- [Billing & Commissions](#-billing--commissions)
+- [Email System](#-email-system)
 - [Deployment](#-deployment)
 
 ---
 
 ## ✨ Features
 
-### 👤 Authentication
-- User registration with **email verification**
-- Secure JWT-based login (HttpOnly cookies)
-- Role-based access: **Customer**, **Vendor**, **Admin**
-- Login activity tracking (IP address & device)
+### 👤 Authentication & Security
+- Secure registration with **email verification**.
+- Role-based access: **Customer**, **Vendor**, and **Admin**.
+- Login activity monitoring with security alerts.
+- Modern background task processing for a responsive UI.
 
-### 🛍️ Customer
-- Browse products and services by category
-- Add to cart, view product details
-- Place orders via **COD** or **Razorpay (Online)**
-- Bulk price negotiation with vendors
-- PDF invoice download for completed orders
-- Notification preference management
+### 🛍️ Customers
+- Unified product & service catalogue with detailed overview pages.
+- **Bulk Price Negotiation**: Request custom quotes for large orders.
+- Direct order placement via **Razorpay (Online)** or **COD**.
+- Real-time order tracking with automated status updates.
 
-### 🏪 Vendor
-- Register with company details (GST, address)
-- Upload and manage products & services
-- View and manage incoming orders
-- Track earnings, commissions, and payouts
-- QC verification system by admin
+### 🏪 Vendors
+- Transparent **Earnings Dashboard** (Gross vs Commission vs Net).
+- Simplified product management and automated inventory tracking.
+- Weekly automated billing system with downloadable compliance receipts.
+- Professional QC verification system for platform-wide quality control.
 
-### 🛡️ Admin
-- Verify vendors and customers
-- View all orders, payments, and transactions
-- Manage commissions and vendor invoices
-- Credit vendor wallets for online orders
-- Reply to customer contact messages
-- Generate weekly commission invoices
-
-### 📧 Email Notifications
-- Email verification on registration
-- Login security alerts
-- Order confirmation (customer + vendor)
-- QC status updates for vendors
-- Contact form acknowledgment & admin reply
-- Background task processing (non-blocking)
-
-### 💳 Payments
-- **Razorpay** integration for online payments
-- **COD** (Cash on Delivery) support
-- Platform commission: **3%** per order
-- GST: **18%** on base amount
-- Weekly invoice generation for vendor commissions
+### 🛡️ Admin Dashboard
+- Centralized management for all users, orders, and payments.
+- One-click vendor verification and automated QC scoring.
+- Automated platform commission tracking (3% flat rate).
+- Customer support suite for managing enquiries and contact messages.
 
 ---
 
@@ -76,14 +56,13 @@ A full-stack B2B marketplace connecting **Customers**, **Vendors**, and **Admins
 | Layer | Technology |
 |---|---|
 | **Frontend** | React 18 + Vite |
-| **Backend** | FastAPI (Python) |
+| **Backend** | FastAPI (Python 3.12) |
 | **Database** | MySQL (Railway) |
-| **Payments** | Razorpay |
-| **Email** | Gmail SMTP (smtplib) |
+| **Payments** | Razorpay Integration |
+| **Production Email** | Brevo HTTP API (Railway Optimized) |
+| **Local Email** | Gmail SMTP Fallback |
 | **Auth** | JWT + bcrypt |
-| **PDF** | fpdf2 + Pillow |
-| **Deployment** | Railway |
-| **Scheduling** | APScheduler |
+| **Invoicing** | fpdf2 + PDF Generation |
 
 ---
 
@@ -92,181 +71,110 @@ A full-stack B2B marketplace connecting **Customers**, **Vendors**, and **Admins
 ```
 ConEco/
 ├── Backend/
-│   ├── main.py                  # FastAPI app entry point
-│   ├── database.py              # MySQL connection
-│   ├── email_service.py         # Email sending (SMTP + BackgroundTasks)
-│   ├── commission_invoicing.py  # Weekly invoice generation
-│   ├── invoice_generator.py     # PDF invoice builder
-│   ├── requirements.txt         # Python dependencies
-│   ├── .env                     # Environment variables (git-ignored)
-│   └── routers/
-│       ├── auth.py              # Login, Register, Verify Email
-│       ├── customer.py          # Cart, Orders, Profile
-│       ├── vendor.py            # Products, Services, Earnings
-│       ├── admin.py             # Dashboard, QC, Payments
-│       ├── payment.py           # Razorpay, COD, Finalize Orders
-│       └── invoice.py           # PDF invoice download
+│   ├── routers/                 # API Endpoints (Auth, Vendor, Customer, Admin)
+│   ├── main.py                  # Core Application & Scheduler
+│   ├── email_service.py         # Unified Email Infrastructure
+│   ├── database.py              # Connection Management
+│   └── commission_invoicing.py  # Billing Automation logic
 │
 ├── Frontend/
 │   ├── src/
-│   │   ├── pages/               # All page components (JSX)
-│   │   ├── components/          # Shared components (Sidebar, etc.)
-│   │   └── App.jsx              # Routes configuration
-│   ├── dist/                    # Production build output
-│   └── package.json
+│   │   ├── pages/               # Functional UI Components
+│   │   ├── components/          # Reusable Layouts & Elements
+│   │   └── App.jsx              # Application Routing
+│   └── dist/                    # Optimized Production Build
 │
-├── railway.toml                 # Railway deployment config
-├── requirements.txt             # Root-level (used by Railway)
-└── README.md
+└── railway.toml                 # Production Deployment Config
 ```
 
 ---
 
 ## ⚙️ Getting Started
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- MySQL database
-
-### 1. Clone the Repository
+### 1. Installation
 ```bash
 git clone https://github.com/coneco0516-sketch/Con-Eco-App.git
 cd Con-Eco-App
-```
 
-### 2. Backend Setup
-```bash
-# Create and activate virtual environment
-python -m venv Backend/venv
-Backend/venv/Scripts/activate   # Windows
-source Backend/venv/bin/activate # Mac/Linux
-
-# Install dependencies
+# Setup Backend Dependencies
 pip install -r requirements.txt
 
-# Configure environment variables
-cp Backend/.env.example Backend/.env
-# Edit Backend/.env with your credentials
+# Setup Frontend
+cd Frontend && npm install
 ```
 
-### 3. Frontend Setup
+### 2. Running Locally
 ```bash
-cd Frontend
-npm install
-npm run dev       # Development server (http://localhost:5173)
-```
+# Terminal 1: Backend
+uvicorn Backend.main:app --reload
 
-### 4. Run Backend
-```bash
-# From the project root:
-uvicorn Backend.main:app --reload --port 8000
+# Terminal 2: Frontend
+npm run dev
 ```
 
 ---
 
 ## 🔐 Environment Variables
 
-Create a `Backend/.env` file with the following:
+Create a `Backend/.env` file:
 
 ```env
-# Database
-DB_NAME=your_db_name
-DB_USER=your_db_user
-DB_PASS=your_db_password
-DB_HOST=your_db_host
-DB_PORT=3306
+# MySQL Database
+DB_NAME=your_db
+DB_HOST=your_host
+DB_USER=your_user
+DB_PASS=your_pass
 
-# JWT
-JWT_SECRET=your_secret_key
+# Credentials
+JWT_SECRET=your_auth_secret
+RAZORPAY_KEY_ID=rzp_test_xxx
+RAZORPAY_KEY_SECRET=your_razorpay_secret
 
-# CORS
-ALLOWED_ORIGINS=http://localhost:5173,https://your-domain.com
+# Production Email (Railway / Production)
+BREVO_API_KEY=xkeysib_xxx
 
-# Email (Gmail App Password)
-MAIL_USERNAME=your@gmail.com
-MAIL_PASSWORD=your_app_password
-MAIL_FROM=your@gmail.com
-MAIL_FROM_NAME=ConEco
-MAIL_PORT=587
-MAIL_SERVER=smtp.gmail.com
+# Local Email Fallback (Gmail)
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_gmail_app_password
 
-# Razorpay
-RAZORPAY_KEY_ID=rzp_test_xxxx
-RAZORPAY_KEY_SECRET=your_secret
-
-# App
-APP_URL=https://your-domain.com
+# Application
+APP_URL=http://localhost:8000
 ```
 
-> ⚠️ **Never commit `.env` to Git.** It is already in `.gitignore`.
+---
 
-> 📌 **Gmail App Password**: Enable 2-Step Verification on your Google account, then generate an App Password at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+## 💳 Billing & Commissions
+
+The platform operates on a simplified, legal-compliant billing model:
+- **Platform Fee**: **3% Flat Commission** on all transactions.
+- **Tax Policy**: Zero GST reference (Platform currently operates as a non-GST entity).
+- **Billing Cycle**: Weekly invoices generated every Monday for outstanding offline commissions.
+- **Settlement**: Online payments are credited to vendor wallets after platform fee deduction.
 
 ---
 
-## 📡 API Overview
+## 📧 Email System
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/register` | Register new user |
-| `POST` | `/api/auth/login` | Login |
-| `GET` | `/api/auth/verify-email` | Verify email token |
-| `GET` | `/api/customer/products` | List all products |
-| `POST` | `/api/customer/cart/add` | Add item to cart |
-| `POST` | `/api/payment/place_order_offline` | Place COD order |
-| `POST` | `/api/payment/verify` | Verify Razorpay payment |
-| `GET` | `/api/invoice/download/{order_id}` | Download PDF invoice |
-| `GET` | `/api/admin/dashboard_stats` | Admin dashboard stats |
-| `POST` | `/api/admin/vendors/update_qc` | Update vendor QC score |
-| `GET` | `/api/vendor/orders` | Vendor orders list |
-
-Full API docs available at: `http://localhost:8000/docs` (Swagger UI)
-
----
-
-## 👥 User Roles
-
-### Customer
-- Register → Verify Email → Browse → Cart → Checkout → Track Orders
-
-### Vendor
-- Register → Admin QC Verification → Upload Products/Services → Manage Orders → Request Payout
-
-### Admin
-- Manage all users, vendors, orders, payments, commissions, and contact messages
+Our notification system is built for **100% Reliability**:
+- **Production (Railway)**: Uses the **Brevo HTTP API** to bypass SMTP port blocks.
+- **Local Development**: Uses **Gmail SMTP** as a zero-cost fallback.
+- **Events**: Verified notifications for registration, new orders (Vendor), status updates (Customer), and security alerts.
 
 ---
 
 ## 🚢 Deployment
 
-The app is deployed on **Railway** using **Nixpacks** build system.
-
-### Deploy Steps:
-1. Push to `main` branch on GitHub
-2. Railway auto-detects changes and redeploys
-3. Ensure all environment variables are set in Railway → **Variables**
-
-### Railway Config (`railway.toml`):
-```toml
-[build]
-builder = "nixpacks"
-
-[deploy]
-startCommand = "cd Backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
-```
-
-> ⚠️ **Note on Email:** Railway's free tier blocks outbound SMTP (port 587). Emails work in local development. For production email delivery, switch to an HTTPS-based provider like [Brevo](https://brevo.com) (free 300 emails/day).
+Fully optimized for **Railway Nixpacks**:
+1. Merging to `main` triggers an automated CI/CD pipeline.
+2. The environment variables are managed via the Railway Dashboard.
+3. The root-level `requirements.txt` ensures seamless dependency installation.
 
 ---
 
 ## 📄 License
-
 MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-## 👨‍💻 Developed by
-
-**ConEco Team** — Internship Project @ Vrishank Soft  
-Built with ❤️ using FastAPI + React
+**Developed by ConEco Team** — Internship Project @ Vrishank Soft  
+Built with ❤️ using FastAPI + React 18
