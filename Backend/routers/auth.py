@@ -24,6 +24,27 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 router = APIRouter()
 
+def get_platform_setting(key, default):
+    """Helper to fetch a platform setting from the DB."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT setting_value FROM platform_settings WHERE setting_key = %s", (key,))
+        row = cursor.fetchone()
+        if row:
+            val = row['setting_value']
+            if val.lower() == 'true': return True
+            if val.lower() == 'false': return False
+            try:
+                if '.' in val: return float(val)
+                return int(val)
+            except: return val
+        return default
+    except:
+        return default
+    finally:
+        conn.close()
+
 import os
 from dotenv import load_dotenv
 
@@ -157,6 +178,14 @@ def register(request: RegisterRequest, background_tasks: BackgroundTasks):
         if cursor.fetchone():
             cursor.close()
             return {"status": "error", "message": "Email already exists"}
+            
+        # Check platform settings for registration
+        if request.role == 'Vendor':
+            if not get_platform_setting('enable_vendor_registration', True):
+                return {"status": "error", "message": "Vendor registration is currently disabled by administrator."}
+        elif request.role == 'Customer':
+            if not get_platform_setting('enable_customer_registration', True):
+                return {"status": "error", "message": "Customer registration is currently disabled by administrator."}
             
         try:
             hashed_password = hash_password(request.password)

@@ -12,6 +12,73 @@ def check_admin(user = Depends(get_current_user_from_cookie)):
         raise HTTPException(status_code=403, detail="Forbidden")
     return user
 
+# ===== PLATFORM SETTINGS =====
+
+@router.get("/platform_settings")
+def get_platform_settings(user = Depends(check_admin)):
+    """Fetch all platform-wide settings from the database."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # Ensure table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS platform_settings (
+                setting_key VARCHAR(100) PRIMARY KEY,
+                setting_value TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        
+        cursor.execute("SELECT setting_key, setting_value FROM platform_settings")
+        rows = cursor.fetchall()
+        
+        settings = {}
+        for row in rows:
+            val = row['setting_value']
+            # Simple type conversion
+            if val.lower() == 'true': val = True
+            elif val.lower() == 'false': val = False
+            else:
+                try:
+                    if '.' in val: val = float(val)
+                    else: val = int(val)
+                except: pass
+            settings[row['setting_key']] = val
+            
+        cursor.close()
+        return {"status": "success", "settings": settings}
+    except Exception as e:
+        print(f"Error fetching platform settings: {e}")
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+@router.post("/platform_settings")
+def update_platform_settings(settings: dict, user = Depends(check_admin)):
+    """Update platform-wide settings."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        for key, value in settings.items():
+            # Convert boolean to string for storage
+            val_str = str(value)
+            cursor.execute("""
+                INSERT INTO platform_settings (setting_key, setting_value)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+            """, (key, val_str))
+        
+        conn.commit()
+        cursor.close()
+        return {"status": "success", "message": "Settings updated successfully"}
+    except Exception as e:
+        print(f"Error updating platform settings: {e}")
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+
 @router.get("/dashboard_stats")
 def dashboard_stats(user = Depends(check_admin)):
     conn = get_db_connection()

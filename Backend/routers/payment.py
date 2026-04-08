@@ -26,6 +26,27 @@ def check_user(user=Depends(get_current_user_from_cookie)):
         raise HTTPException(status_code=401, detail="Not logged in")
     return user
 
+def get_platform_setting(key, default):
+    """Helper to fetch a platform setting from the DB."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT setting_value FROM platform_settings WHERE setting_key = %s", (key,))
+        row = cursor.fetchone()
+        if row:
+            val = row['setting_value']
+            if val.lower() == 'true': return True
+            if val.lower() == 'false': return False
+            try:
+                if '.' in val: return float(val)
+                return int(val)
+            except: return val
+        return default
+    except:
+        return default
+    finally:
+        conn.close()
+
 
 # ── 1. Create Razorpay Order ─────────────────────────────────────────────────
 class CreateOrderRequest(BaseModel):
@@ -141,8 +162,12 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
         for item in cart_items:
             base_amount = float(item["price"]) * item["quantity"]
             gst_amount = round(base_amount * 0.18, 2)
-            commission_rate = 3.0
-            commission_amount = round(base_amount * commission_rate / 100, 2)
+            
+            # Dynamic commission rate from platform settings
+            comm_key = 'product_commission_pct' if item['item_type'] == 'Product' else 'service_commission_pct'
+            commission_rate = get_platform_setting(comm_key, 3.0)
+            
+            commission_amount = round(base_amount * float(commission_rate) / 100, 2)
             total_amount = round(base_amount + gst_amount + commission_amount, 2)
             
             order_status = 'Pending' if payment_method == 'COD' else 'Processing'

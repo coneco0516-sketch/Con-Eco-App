@@ -64,13 +64,60 @@ function ProtectedRoute({ children, allowedRoles }) {
 function AppContent() {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('is_logged_in'));
+  const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
 
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('is_logged_in'));
+    checkMaintenance();
   }, [location]);
+
+  const checkMaintenance = async () => {
+    try {
+      const resp = await fetch('/api/admin/platform_settings');
+      const data = await resp.json();
+      if (data.status === 'success') {
+        const maintenanceActive = data.settings.server_maintenance_mode === true;
+        const userRole = localStorage.getItem('user_role');
+        
+        // If maintenance is on, and user is NOT an Admin, show popup
+        if (maintenanceActive && userRole !== 'Admin') {
+          setShowMaintenancePopup(true);
+        } else {
+          setShowMaintenancePopup(false);
+        }
+      }
+    } catch (err) {
+      console.error("Maintenance check failed:", err);
+    }
+  };
+
+  const handleMaintenanceOk = () => {
+    // Close the "website" by redirecting to Google
+    window.location.href = "https://www.google.com";
+  };
 
   return (
     <div className="app-container">
+      {showMaintenancePopup && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 9999,
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          backdropFilter: 'blur(12px)'
+        }}>
+          <div className="glass-panel" style={{ padding: '3.5rem', textAlign: 'center', maxWidth: '550px', border: '1px solid var(--danger-color)', boxShadow: '0 0 40px rgba(248, 81, 73, 0.2)' }}>
+            <h2 style={{ color: 'var(--danger-color)', fontSize: '2.2rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}>
+              <span>⚠️</span> Server Maintenance
+            </h2>
+            <p style={{ color: 'white', fontSize: '1.25rem', marginBottom: '2.5rem', lineHeight: '1.8', fontWeight: 500 }}>
+              Server is under updation kindly wait for the updates.
+            </p>
+            <button className="btn danger" onClick={handleMaintenanceOk} style={{ padding: '1rem 4rem', fontSize: '1.2rem', borderRadius: '8px' }}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
       <Navbar />
       <main className="main-content">
         <Routes>
