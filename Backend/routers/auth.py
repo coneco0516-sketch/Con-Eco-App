@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response, Request, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Response, Request, BackgroundTasks, Depends
 from pydantic import BaseModel
 import jwt
 from datetime import datetime, timedelta
@@ -667,3 +667,19 @@ def reset_password(request: ResetPasswordRequest):
         return {"status": "success", "message": "Password updated successfully. You can now login."}
     finally:
         conn.close()
+
+
+class PushSubscriptionRequest(BaseModel):
+    subscription: dict
+
+@router.post("/subscribe-push")
+def subscribe_push(request: PushSubscriptionRequest, user = Depends(get_current_user_from_cookie)):
+    """Save user's browser push subscription"""
+    from push_service import save_push_subscription
+    try:
+        save_push_subscription(user['user_id'], request.subscription)
+        return {"status": "success", "message": "Subscribed to push notifications"}
+    except Exception as e:
+        print(f"Push Sub Error: {e}")
+        return {"status": "error", "message": str(e)}
+

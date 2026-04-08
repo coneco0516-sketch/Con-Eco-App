@@ -69,7 +69,40 @@ function AppContent() {
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('is_logged_in'));
     checkMaintenance();
-  }, [location]);
+    if (isLoggedIn) {
+      registerPushService();
+    }
+  }, [location, isLoggedIn]);
+
+  const registerPushService = async () => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('Service Worker registered');
+
+        // Check if push is enabled in settings
+        const settingsResp = await fetch('/api/admin/platform_settings');
+        const settingsData = await settingsResp.json();
+        
+        if (settingsData.status === 'success' && settingsData.settings.push_notifications) {
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: 'BFA_O8W5_zD_2_yB_Z_8_Y_2_z_Y_8_Y_2_z_Y_8_Y_2_z_Y_8_Y_2_z_Y' // Public VAPID Key
+          });
+
+          await fetch('/api/auth/subscribe-push', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription }),
+            credentials: 'include'
+          });
+          console.log('Push subscription saved');
+        }
+      } catch (err) {
+        console.warn('Push registration failed:', err);
+      }
+    }
+  };
 
   const checkMaintenance = async () => {
     try {

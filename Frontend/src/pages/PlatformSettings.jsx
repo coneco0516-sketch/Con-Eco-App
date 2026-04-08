@@ -13,6 +13,7 @@ function PlatformSettings() {
     enable_order_cancellation: true,
     auto_order_confirmation: false,
     email_notifications: true,
+    push_notifications: false,
     server_maintenance_mode: false
   });
   
@@ -165,8 +166,12 @@ function PlatformSettings() {
                 <label style={{ color: 'var(--text-secondary)' }}>Email Notifications</label>
                 <input type="checkbox" name="email_notifications" checked={settings.email_notifications} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ color: 'var(--text-secondary)' }}>Push Notifications (Browser)</label>
+                <input type="checkbox" name="push_notifications" checked={settings.push_notifications} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
+              </div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
-                SMS and Push Notifications are currently disabled as they require integrated API keys.
+                Push Notifications allow real-time browser alerts even when the app is closed.
               </div>
             </div>
           </section>
