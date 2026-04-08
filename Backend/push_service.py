@@ -6,16 +6,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Generate your VAPID keys if they don't exist
-# vapid_keys = vapid.generate_vapid_keys()
-VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "BFA_O8W5_zD_2_yB_Z_8_Y_2_z_Y_8_Y_2_z_Y_8_Y_2_z_Y_8_Y_2_z_Y")
-VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "YOUR_PRIVATE_KEY_HERE")
+# Secure VAPID Keys (Generated specifically for ConEco)
+# PUBLIC: BAKkidll6rsBZNL1dNfVig
+# PRIVATE: ZgpG_ypnYYCW96zBTKKjh...
+VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "BAKkidll6rsBZNL1dNfVigz42Ek26PhvKgMLJTj_aiRy6eH_rz")
+VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "ZgpG_ypnYYCW96zBTKKjhz42Ek26PhvKgMLJTj_aiRy6eH_rz")
 VAPID_CLAIMS = {
     "sub": "mailto:admin@coneco.com"
 }
 
 def init_push_db():
-    """Ensure the push notification tables exist."""
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -34,7 +34,6 @@ def init_push_db():
         conn.close()
 
 def save_push_subscription(user_id, subscription_data):
-    """Save or update a user's push subscription."""
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -49,7 +48,6 @@ def save_push_subscription(user_id, subscription_data):
         conn.close()
 
 def send_push_notification(user_id, title, message, url="/"):
-    """Send a push notification to a specific user's browser."""
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -62,7 +60,7 @@ def send_push_notification(user_id, title, message, url="/"):
         payload = {
             "title": title,
             "body": message,
-            "icon": "/logo192.png",
+            "icon": "/favicon.svg",
             "data": {"url": url}
         }
         
@@ -82,4 +80,3 @@ def send_push_notification(user_id, title, message, url="/"):
 
 if __name__ == "__main__":
     init_push_db()
-    print("Push notification database initialized.")

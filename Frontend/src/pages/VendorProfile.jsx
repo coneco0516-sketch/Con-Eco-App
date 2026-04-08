@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 import { useNavigate } from 'react-router-dom';
 
+const PUSH_VAPID_KEY = 'BAKkidll6rsBZNL1dNfVigz42Ek26PhvKgMLJTj_aiRy6eH_rz';
+
+
 function VendorProfile() {
   const [profile, setProfile] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -63,6 +66,50 @@ function VendorProfile() {
     localStorage.removeItem('user_role');
     fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).then(() => navigate('/login'));
   };
+
+  const [pushStatus, setPushStatus] = useState('Checking...');
+  useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.pushManager.getSubscription().then(sub => {
+          setPushStatus(sub ? 'Subscribed' : 'Not Subscribed');
+        });
+      });
+    } else {
+      setPushStatus('Not Supported');
+    }
+  }, []);
+
+  const handleSubscribePush = async () => {
+    if (pushStatus === 'Not Supported') return;
+    setPushStatus('Subscribing...');
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: PUSH_VAPID_KEY
+      });
+      const resp = await fetch('/api/auth/subscribe-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub }),
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        setPushStatus('Subscribed');
+        setMsg('Push notifications enabled!');
+      } else {
+        setPushStatus('Error');
+        setMsg('Server error: ' + data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      setPushStatus('Denied/Error');
+      setMsg('Browser blocked notifications. Check site settings.');
+    }
+  };
+
 
   return (
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
@@ -135,10 +182,23 @@ function VendorProfile() {
                 <p><strong>Address:</strong> {profile.address || 'Not provided'}</p>
                 <p><strong>City:</strong> {profile.city || 'Not provided'}</p>
                 <p><strong>State:</strong> {profile.state || 'Not provided'}</p>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button onClick={() => setEditMode(true)} className="btn">Edit Business Info</button>
-                  <button onClick={handleLogout} className="btn danger">Logout</button>
-                </div>
+                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                   <button onClick={() => setEditMode(true)} className="btn">Edit Business Info</button>
+                   <button onClick={handleLogout} className="btn danger">Logout</button>
+                 </div>
+
+                 <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                   <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>🔔 Browser Notifications</h4>
+                   <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                     Status: <span style={{ color: pushStatus === 'Subscribed' ? 'var(--primary-color)' : 'var(--warning-color)' }}>{pushStatus}</span>
+                   </p>
+                   {pushStatus !== 'Subscribed' && (
+                     <button onClick={handleSubscribePush} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                       {pushStatus === 'Subscribing...' ? 'Working...' : 'Enable Alert Notifications'}
+                     </button>
+                   )}
+                 </div>
+
               </div>
             ) : (
               <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
