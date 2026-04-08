@@ -13,11 +13,6 @@ function PlatformSettings() {
     enable_order_cancellation: true,
     auto_order_confirmation: false,
     email_notifications: true,
-    sms_notifications: false,
-    push_notifications: true,
-    enable_otp_login: true,
-    enable_2fa: false,
-    session_timeout_mins: 30,
     server_maintenance_mode: false
   });
   
@@ -170,13 +165,8 @@ function PlatformSettings() {
                 <label style={{ color: 'var(--text-secondary)' }}>Email Notifications</label>
                 <input type="checkbox" name="email_notifications" checked={settings.email_notifications} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ color: 'var(--text-secondary)' }}>SMS Notifications</label>
-                <input type="checkbox" name="sms_notifications" checked={settings.sms_notifications} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ color: 'var(--text-secondary)' }}>Push Notifications</label>
-                <input type="checkbox" name="push_notifications" checked={settings.push_notifications} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
+                SMS and Push Notifications are currently disabled as they require integrated API keys.
               </div>
             </div>
           </section>
