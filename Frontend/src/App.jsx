@@ -69,25 +69,37 @@ function AppContent() {
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('is_logged_in'));
     checkMaintenance();
+  }, [location]);
+
+  useEffect(() => {
     if (isLoggedIn) {
       registerPushService();
     }
-  }, [location, isLoggedIn]);
+  }, [isLoggedIn]);
 
   const registerPushService = async () => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       try {
+        // Register service worker if not already
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered');
+        
+        // Wait for registration to be active
+        await navigator.serviceWorker.ready;
 
-        // Check if push is enabled in settings
+        // Check if push is enabled in platform settings
         const settingsResp = await fetch('/api/admin/platform_settings');
         const settingsData = await settingsResp.json();
         
         if (settingsData.status === 'success' && settingsData.settings.push_notifications) {
+          // Check if permission is already granted or if we should ask
+          if (Notification.permission === 'denied') {
+            console.warn('Push Notifications are blocked by the user.');
+            return;
+          }
+
           const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: 'BFA_O8W5_zD_2_yB_Z_8_Y_2_z_Y_8_Y_2_z_Y_8_Y_2_z_Y_8_Y_2_z_Y' // Public VAPID Key
+            applicationServerKey: 'BAKkidll6rsBZNL1dNfVigz42Ek26PhvKgMLJTj_aiRy6eH_rz' // SECURE VAPID KEY
           });
 
           await fetch('/api/auth/subscribe-push', {
@@ -96,10 +108,10 @@ function AppContent() {
             body: JSON.stringify({ subscription }),
             credentials: 'include'
           });
-          console.log('Push subscription saved');
+          console.log('Push subscription synced with server');
         }
       } catch (err) {
-        console.warn('Push registration failed:', err);
+        console.warn('Push registration flow skipped or failed:', err);
       }
     }
   };
@@ -109,14 +121,17 @@ function AppContent() {
       const resp = await fetch('/api/admin/platform_settings');
       const data = await resp.json();
       if (data.status === 'success') {
-        const maintenanceActive = data.settings.server_maintenance_mode === true;
+        const maintenanceActive = String(data.settings.server_maintenance_mode) === 'true';
         const userRole = localStorage.getItem('user_role');
         
         // If maintenance is on, and user is NOT an Admin, show popup
         if (maintenanceActive && userRole !== 'Admin') {
           setShowMaintenancePopup(true);
+          // Block scrolling when maintenance is active
+          document.body.style.overflow = 'hidden';
         } else {
           setShowMaintenancePopup(false);
+          document.body.style.overflow = 'auto';
         }
       }
     } catch (err) {
@@ -125,7 +140,7 @@ function AppContent() {
   };
 
   const handleMaintenanceOk = () => {
-    // Close the "website" by redirecting to Google
+    // Redirect to a safe external site
     window.location.href = "https://www.google.com";
   };
 
@@ -134,25 +149,48 @@ function AppContent() {
       {showMaintenancePopup && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 9999,
+          backgroundColor: '#0a0a0a', zIndex: 99999,
           display: 'flex', justifyContent: 'center', alignItems: 'center',
-          backdropFilter: 'blur(12px)'
+          backdropFilter: 'blur(20px)',
+          overflow: 'hidden'
         }}>
-          <div className="glass-panel" style={{ padding: '3.5rem', textAlign: 'center', maxWidth: '550px', border: '1px solid var(--danger-color)', boxShadow: '0 0 40px rgba(248, 81, 73, 0.2)' }}>
-            <h2 style={{ color: 'var(--danger-color)', fontSize: '2.2rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem' }}>
-              <span>⚠️</span> Server Maintenance
+          <div className="glass-panel" style={{ 
+            padding: '4rem', 
+            textAlign: 'center', 
+            maxWidth: '600px', 
+            border: '1px solid #ef4444', 
+            boxShadow: '0 0 60px rgba(239, 68, 68, 0.2)',
+            animation: 'fadeIn 0.5s ease-out'
+          }}>
+            <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🛠️</div>
+            <h2 style={{ color: '#ef4444', fontSize: '2.5rem', marginBottom: '1.5rem', fontWeight: 800 }}>
+              System Maintenance
             </h2>
-            <p style={{ color: 'white', fontSize: '1.25rem', marginBottom: '2.5rem', lineHeight: '1.8', fontWeight: 500 }}>
-              Server is under updation kindly wait for the updates.
+            <p style={{ color: 'white', fontSize: '1.3rem', marginBottom: '2.5rem', lineHeight: '1.8', opacity: 0.9 }}>
+              ConEco Marketplace is currently undergoing scheduled maintenance to improve our services. We'll be back online shortly!
             </p>
-            <button className="btn danger" onClick={handleMaintenanceOk} style={{ padding: '1rem 4rem', fontSize: '1.2rem', borderRadius: '8px' }}>
-              OK
+            <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', marginBottom: '2.5rem' }}>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                Estimated Downtime: ~30 minutes
+              </p>
+            </div>
+            <button 
+              className="btn danger" 
+              onClick={handleMaintenanceOk} 
+              style={{ padding: '1.2rem 4.5rem', fontSize: '1.2rem', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'transform 0.2s' }}
+              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              Close & Redirect
             </button>
           </div>
         </div>
       )}
-      <Navbar />
-      <main className="main-content">
+      
+      {/* Rest of the App only renders if not in maintenance (or as background blurred) */}
+      <div style={{ filter: showMaintenancePopup ? 'blur(15px)' : 'none', pointerEvents: showMaintenancePopup ? 'none' : 'auto', transition: 'filter 0.3s ease' }}>
+        <Navbar />
+        <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -220,6 +258,7 @@ function AppContent() {
           </div>
         </footer>
       )}
+      </div>
     </div>
   );
 }
