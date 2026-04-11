@@ -18,6 +18,9 @@ function loadRazorpayScript() {
 function Checkout() {
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
+  const [baseTotal, setBaseTotal] = useState(0);
+  const [gstTotal, setGstTotal] = useState(0);
+  const [commissionTotal, setCommissionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState('');
@@ -32,6 +35,9 @@ function Checkout() {
       .then(data => {
         if (data.items) setCart(data.items);
         if (data.total) setTotal(data.total);
+        if (data.base_total !== undefined) setBaseTotal(data.base_total);
+        if (data.gst_total !== undefined) setGstTotal(data.gst_total);
+        if (data.commission_total !== undefined) setCommissionTotal(data.commission_total);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -170,9 +176,7 @@ function Checkout() {
       const next = prev.map(item => 
         item.cart_id === cartId ? { ...item, quantity: newQuantity } : item
       );
-      // Recalculate total locally: sum(price * qty), + 18% GST, + 3% comm
-      const newBaseTotal = next.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      setTotal(newBaseTotal * 1.21); // 1.0 (base) + 0.18 (gst) + 0.03 (comm)
+      // Let the backend update handle precise totals. For optimistic UI we can estimate lightly.
       return next;
     });
 
@@ -188,6 +192,16 @@ function Checkout() {
         // Revert on failure
         setCart(prevCart);
         setTotal(prevTotal);
+      } else {
+        // Fetch accurate fresh totals from cart endpoint
+        fetch('/api/customer/cart', { credentials: 'include' })
+          .then(res => res.json())
+          .then(data => {
+            if (data.total) setTotal(data.total);
+            if (data.base_total !== undefined) setBaseTotal(data.base_total);
+            if (data.gst_total !== undefined) setGstTotal(data.gst_total);
+            if (data.commission_total !== undefined) setCommissionTotal(data.commission_total);
+          });
       }
     } catch (err) {
       setCart(prevCart);
@@ -269,15 +283,15 @@ function Checkout() {
             </ul>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 'bold' }}>
               <span style={{ color: 'white' }}>Subtotal (Base Prices)</span>
-              <span style={{ color: 'var(--text-secondary)' }}>₹{(total / 1.21).toFixed(2)}</span>
+              <span style={{ color: 'var(--text-secondary)' }}>₹{baseTotal.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '1rem' }}>
               <span style={{ color: '#3498db' }}>GST (18%)</span>
-              <span style={{ color: '#3498db' }}>₹{((total / 1.21) * 0.18).toFixed(2)}</span>
+              <span style={{ color: '#3498db' }}>₹{gstTotal.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1rem' }}>
-              <span style={{ color: '#ffd700' }}>Platform Commission (3%)</span>
-              <span style={{ color: '#ffd700' }}>₹{((total / 1.21) * 0.03).toFixed(2)}</span>
+              <span style={{ color: '#ffd700' }}>Platform Commission</span>
+              <span style={{ color: '#ffd700' }}>₹{commissionTotal.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 'bold', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
               <span style={{ color: 'white' }}>Total Amount</span>

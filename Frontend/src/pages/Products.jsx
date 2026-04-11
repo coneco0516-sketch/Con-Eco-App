@@ -8,6 +8,7 @@ function Products() {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(true);
+  const [commissionRate, setCommissionRate] = useState(3.0);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -15,6 +16,7 @@ function Products() {
       .then(res => res.json())
       .then(data => {
         if (data.items) setProducts(data.items);
+        if (data.commission_rate !== undefined) setCommissionRate(data.commission_rate);
         setLoading(false);
       })
       .catch(err => setLoading(false));
@@ -118,8 +120,8 @@ function Products() {
                 <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{p.name}</h3>
                 <div style={{ marginBottom: '1rem' }}>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0' }}>Base: ₹{p.price} {p.unit ? `/ ${p.unit}` : ''}</p>
-                  <p style={{ color: '#ffd700', fontSize: '0.85rem', margin: '0.25rem 0' }}>Commission (3%): ₹{(p.price * 0.03).toFixed(2)}</p>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0.5rem 0 0 0' }}>Total: ₹{(parseFloat(p.price) + parseFloat(p.price) * 0.03).toFixed(2)}</p>
+                  <p style={{ color: '#ffd700', fontSize: '0.85rem', margin: '0.25rem 0' }}>Commission ({commissionRate}%): ₹{(p.price * (commissionRate/100)).toFixed(2)}</p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0.5rem 0 0 0' }}>Total: ₹{(parseFloat(p.price) + parseFloat(p.price) * (commissionRate/100)).toFixed(2)}</p>
                 </div>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'auto' }}>Vendor: {p.vendor_name}</p>
                 <button 

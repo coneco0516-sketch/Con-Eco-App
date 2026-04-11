@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from database import get_db_connection
-from routers.auth import get_current_user_from_cookie
+from routers.auth import get_current_user_from_cookie, get_platform_setting
 from pydantic import BaseModel
 from typing import Optional
 import random
@@ -25,7 +25,8 @@ def get_products(user = Depends(check_customer)):
     items = cursor.fetchall()
     cursor.close()
     conn.close()
-    return {"status": "success", "items": items}
+    commission_rate = float(get_platform_setting('product_commission_pct', 3.0))
+    return {"status": "success", "items": items, "commission_rate": commission_rate}
 
 @router.get("/services")
 def get_services(user = Depends(check_customer)):
@@ -39,7 +40,8 @@ def get_services(user = Depends(check_customer)):
     items = cursor.fetchall()
     cursor.close()
     conn.close()
-    return {"status": "success", "items": items}
+    commission_rate = float(get_platform_setting('service_commission_pct', 3.0))
+    return {"status": "success", "items": items, "commission_rate": commission_rate}
 
 class CartItem(BaseModel):
     item_type: str
@@ -75,11 +77,23 @@ def get_cart(user = Depends(check_customer)):
         cursor.execute(sql, (cust_id,))
         items = cursor.fetchall()
         
-        # Calculate totals with 18% GST and 3% platform commission
-        base_total = sum([(float(i['price']) * i['quantity']) for i in items])
+        # Calculate totals with dynamic platform commission
+        product_rate = get_platform_setting('product_commission_pct', 3.0)
+        service_rate = get_platform_setting('service_commission_pct', 3.0)
+        
+        base_total = 0.0
+        commission_total = 0.0
+        for i in items:
+            item_base = float(i['price']) * i['quantity']
+            base_total += item_base
+            
+            # Use specific rate based on item type
+            rate = float(product_rate) if i['item_type'] == 'Product' else float(service_rate)
+            i['commission_rate'] = rate
+            commission_total += item_base * rate / 100
+
         gst_total = round(base_total * 0.18, 2)
-        commission_rate = 3.0  # 3% platform commission
-        commission_total = round(base_total * commission_rate / 100, 2)
+        commission_total = round(commission_total, 2)
         total = round(base_total + gst_total + commission_total, 2)
         
         cursor.close()
@@ -89,8 +103,7 @@ def get_cart(user = Depends(check_customer)):
             "base_total": round(base_total, 2),
             "gst_total": gst_total,
             "commission_total": commission_total,
-            "total": total,
-            "commission_rate": commission_rate
+            "total": total
         }
     finally:
         conn.close()
@@ -185,7 +198,12 @@ def checkout(data: CheckoutData, user = Depends(check_customer)):
         for item in cart_items:
             base_amount = float(item['price']) * item['quantity']
             gst_amount = round(base_amount * 0.18, 2)
-            commission_amount = round(base_amount * 0.03, 2)
+            
+            comm_key = 'product_commission_pct' if item['item_type'] == 'Product' else 'service_commission_pct'
+            rate_val = get_platform_setting(comm_key, 3.0)
+            commission_rate = float(rate_val)
+            
+            commission_amount = round(base_amount * commission_rate / 100, 2)
             total_amount = round(base_amount + gst_amount + commission_amount, 2)
             
             cursor.execute("""
@@ -198,7 +216,7 @@ def checkout(data: CheckoutData, user = Depends(check_customer)):
             cursor.execute(
                 """INSERT INTO commissions (order_id, vendor_id, commission_amount, commission_rate, status) 
                    VALUES (%s,%s,%s,%s,'Pending')""",
-                (order_id, item['vendor_id'], commission_amount, 3.0)
+                (order_id, item['vendor_id'], commission_amount, commission_rate)
             )
             
             txn_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -431,7 +449,12 @@ def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
         # Calculate initial estimated amount (standard price)
         base_amount = float(item['price']) * data.quantity
         gst_amount = round(base_amount * 0.18, 2)
-        commission_amount = round(base_amount * 0.03, 2)
+        
+        comm_key = 'product_commission_pct' if data.item_type.capitalize() == 'Product' else 'service_commission_pct'
+        rate_val = get_platform_setting(comm_key, 3.0)
+        commission_rate = float(rate_val)
+        
+        commission_amount = round(base_amount * commission_rate / 100, 2)
         total_amount = round(base_amount + gst_amount + commission_amount, 2)
         
         full_address = f"{data.address}, {data.city}, {data.state}"
@@ -457,7 +480,7 @@ def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
         cursor.execute(
             """INSERT INTO commissions (order_id, vendor_id, commission_amount, commission_rate, status) 
                VALUES (%s,%s,%s,%s,'Pending')""",
-            (order_id, item['vendor_id'], commission_amount, 3.0)
+            (order_id, item['vendor_id'], commission_amount, commission_rate)
         )
         
         # Create a placeholder payment

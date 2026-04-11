@@ -354,13 +354,19 @@ def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor), backgroun
                  return {"status": "error", "message": "Price is required to accept bulk request."}
             
             # Recalculate amounts
-            cursor.execute("SELECT quantity FROM Orders WHERE order_id=%s", (data.order_id,))
+            cursor.execute("SELECT quantity, order_type FROM Orders WHERE order_id=%s", (data.order_id,))
             res = cursor.fetchone()
             qty = res['quantity'] if res else 1
+            order_type = res.get('order_type', 'Product') if res else 'Product'
             
             base_amount = float(data.negotiated_price) * qty
             gst_amount = round(base_amount * 0.18, 2)
-            commission_amount = round(base_amount * 0.03, 2)
+            
+            from routers.auth import get_platform_setting
+            comm_key = 'product_commission_pct' if order_type == 'Product' else 'service_commission_pct'
+            commission_rate = float(get_platform_setting(comm_key, 3.0))
+            
+            commission_amount = round(base_amount * commission_rate / 100, 2)
             total_amount = round(base_amount + gst_amount + commission_amount, 2)
             
             cursor.execute("""
@@ -375,6 +381,13 @@ def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor), backgroun
                     total_amount=%s
                 WHERE order_id=%s AND vendor_id=%s
             """, (data.negotiated_price, data.vendor_message, total_amount, base_amount, gst_amount, commission_amount, total_amount, data.order_id, vendor_id))
+            
+            # Update commission entry
+            cursor.execute("""
+                UPDATE commissions 
+                SET commission_amount=%s, commission_rate=%s 
+                WHERE order_id=%s
+            """, (commission_amount, commission_rate, data.order_id))
             
             # Also update the payment record
             cursor.execute("UPDATE Payments SET amount=%s WHERE order_id=%s", (total_amount, data.order_id))
