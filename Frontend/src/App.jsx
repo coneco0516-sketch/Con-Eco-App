@@ -124,10 +124,12 @@ function AppContent() {
       if (data.status === 'success') {
         const maintenanceActive = String(data.maintenance_active) === 'true';
         const userRole = localStorage.getItem('user_role');
-        console.log("Maintenance Active:", maintenanceActive, "User Role:", userRole);
+        const isLoggedInStatus = localStorage.getItem('is_logged_in') === 'true';
+        console.log("Maintenance Active:", maintenanceActive, "User Role:", userRole, "Logged In:", isLoggedInStatus);
         
-        // If maintenance is on, and user is NOT an Admin, show popup
-        if (maintenanceActive && userRole !== 'Admin') {
+        // If maintenance is on, user IS logged in, and user is NOT an Admin, show popup
+        // Logged out users will not see the maintenance popup
+        if (maintenanceActive && isLoggedInStatus && userRole !== 'Admin') {
           console.log("Showing Maintenance Popup...");
           setShowMaintenancePopup(true);
           // Block scrolling when maintenance is active
