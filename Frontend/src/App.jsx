@@ -116,7 +116,7 @@ function AppContent() {
 
           const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlB64ToUint8Array('BAKkidll6rsBZNL1dNfVigz42Ek26PhvKgMLJTj_aiRy6eH_rz') // SECURE VAPID KEY
+            applicationServerKey: urlB64ToUint8Array('BMWUGlFCX4gbzFvuIVv-C0l6xRNm2ymMTnd3-mQqoCwAC7TOkheENAnxhPqXJk-dLZq4DzSwd6lFVY_7QWcFBOM') // SECURE VAPID KEY
           });
 
           await fetch('/api/auth/subscribe-push', {

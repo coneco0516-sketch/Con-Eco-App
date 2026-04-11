@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Secure VAPID Keys (Generated specifically for ConEco)
-# PUBLIC: BAKkidll6rsBZNL1dNfVig
-# PRIVATE: ZgpG_ypnYYCW96zBTKKjh...
-VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "BAKkidll6rsBZNL1dNfVigz42Ek26PhvKgMLJTj_aiRy6eH_rz")
-VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "ZgpG_ypnYYCW96zBTKKjhz42Ek26PhvKgMLJTj_aiRy6eH_rz")
+# PUBLIC: BMWUGlFCX4gbzFvuIVv-C0l6xRNm2ymMTnd3-mQqoCwAC7TOkheENAnxhPqXJk-dLZq4DzSwd6lFVY_7QWcFBOM
+# PRIVATE: eq-wTIxgAfDQF6O89K5AkqD9TEhAmtGDX2qoZq4Ewbk
+VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "BMWUGlFCX4gbzFvuIVv-C0l6xRNm2ymMTnd3-mQqoCwAC7TOkheENAnxhPqXJk-dLZq4DzSwd6lFVY_7QWcFBOM")
+VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "eq-wTIxgAfDQF6O89K5AkqD9TEhAmtGDX2qoZq4Ewbk")
 VAPID_CLAIMS = {
     "sub": "mailto:admin@coneco.com"
 }

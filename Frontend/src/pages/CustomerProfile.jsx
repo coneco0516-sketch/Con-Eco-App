@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CustomerSidebar from '../components/CustomerSidebar';
 import { useNavigate } from 'react-router-dom';
 
-const PUSH_VAPID_KEY = 'BAKkidll6rsBZNL1dNfVigz42Ek26PhvKgMLJTj_aiRy6eH_rz';
+const PUSH_VAPID_KEY = 'BMWUGlFCX4gbzFvuIVv-C0l6xRNm2ymMTnd3-mQqoCwAC7TOkheENAnxhPqXJk-dLZq4DzSwd6lFVY_7QWcFBOM';
 
 
 function CustomerProfile() {
