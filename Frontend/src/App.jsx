@@ -144,9 +144,20 @@ function AppContent() {
     }
   };
 
-  const handleMaintenanceOk = () => {
-    // Redirect to a safe external site
-    window.location.href = "https://www.google.com";
+  const handleMaintenanceOk = async () => {
+    try {
+      // Clear cookie session via backend
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.error("Logout error during maintenance redirect:", err);
+    }
+    
+    // Clear local states
+    localStorage.removeItem('is_logged_in');
+    localStorage.removeItem('user_role');
+    
+    // Redirect to public homepage
+    window.location.href = "/";
   };
 
   return (
