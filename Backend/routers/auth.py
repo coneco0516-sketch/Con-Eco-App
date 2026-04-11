@@ -682,8 +682,8 @@ class PushSubscriptionRequest(BaseModel):
 @router.post("/subscribe-push")
 def subscribe_push(request: PushSubscriptionRequest, user = Depends(get_current_user_from_cookie)):
     """Save user's browser push subscription"""
-    from push_service import save_push_subscription
     try:
+        from push_service import save_push_subscription
         save_push_subscription(user['user_id'], request.subscription)
         return {"status": "success", "message": "Subscribed to push notifications"}
     except Exception as e:

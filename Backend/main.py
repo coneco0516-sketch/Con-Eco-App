@@ -60,6 +60,13 @@ async def lifespan(app: FastAPI):
     scheduler.start()
     print("[SCHEDULER] Started. Invoice generation: every Monday 00:01 IST. Penalty enforcement: every Thursday 00:01 IST.")
 
+    try:
+        from push_service import init_push_db
+        init_push_db()
+        print("[DATABASE] Push subscriptions table initialized.")
+    except Exception as e:
+        print(f"[DATABASE ERROR] Could not initialize push db: {e}")
+
     yield  # App runs here
 
     scheduler.shutdown()
