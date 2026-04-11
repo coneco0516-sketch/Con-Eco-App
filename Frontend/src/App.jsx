@@ -118,14 +118,17 @@ function AppContent() {
 
   const checkMaintenance = async () => {
     try {
-      const resp = await fetch('/api/admin/platform_settings');
+      const resp = await fetch('/api/auth/maintenance-mode');
       const data = await resp.json();
+      console.log("Maintenance Status Response:", data);
       if (data.status === 'success') {
-        const maintenanceActive = String(data.settings.server_maintenance_mode) === 'true';
+        const maintenanceActive = String(data.maintenance_active) === 'true';
         const userRole = localStorage.getItem('user_role');
+        console.log("Maintenance Active:", maintenanceActive, "User Role:", userRole);
         
         // If maintenance is on, and user is NOT an Admin, show popup
         if (maintenanceActive && userRole !== 'Admin') {
+          console.log("Showing Maintenance Popup...");
           setShowMaintenancePopup(true);
           // Block scrolling when maintenance is active
           document.body.style.overflow = 'hidden';

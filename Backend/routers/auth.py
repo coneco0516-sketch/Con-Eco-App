@@ -33,14 +33,21 @@ def get_platform_setting(key, default):
         row = cursor.fetchone()
         if row:
             val = row['setting_value']
-            if val.lower() == 'true': return True
-            if val.lower() == 'false': return False
+            if val is None: return default
+            
+            # Convert to string for lower case check if it's not already
+            s_val = str(val).lower()
+            if s_val == 'true': return True
+            if s_val == 'false': return False
+            
             try:
-                if '.' in val: return float(val)
+                if '.' in str(val): return float(val)
                 return int(val)
-            except: return val
+            except: 
+                return val
         return default
-    except:
+    except Exception as e:
+        print(f"DEBUG: Error in get_platform_setting for {key}: {e}")
         return default
     finally:
         conn.close()
@@ -682,4 +689,9 @@ def subscribe_push(request: PushSubscriptionRequest, user = Depends(get_current_
     except Exception as e:
         print(f"Push Sub Error: {e}")
         return {"status": "error", "message": str(e)}
+
+@router.get("/maintenance-mode")
+def get_maintenance_mode():
+    """Public endpoint to check if maintenance mode is active."""
+    return {"status": "success", "maintenance_active": get_platform_setting('server_maintenance_mode', False)}
 
