@@ -119,12 +119,12 @@ function CustomerProfile() {
         setMsg('Server error: ' + data.message);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Push Error details:", err);
       setPushStatus('Denied/Error');
       if (err.message === 'Permission denied') {
-        setMsg('Please allow notifications in your browser permissions menu.');
+        setMsg('Please allow notifications in your browser settings (Click the padlock icon near URL).');
       } else {
-        setMsg('Browser blocked notifications. Check site settings.');
+        setMsg('Push Error: ' + err.toString());
       }
     }
   };
