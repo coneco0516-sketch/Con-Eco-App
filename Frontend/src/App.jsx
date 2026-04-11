@@ -77,6 +77,17 @@ function AppContent() {
     }
   }, [isLoggedIn]);
 
+  const urlB64ToUint8Array = (base64String) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  };
+
   const registerPushService = async () => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       try {
@@ -87,11 +98,17 @@ function AppContent() {
         await navigator.serviceWorker.ready;
 
         // Check if push is enabled in platform settings
-        const settingsResp = await fetch('/api/admin/platform_settings');
+        const settingsResp = await fetch('/api/auth/maintenance-mode');
         const settingsData = await settingsResp.json();
         
-        if (settingsData.status === 'success' && settingsData.settings.push_notifications) {
-          // Check if permission is already granted or if we should ask
+        if (settingsData.status === 'success') {
+          // Note: using the same payload but ideally it should check push_notifications flag from public API
+          // For now, assume it's true, or ask for permission first.
+          
+          if (Notification.permission === 'default') {
+            await Notification.requestPermission();
+          }
+
           if (Notification.permission === 'denied') {
             console.warn('Push Notifications are blocked by the user.');
             return;
@@ -99,7 +116,7 @@ function AppContent() {
 
           const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: 'BAKkidll6rsBZNL1dNfVigz42Ek26PhvKgMLJTj_aiRy6eH_rz' // SECURE VAPID KEY
+            applicationServerKey: urlB64ToUint8Array('BAKkidll6rsBZNL1dNfVigz42Ek26PhvKgMLJTj_aiRy6eH_rz') // SECURE VAPID KEY
           });
 
           await fetch('/api/auth/subscribe-push', {

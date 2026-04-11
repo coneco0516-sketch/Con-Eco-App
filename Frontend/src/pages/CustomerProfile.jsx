@@ -80,14 +80,29 @@ function CustomerProfile() {
     }
   }, []);
 
+  const urlB64ToUint8Array = (base64String) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  };
+
   const handleSubscribePush = async () => {
     if (pushStatus === 'Not Supported') return;
     setPushStatus('Subscribing...');
     try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+          throw new Error('Permission denied');
+      }
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: PUSH_VAPID_KEY
+        applicationServerKey: urlB64ToUint8Array(PUSH_VAPID_KEY)
       });
       const resp = await fetch('/api/auth/subscribe-push', {
         method: 'POST',
@@ -106,7 +121,11 @@ function CustomerProfile() {
     } catch (err) {
       console.error(err);
       setPushStatus('Denied/Error');
-      setMsg('Browser blocked notifications. Check site settings.');
+      if (err.message === 'Permission denied') {
+        setMsg('Please allow notifications in your browser permissions menu.');
+      } else {
+        setMsg('Browser blocked notifications. Check site settings.');
+      }
     }
   };
 
