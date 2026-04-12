@@ -21,11 +21,10 @@ def init_push_db():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_push_subscriptions (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id INT NOT NULL,
+                id SERIAL PRIMARY KEY,
+                user_id INT NOT NULL UNIQUE,
                 subscription_json TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY idx_user_id (user_id)
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         conn.commit()
@@ -37,10 +36,11 @@ def save_push_subscription(user_id, subscription_data):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
+        # PostgreSQL syntax for Upsert
         cursor.execute("""
             INSERT INTO user_push_subscriptions (user_id, subscription_json)
             VALUES (%s, %s)
-            ON DUPLICATE KEY UPDATE subscription_json = VALUES(subscription_json)
+            ON CONFLICT (user_id) DO UPDATE SET subscription_json = EXCLUDED.subscription_json
         """, (user_id, json.dumps(subscription_data)))
         conn.commit()
         cursor.close()

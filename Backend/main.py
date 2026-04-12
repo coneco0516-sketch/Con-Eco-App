@@ -129,11 +129,11 @@ async def contact_us(form: ContactForm, background_tasks: BackgroundTasks = None
         # Ensure table exists on production
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS contactmessages (
-                message_id INT AUTO_INCREMENT PRIMARY KEY,
+                message_id SERIAL PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
                 email VARCHAR(100) NOT NULL,
                 message TEXT NOT NULL,
-                status ENUM('Unread','Read','Replied') DEFAULT 'Unread',
+                status VARCHAR(20) DEFAULT 'Unread',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
