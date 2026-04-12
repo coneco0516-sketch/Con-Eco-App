@@ -252,7 +252,7 @@ def vendor_orders(user = Depends(check_vendor)):
                    o.amount, o.base_amount, o.status, 
                    o.payment_method, o.delivery_address, 
                    pvt.status as payment_status,
-                   DATE_FORMAT(o.created_at, '%d %b %Y') as date,
+                   TO_CHAR(o.created_at, 'DD Mon YYYY') as date,
                    o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price, o.quantity
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
@@ -473,13 +473,13 @@ def vendor_withdraw(data: WithdrawRequest, user = Depends(check_vendor)):
         try:
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS Payouts (
-                payout_id INT AUTO_INCREMENT PRIMARY KEY,
+                payout_id SERIAL PRIMARY KEY,
                 vendor_id INT,
                 amount DECIMAL(10,2),
                 account_name VARCHAR(100),
                 account_number VARCHAR(100),
                 ifsc VARCHAR(50),
-                status ENUM('Pending', 'Completed', 'Rejected') DEFAULT 'Pending',
+                status VARCHAR(20) DEFAULT 'Pending',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id)
             )
@@ -589,13 +589,13 @@ def vendor_earnings(user = Depends(check_vendor)):
         stats['total'] = stats['total_gross']
         
         try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS Payouts (payout_id INT AUTO_INCREMENT PRIMARY KEY, vendor_id INT, amount DECIMAL(10,2), account_name VARCHAR(100), account_number VARCHAR(100), ifsc VARCHAR(50), status ENUM('Pending', 'Completed', 'Rejected') DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id))")
+            cursor.execute("CREATE TABLE IF NOT EXISTS Payouts (payout_id SERIAL PRIMARY KEY, vendor_id INT, amount DECIMAL(10,2), account_name VARCHAR(100), account_number VARCHAR(100), ifsc VARCHAR(50), status VARCHAR(20) DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id))")
             conn.commit()
         except:
             pass
             
         sql_payments = """
-            SELECT DATE_FORMAT(o.created_at, '%%d %%b %%Y') as date, 
+            SELECT TO_CHAR(o.created_at, 'DD Mon YYYY') as date, 
                    CONCAT('Order #', o.order_id) as description, 
                    p.amount as gross,
                    o.gst_amount as gst,
@@ -610,7 +610,7 @@ def vendor_earnings(user = Depends(check_vendor)):
         """
         
         sql_payouts = """
-            SELECT DATE_FORMAT(created_at, '%%d %%b %%Y') as date,
+            SELECT TO_CHAR(created_at, 'DD Mon YYYY') as date,
                    'Bank Withdrawal' as description,
                    amount as gross,
                    0 as gst,
@@ -661,9 +661,9 @@ def get_invoices(user = Depends(check_vendor)):
         
         cursor.execute("""
             SELECT invoice_id, amount, status, 
-                   DATE_FORMAT(billing_period_start, '%d %b %Y') as start, 
-                   DATE_FORMAT(billing_period_end, '%d %b %Y') as end, 
-                   DATE_FORMAT(due_date, '%d %b %Y') as due 
+                   TO_CHAR(billing_period_start, 'DD Mon YYYY') as start, 
+                   TO_CHAR(billing_period_end, 'DD Mon YYYY') as end, 
+                   TO_CHAR(due_date, 'DD Mon YYYY') as due 
             FROM weekly_invoices 
             WHERE vendor_id = %s 
             ORDER BY created_at DESC

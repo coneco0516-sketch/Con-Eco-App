@@ -29,7 +29,7 @@ def get_platform_setting(key, default):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT setting_value FROM platform_settings WHERE setting_key = %s", (key,))
+        cursor.execute("SELECT setting_value FROM platformsettings WHERE setting_key = %s", (key,))
         row = cursor.fetchone()
         if row:
             val = row['setting_value']

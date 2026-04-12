@@ -240,7 +240,7 @@ def get_my_orders(user = Depends(check_customer)):
         
         sql = """
         SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, o.payment_method, pvt.status as payment_status, 
-               DATE_FORMAT(o.created_at, '%d %b %Y') as date, p.name as item_name, v.company_name as vendor_name, 
+               TO_CHAR(o.created_at, 'DD Mon YYYY') as date, p.name as item_name, v.company_name as vendor_name, 
                u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
                o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price
         FROM Orders o
@@ -268,7 +268,7 @@ def get_my_services(user = Depends(check_customer)):
         
         sql = """
         SELECT o.order_id, o.order_type, o.amount, o.status, o.payment_method, pvt.status as payment_status,
-               DATE_FORMAT(o.created_at, '%d %b %Y') as date, s.name as item_name, v.company_name as vendor_name, 
+               TO_CHAR(o.created_at, 'DD Mon YYYY') as date, s.name as item_name, v.company_name as vendor_name, 
                u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
         FROM Orders o
         JOIN Services s ON o.item_id = s.service_id
@@ -394,7 +394,7 @@ def get_reviews(item_type: str, item_id: int):
         
         # Get individual reviews
         sql = """
-            SELECT r.review_id, r.rating, r.comment, DATE_FORMAT(r.created_at, '%d %b %Y') as date, u.name as customer_name
+            SELECT r.review_id, r.rating, r.comment, TO_CHAR(r.created_at, 'DD Mon YYYY') as date, u.name as customer_name
             FROM ItemReviews r
             JOIN Users u ON r.customer_id = u.user_id
             WHERE r.item_type=%s AND r.item_id=%s

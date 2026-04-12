@@ -14,23 +14,21 @@ def check_admin(user = Depends(get_current_user_from_cookie)):
 
 # ===== PLATFORM SETTINGS =====
 
-@router.get("/platform_settings")
-def get_platform_settings(user = Depends(check_admin)):
+@router.get("/platformsettings")
+def get_platformsettings(user = Depends(check_admin)):
     """Fetch all platform-wide settings from the database."""
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
         # Ensure table exists
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS platform_settings (
+            CREATE TABLE IF NOT EXISTS platformsettings (
                 setting_key VARCHAR(100) PRIMARY KEY,
                 setting_value TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """)
         conn.commit()
         
-        cursor.execute("SELECT setting_key, setting_value FROM platform_settings")
+        cursor.execute("SELECT setting_key, setting_value FROM platformsettings")
         rows = cursor.fetchall()
         
         settings = {}
@@ -54,8 +52,8 @@ def get_platform_settings(user = Depends(check_admin)):
     finally:
         conn.close()
 
-@router.post("/platform_settings")
-def update_platform_settings(settings: dict, user = Depends(check_admin)):
+@router.post("/platformsettings")
+def update_platformsettings(settings: dict, user = Depends(check_admin)):
     """Update platform-wide settings."""
     conn = get_db_connection()
     try:
@@ -64,9 +62,9 @@ def update_platform_settings(settings: dict, user = Depends(check_admin)):
             # Convert boolean to string for storage
             val_str = str(value)
             cursor.execute("""
-                INSERT INTO platform_settings (setting_key, setting_value)
+                INSERT INTO platformsettings (setting_key, setting_value)
                 VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+                ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
             """, (key, val_str))
         
         conn.commit()
@@ -246,7 +244,7 @@ def get_orders(user = Depends(check_admin)):
         sql = """
         SELECT o.order_id, u_cust.name as customer_name, v.company_name as vendor_name, 
                o.order_type, o.amount, o.status, o.payment_method, pvt.status as payment_status,
-               DATE_FORMAT(o.created_at, '%d %M %Y') as date,
+               TO_CHAR(o.created_at, 'DD Mon YYYY') as date,
                ir.comment as review_message, ir.rating as review_rating
         FROM Orders o
         JOIN Customers c ON o.customer_id = c.customer_id
@@ -326,7 +324,7 @@ def get_payments(user = Depends(check_admin)):
         
         # Added columns: payment_method, vendor_credited, order_id, base_amount
         sql = """
-        SELECT DATE_FORMAT(p.transaction_date, '%d %b %Y') as date, p.txn_id, u_cust.name as customer_name,
+        SELECT TO_CHAR(p.transaction_date, 'DD Mon YYYY') as date, p.txn_id, u_cust.name as customer_name,
                v.company_name as vendor_name, p.amount, (p.amount - o.base_amount) as commission, p.status, o.payment_method, COALESCE(o.vendor_credited, 0) as vendor_credited, o.order_id, o.base_amount
         FROM Payments p
         JOIN Orders o ON p.order_id = o.order_id
@@ -354,10 +352,10 @@ def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(check_admin)):
         # 0. Schema Check: Ensure VendorWallets table exists (just in case)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS VendorWallets (
-                wallet_id INT AUTO_INCREMENT PRIMARY KEY,
+                wallet_id SERIAL PRIMARY KEY,
                 vendor_id INT UNIQUE,
                 balance DECIMAL(10,2) DEFAULT 0.00,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         conn.commit()
@@ -373,7 +371,7 @@ def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(check_admin)):
         net_amount = order['base_amount']
 
         # 1. Ensure wallet exists
-        cursor.execute("INSERT IGNORE INTO VendorWallets (vendor_id, balance) VALUES (%s, 0.00)", (order['vendor_id'],))
+        cursor.execute("INSERT INTO VendorWallets (vendor_id, balance) VALUES (%s, 0.00) ON CONFLICT (vendor_id) DO NOTHING", (order['vendor_id'],))
         
         # 2. Update balance
         cursor.execute("UPDATE VendorWallets SET balance = balance + %s WHERE vendor_id=%s", (net_amount, order['vendor_id']))
@@ -393,7 +391,7 @@ def get_payouts(user = Depends(check_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
-        try: cursor.execute("CREATE TABLE IF NOT EXISTS Payouts (payout_id INT AUTO_INCREMENT PRIMARY KEY, vendor_id INT, amount DECIMAL(10,2), account_name VARCHAR(100), account_number VARCHAR(100), ifsc VARCHAR(50), status ENUM('Pending', 'Completed', 'Rejected') DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id))")
+        try: cursor.execute("CREATE TABLE IF NOT EXISTS Payouts (payout_id SERIAL PRIMARY KEY, vendor_id INT, amount DECIMAL(10,2), account_name VARCHAR(100), account_number VARCHAR(100), ifsc VARCHAR(50), status VARCHAR(20) DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id))")
         except: pass
         conn.commit()
         
@@ -529,11 +527,11 @@ def get_contact_messages(user = Depends(check_admin)):
         # Ensure the table exists
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS contactmessages (
-                message_id INT AUTO_INCREMENT PRIMARY KEY,
+                message_id SERIAL PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
                 email VARCHAR(100) NOT NULL,
                 message TEXT NOT NULL,
-                status ENUM('Unread','Read','Replied') DEFAULT 'Unread',
+                status VARCHAR(20) DEFAULT 'Unread',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -541,7 +539,7 @@ def get_contact_messages(user = Depends(check_admin)):
         
         cursor.execute("""
             SELECT message_id, name, email, message, status,
-                   DATE_FORMAT(created_at, '%d %b %Y %H:%i') as date
+                   TO_CHAR(created_at, 'DD Mon YYYY HH24:MI') as date
             FROM contactmessages
             ORDER BY created_at DESC
         """)
