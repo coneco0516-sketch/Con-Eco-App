@@ -38,7 +38,7 @@ async def get_order_summary(order_id: int, user=Depends(get_current_user_from_co
                u_vend.email as vendor_email,
                u_cust.name as customer_name,
                u_cust.phone as customer_phone,
-               DATE_FORMAT(o.created_at, '%d %b %Y') as date
+               TO_CHAR(o.created_at, 'DD Mon YYYY') as date
         FROM Orders o
         LEFT JOIN Products p ON o.order_type = 'Product' AND o.item_id = p.product_id
         LEFT JOIN Services s ON o.order_type = 'Service' AND o.item_id = s.service_id
@@ -101,10 +101,10 @@ async def get_commission_gst_invoice(invoice_id: int, user=Depends(get_current_u
         # Fetch invoice + vendor details
         sql = """
         SELECT wi.invoice_id, wi.vendor_id, wi.amount, wi.status,
-               DATE_FORMAT(wi.billing_period_start, '%d %b %Y') as period_start,
-               DATE_FORMAT(wi.billing_period_end,   '%d %b %Y') as period_end,
-               DATE_FORMAT(wi.due_date,             '%d %b %Y') as due_date,
-               DATE_FORMAT(wi.created_at,           '%d %b %Y') as created_date,
+               TO_CHAR(wi.billing_period_start, 'DD Mon YYYY') as period_start,
+               TO_CHAR(wi.billing_period_end,   'DD Mon YYYY') as period_end,
+               TO_CHAR(wi.due_date,             'DD Mon YYYY') as due_date,
+               TO_CHAR(wi.created_at,           'DD Mon YYYY') as created_date,
                u.name as vendor_name,
                v.company_name,
                v.gstin as vendor_gstin,

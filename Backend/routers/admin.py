@@ -21,11 +21,13 @@ def get_platformsettings(user = Depends(check_admin)):
     try:
         cursor = conn.cursor(dictionary=True)
         # Ensure table exists
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS platformsettings (
                 setting_key VARCHAR(100) PRIMARY KEY,
                 setting_value TEXT,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
+        """)
         conn.commit()
         
         cursor.execute("SELECT setting_key, setting_value FROM platformsettings")
@@ -396,7 +398,8 @@ def get_payouts(user = Depends(check_admin)):
         conn.commit()
         
         cursor.execute("""
-            SELECT p.payout_id, v.company_name, p.amount, p.account_name, p.account_number, p.ifsc, p.status, DATE_FORMAT(p.created_at, '%d %b %Y') as date
+            SELECT p.payout_id, v.company_name, p.amount, p.account_name, p.account_number, p.ifsc, p.status,
+                   TO_CHAR(p.created_at, 'DD Mon YYYY') as date
             FROM Payouts p
             JOIN Vendors v ON p.vendor_id = v.vendor_id
             ORDER BY p.created_at DESC
@@ -639,11 +642,11 @@ def get_all_weekly_invoices(user = Depends(check_admin)):
         cursor.execute("""
             SELECT i.invoice_id, u.name as vendor_name, v.company_name,
                    i.amount, i.status,
-                   DATE_FORMAT(i.billing_period_start, '%d %b %Y') as period_start,
-                   DATE_FORMAT(i.billing_period_end, '%d %b %Y') as period_end,
-                   DATE_FORMAT(i.due_date, '%d %b %Y') as due_date,
+                   TO_CHAR(i.billing_period_start, 'DD Mon YYYY') as period_start,
+                   TO_CHAR(i.billing_period_end, 'DD Mon YYYY') as period_end,
+                   TO_CHAR(i.due_date, 'DD Mon YYYY') as due_date,
                    v.commission_strikes,
-                   EXISTS(SELECT 1 FROM Users u2 WHERE u2.user_id = v.vendor_id AND u2.is_blocked = 1) as is_blocked
+                   EXISTS(SELECT 1 FROM Users u2 WHERE u2.user_id = v.vendor_id AND u2.is_blocked = TRUE) as is_blocked
             FROM weekly_invoices i
             JOIN Vendors v ON i.vendor_id = v.vendor_id
             JOIN Users u ON v.vendor_id = u.user_id
