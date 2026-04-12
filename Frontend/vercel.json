@@ -1,8 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/(api|uploads|assets)/(.*)",
-      "destination": "https://coneco-backend.onrender.com/$1/$2"
+      "source": "/api/(.*)",
+      "destination": "https://con-eco-app.onrender.com/api/$1"
+    },
+    {
+      "source": "/uploads/(.*)",
+      "destination": "https://con-eco-app.onrender.com/uploads/$1"
     },
     {
       "source": "/(.*)",
