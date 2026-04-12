@@ -26,7 +26,8 @@ class PostgresPool:
                 password=db_pass,
                 host=db_host,
                 port=db_port,
-                database=db_name
+                database=db_name,
+                sslmode='require'
             )
             print("PostgreSQL connection pool initialized.")
         except Exception as e:
@@ -35,6 +36,9 @@ class PostgresPool:
     def get_connection(self):
         if self._pool is None:
             self.initialize()
+        
+        if self._pool is None:
+            raise RuntimeError("Database connection pool is unavailable. Check DB credentials and network.")
         
         conn = self._pool.getconn()
         

@@ -593,15 +593,15 @@ def forgot_password(request: ForgotPasswordRequest, background_tasks: Background
                 cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_token VARCHAR(255) DEFAULT NULL")
                 conn.commit()
             except Exception as e:
-                if "Duplicate column name" not in str(e):
+                if "already exists" not in str(e):
                     print(f"[auth] Token column migration error: {e}")
 
             # Try adding timestamp column
             try:
-                cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_sent_at DATETIME DEFAULT NULL")
+                cursor.execute("ALTER TABLE Users ADD COLUMN reset_password_sent_at TIMESTAMP DEFAULT NULL")
                 conn.commit()
             except Exception as e:
-                if "Duplicate column name" not in str(e):
+                if "already exists" not in str(e):
                     print(f"[auth] Status column migration error: {e}")
         except Exception as global_e:
             migration_error = str(global_e)
@@ -693,5 +693,9 @@ def subscribe_push(request: PushSubscriptionRequest, user = Depends(get_current_
 @router.get("/maintenance-mode")
 def get_maintenance_mode():
     """Public endpoint to check if maintenance mode is active."""
-    return {"status": "success", "maintenance_active": get_platform_setting('server_maintenance_mode', False)}
+    try:
+        maintenance_active = get_platform_setting('server_maintenance_mode', False)
+    except Exception:
+        maintenance_active = False
+    return {"status": "success", "maintenance_active": maintenance_active}
 
