@@ -37,6 +37,9 @@ def setup_database():
                 password_hash VARCHAR(255) NOT NULL,
                 role VARCHAR(20) CHECK (role IN ('Admin', 'Customer', 'Vendor')),
                 is_blocked BOOLEAN DEFAULT FALSE,
+                email_verified BOOLEAN DEFAULT FALSE,
+                email_verification_token VARCHAR(255) UNIQUE,
+                email_verification_sent_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -203,6 +206,19 @@ def setup_database():
 
         # 9. Logs & Preferences
         cursor.execute("""
+            CREATE TABLE IF NOT EXISTS email_notifications (
+                id SERIAL PRIMARY KEY,
+                user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+                email VARCHAR(255) NOT NULL,
+                notification_type VARCHAR(50) NOT NULL,
+                subject VARCHAR(255),
+                sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status VARCHAR(20) DEFAULT 'sent',
+                metadata JSON
+            )
+        """)
+
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS email_logs (
                 id SERIAL PRIMARY KEY,
                 to_email VARCHAR(255),
@@ -284,6 +300,63 @@ def setup_database():
                 booking_time TIME NOT NULL,
                 amount DECIMAL(10,2) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # 11. Legacy Tables (from original schema)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS faqs (
+                faq_id SERIAL PRIMARY KEY,
+                question VARCHAR(255) NOT NULL,
+                answer TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS otp_verifications (
+                otp_id SERIAL PRIMARY KEY,
+                user_email VARCHAR(100) NOT NULL,
+                otp_code VARCHAR(10) NOT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                is_verified BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS vendorearnings (
+                earning_id SERIAL PRIMARY KEY,
+                vendor_id INT REFERENCES vendors(vendor_id) ON DELETE CASCADE,
+                order_id INT REFERENCES orders(order_id) ON DELETE CASCADE,
+                booking_id VARCHAR(50) REFERENCES bookedservices(booking_id) ON DELETE CASCADE,
+                earning_amount DECIMAL(12,2) NOT NULL,
+                platform_fee DECIMAL(12,2) NOT NULL,
+                net_payout DECIMAL(12,2) NOT NULL,
+                status VARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Paid')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS vendorreviews (
+                review_id SERIAL PRIMARY KEY,
+                vendor_id INT REFERENCES vendors(vendor_id) ON DELETE CASCADE,
+                customer_id INT REFERENCES customers(customer_id) ON DELETE CASCADE,
+                rating DECIMAL(2,1) CHECK (rating >= 1.0 AND rating <= 5.0),
+                comment TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS orderitems (
+                order_item_id SERIAL PRIMARY KEY,
+                order_id INT REFERENCES orders(order_id) ON DELETE CASCADE,
+                product_id INT REFERENCES products(product_id) ON DELETE CASCADE,
+                quantity INT NOT NULL,
+                price_at_time DECIMAL(12,2) NOT NULL
             )
         """)
 
