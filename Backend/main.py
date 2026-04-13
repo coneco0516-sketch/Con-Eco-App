@@ -98,12 +98,14 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"REQUEST: {request.method} {request.url.path} from {request.headers.get('origin')}")
+    response = await call_next(request)
+    return response
 
 @app.exception_handler(401)
 async def not_authorized_handler(request: Request, exc):
-    # Overrides 401 exceptions to return 200 JSON with status='not_logged_in' 
-    # to perfectly match our existing frontend JS logic!
-    return JSONResponse(status_code=200, content={"status": "not_logged_in", "detail": str(exc.detail)})
 
 from pydantic import BaseModel
 from email_service import send_contact_form, send_contact_acknowledgment
