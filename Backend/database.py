@@ -1,78 +1,38 @@
-import psycopg2
-from psycopg2 import pool
-from psycopg2.extras import RealDictCursor
 import os
+import mysql.connector
+from mysql.connector import pooling
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# PostgreSQL configuration
-db_host = os.environ.get("DB_HOST", "localhost")
-db_name = os.environ.get("DB_NAME", "postgres")
-db_user = os.environ.get("DB_USER", "postgres")
-db_pass = os.environ.get("DB_PASS", "")
-db_port = os.environ.get("DB_PORT", "5432")
+# --- Railway MySQL Configuration ---
+mysql_host = os.environ.get("MYSQLHOST", "caboose.proxy.rlwy.net")
+mysql_port = int(os.environ.get("MYSQLPORT", 31353))
+mysql_user = os.environ.get("MYSQLUSER", "root")
+mysql_pass = os.environ.get("MYSQLPASSWORD", "XbRyzQaaWKiYnvEFBgXdWYhSruLGvPnA")
+mysql_db = os.environ.get("MYSQLDATABASE", "railway")
 
-class PostgresPool:
-    def __init__(self):
-        self._pool = None
-        self.initialize()
-
-    def initialize(self):
-        try:
-            self._pool = psycopg2.pool.SimpleConnectionPool(
-                1, 20,
-                user=db_user,
-                password=db_pass,
-                host=db_host,
-                port=db_port,
-                database=db_name,
-                sslmode='require'
-            )
-            print("PostgreSQL connection pool initialized.")
-        except Exception as e:
-            print(f"Error initializing PostgreSQL connection pool: {e}")
-
-    def get_connection(self):
-        if self._pool is None:
-            self.initialize()
-        
-        if self._pool is None:
-            raise RuntimeError("Database connection pool is unavailable. Check DB credentials and network.")
-        
-        conn = self._pool.getconn()
-        
-        # Wrap the connection to handle pooling 'close' behavior
-        # and monkey patch cursor to support 'dictionary=True'
-        original_close = conn.close
-        original_cursor = conn.cursor
-        pool_ref = self._pool
-
-        def wrapped_close():
-            if pool_ref and conn:
-                try:
-                    pool_ref.putconn(conn)
-                except Exception as e:
-                    print(f"Error returning connection to pool: {e}")
-                    original_close()
-            else:
-                original_close()
-
-        def compat_cursor(dictionary=False, **kwargs):
-            if dictionary:
-                return original_cursor(cursor_factory=RealDictCursor, **kwargs)
-            return original_cursor(**kwargs)
-        
-        conn.close = wrapped_close
-        conn.cursor = compat_cursor
-        return conn
-
-_pool_manager = PostgresPool()
+# --- MySQL Connection Pool ---
+try:
+    mysql_pool = mysql.connector.pooling.MySQLConnectionPool(
+        pool_name="coneco_pool",
+        pool_size=10,
+        host=mysql_host,
+        port=mysql_port,
+        user=mysql_user,
+        password=mysql_pass,
+        database=mysql_db
+    )
+    print("Railway MySQL connection pool initialized.")
+except Exception as e:
+    print(f"Error initializing Railway MySQL pool: {e}")
+    mysql_pool = None
 
 def get_db_connection():
-    return _pool_manager.get_connection()
+    if mysql_pool:
+        return mysql_pool.get_connection()
+    raise RuntimeError("Railway MySQL connection pool is unavailable.")
 
 def release_db_connection(conn):
-    # Now that we've wrapped conn.close(), we can just call it
     if conn:
         conn.close()

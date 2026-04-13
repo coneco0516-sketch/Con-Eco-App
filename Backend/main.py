@@ -1,4 +1,8 @@
 # Version: RESTORE_STABLE_V1.1
+import bcrypt
+if not hasattr(bcrypt, "__about__"):
+    bcrypt.__about__ = type("About", (), {"__version__": bcrypt.__version__})
+
 from pathlib import Path
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -41,7 +45,7 @@ async def lifespan(app: FastAPI):
     """Start background scheduler on app startup, stop on shutdown."""
     scheduler = BackgroundScheduler(timezone=IST)
 
-    # Every Monday at 00:01 IST → generate invoices for the past week
+    # Every Monday at 00:01 IST -> generate invoices for the past week
     scheduler.add_job(
         run_invoice_generation,
         CronTrigger(day_of_week='mon', hour=0, minute=1, timezone=IST),
@@ -49,7 +53,7 @@ async def lifespan(app: FastAPI):
         replace_existing=True
     )
 
-    # Every Thursday at 00:01 IST → enforce penalties (3 days after invoice)
+    # Every Thursday at 00:01 IST -> enforce penalties (3 days after invoice)
     scheduler.add_job(
         run_penalty_enforcement,
         CronTrigger(day_of_week='thu', hour=0, minute=1, timezone=IST),

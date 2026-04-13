@@ -34,17 +34,17 @@ def add_payment_method_column():
                 ALTER TABLE Orders 
                 ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Card' AFTER status
             """)
-            print("✅ Added payment_method column")
+            print("[OK] Added payment_method column")
         else:
             print("ℹ️  payment_method column already exists")
         
         connection.commit()
         cursor.close()
         connection.close()
-        print("✅ Orders table updated successfully!\n")
+        print("[OK] Orders table updated successfully!\n")
         
     except Error as err:
-        print(f"❌ Error: {err}")
+        print(f"[FAIL] Error: {err}")
         return False
     
     return True

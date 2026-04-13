@@ -46,9 +46,9 @@ APP_URL  = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
 if BREVO_API_KEY:
-    print(f"INFO: Email → Brevo HTTP API (production mode)")
+    print(f"INFO: Email -> Brevo HTTP API (production mode)")
 elif MAIL_USERNAME and MAIL_PASSWORD:
-    print(f"INFO: Email → Gmail SMTP fallback ({MAIL_USERNAME})")
+    print(f"INFO: Email -> Gmail SMTP fallback ({MAIL_USERNAME})")
 else:
     print("WARNING: No email provider configured. Emails will be skipped.")
 
@@ -81,13 +81,13 @@ def log_email_attempt(to_email: str, subject: str, status: str, error: str = Non
         print(f"[email_log] Could not write log: {e}")
 
 
-# ─── CORE SEND (BREVO HTTP → GMAIL SMTP FALLBACK) ────────────────────────────
+# ─── CORE SEND (BREVO HTTP -> GMAIL SMTP FALLBACK) ────────────────────────────
 def send_email(to_email: str, subject: str, html_content: str,
                plain_text: str = None, max_retries: int = 3) -> bool:
     """
     Send email via:
-      1. Brevo HTTP REST API (if BREVO_API_KEY is set) → works on Railway
-      2. Gmail SMTP fallback (if MAIL_USERNAME/PASSWORD set) → works locally
+      1. Brevo HTTP REST API (if BREVO_API_KEY is set) -> works on Railway
+      2. Gmail SMTP fallback (if MAIL_USERNAME/PASSWORD set) -> works locally
     Retries up to max_retries times. Logs every attempt to DB.
     Never raises — returns True on success, False on failure.
     """
@@ -100,7 +100,7 @@ def send_email(to_email: str, subject: str, html_content: str,
     if BREVO_API_KEY:
         for attempt in range(1, max_retries + 1):
             try:
-                print(f"[email/brevo] Attempt {attempt} → {to_email}")
+                print(f"[email/brevo] Attempt {attempt} -> {to_email}")
                 payload = {
                     "sender": {"name": MAIL_FROM_NAME, "email": MAIL_FROM or MAIL_USERNAME},
                     "to": [{"email": to_email}],
@@ -116,7 +116,7 @@ def send_email(to_email: str, subject: str, html_content: str,
                 resp = http_requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=15)
 
                 if resp.status_code in (200, 201):
-                    print(f"[email/brevo] SUCCESS → {to_email}")
+                    print(f"[email/brevo] SUCCESS -> {to_email}")
                     log_email_attempt(to_email, subject, "Success")
                     return True
                 else:
@@ -146,12 +146,12 @@ def send_email(to_email: str, subject: str, html_content: str,
 
         for attempt in range(1, max_retries + 1):
             try:
-                print(f"[email/smtp] Attempt {attempt} → {to_email}")
+                print(f"[email/smtp] Attempt {attempt} -> {to_email}")
                 with smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=15) as server:
                     server.starttls()
                     server.login(MAIL_USERNAME, MAIL_PASSWORD)
                     server.send_message(msg)
-                print(f"[email/smtp] SUCCESS → {to_email}")
+                print(f"[email/smtp] SUCCESS -> {to_email}")
                 log_email_attempt(to_email, subject, "Success")
                 return True
             except smtplib.SMTPAuthenticationError:
@@ -165,7 +165,7 @@ def send_email(to_email: str, subject: str, html_content: str,
                     return False
                 import time; time.sleep(2 ** attempt)
     else:
-        print(f"[email] SKIP (no provider configured) → {to_email}")
+        print(f"[email] SKIP (no provider configured) -> {to_email}")
         return False
 
     return False

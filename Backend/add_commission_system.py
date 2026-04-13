@@ -43,7 +43,7 @@ def add_commission_columns():
                 ALTER TABLE Orders 
                 ADD COLUMN base_amount DECIMAL(10,2) DEFAULT 0 AFTER amount
             """)
-            print("✅ Added base_amount column")
+            print("[OK] Added base_amount column")
         
         # Add commission_amount column
         if 'commission_amount' not in existing_cols:
@@ -51,7 +51,7 @@ def add_commission_columns():
                 ALTER TABLE Orders 
                 ADD COLUMN commission_amount DECIMAL(10,2) DEFAULT 0 AFTER base_amount
             """)
-            print("✅ Added commission_amount column")
+            print("[OK] Added commission_amount column")
         
         # Add total_amount column
         if 'total_amount' not in existing_cols:
@@ -59,15 +59,15 @@ def add_commission_columns():
                 ALTER TABLE Orders 
                 ADD COLUMN total_amount DECIMAL(10,2) DEFAULT 0 AFTER commission_amount
             """)
-            print("✅ Added total_amount column")
+            print("[OK] Added total_amount column")
         
         connection.commit()
         cursor.close()
         connection.close()
-        print("✅ Orders table updated successfully!\n")
+        print("[OK] Orders table updated successfully!\n")
         
     except Error as err:
-        print(f"❌ Error: {err}")
+        print(f"[FAIL] Error: {err}")
         return False
     
     return True
@@ -102,10 +102,10 @@ def create_commissions_table():
         connection.commit()
         cursor.close()
         connection.close()
-        print("✅ Commissions table created successfully!\n")
+        print("[OK] Commissions table created successfully!\n")
         
     except Error as err:
-        print(f"❌ Error: {err}")
+        print(f"[FAIL] Error: {err}")
         return False
     
     return True
@@ -134,7 +134,7 @@ def migrate_existing_orders():
         connection.commit()
         
         if migrated > 0:
-            print(f"✅ Migrated {migrated} existing orders\n")
+            print(f"[OK] Migrated {migrated} existing orders\n")
         else:
             print("ℹ️  No orders to migrate (already have commission data)\n")
         
@@ -142,7 +142,7 @@ def migrate_existing_orders():
         connection.close()
         
     except Error as err:
-        print(f"❌ Error: {err}")
+        print(f"[FAIL] Error: {err}")
         return False
     
     return True
@@ -157,15 +157,15 @@ if __name__ == "__main__":
         if create_commissions_table():
             if migrate_existing_orders():
                 print("=" * 50)
-                print("✅ ALL MIGRATIONS COMPLETED SUCCESSFULLY!")
+                print("[OK] ALL MIGRATIONS COMPLETED SUCCESSFULLY!")
                 print("=" * 50)
                 print("\n📊 Commission tracking is now enabled:")
                 print("   - Base amount: Vendor's set price")
                 print("   - Commission: 5% of base amount")
                 print("   - Total: Base + Commission (charged to customer)")
             else:
-                print("⚠️  Migration completed with warnings")
+                print("[WARN]️  Migration completed with warnings")
         else:
-            print("❌ Failed to create commissions table")
+            print("[FAIL] Failed to create commissions table")
     else:
-        print("❌ Failed to add commission columns")
+        print("[FAIL] Failed to add commission columns")
