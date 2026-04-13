@@ -214,6 +214,18 @@ def setup_database():
         """)
 
         cursor.execute("""
+            CREATE TABLE IF NOT EXISTS login_activity (
+                id SERIAL PRIMARY KEY,
+                user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+                email VARCHAR(100),
+                user_type VARCHAR(50),
+                ip_address VARCHAR(50),
+                user_agent TEXT,
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS notification_preferences (
                 user_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
                 user_type VARCHAR(20),
