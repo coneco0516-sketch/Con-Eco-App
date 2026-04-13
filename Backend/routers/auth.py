@@ -79,7 +79,14 @@ def login(request: LoginRequest, response: Response, http_request: Request, back
             return {"status": "error", "message": "Invalid credentials"}
             
         token = create_access_token({"user_id": user['user_id'], "role": user['role']})
-        response.set_cookie(key="session_token", value=token, httponly=True, samesite="Lax")
+        # Use SameSite=None and Secure=True for cross-domain support on Render
+        response.set_cookie(
+            key="session_token", 
+            value=token, 
+            httponly=True, 
+            samesite="None", 
+            secure=True
+        )
         
         # Record activity
         ip = http_request.client.host if http_request.client else "unknown"
