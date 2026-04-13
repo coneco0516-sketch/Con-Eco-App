@@ -86,10 +86,9 @@ import os
 # e.g. ALLOWED_ORIGINS="https://coneco.com,https://www.coneco.com,http://localhost:5173"
 allowed_origins_env = os.environ.get(
     "ALLOWED_ORIGINS", 
-    "http://localhost:5173,http://localhost:8000,http://127.0.0.1:5173,http://127.0.0.1:8000"
+    "http://localhost:5173,http://localhost:8000,http://127.0.0.1:5173,http://127.0.0.1:8000,https://con-eco-app-w78g.onrender.com,https://con-eco-frontend.onrender.com"
 )
 ALLOWED_ORIGINS = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
-print(f"[CORS] Whitelisted origins: {ALLOWED_ORIGINS}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -97,18 +96,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
-
-@app.middleware("http")
-async def add_cors_debug_headers(request: Request, call_next):
-    origin = request.headers.get("origin")
-    print(f"DEBUG: Request from origin: {origin}")
-    response = await call_next(request)
-    # Force CORS headers on every response just in case the middleware skips some
-    if origin:
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
 
 @app.exception_handler(401)
 async def not_authorized_handler(request: Request, exc):
