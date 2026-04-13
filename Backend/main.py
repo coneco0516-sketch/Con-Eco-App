@@ -89,6 +89,7 @@ allowed_origins_env = os.environ.get(
     "http://localhost:5173,http://localhost:8000,http://127.0.0.1:5173,http://127.0.0.1:8000"
 )
 ALLOWED_ORIGINS = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+print(f"[CORS] Whitelisted origins: {ALLOWED_ORIGINS}")
 
 app.add_middleware(
     CORSMiddleware,
