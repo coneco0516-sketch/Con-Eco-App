@@ -41,7 +41,7 @@ FROM_EMAIL         = MAIL_FROM
 FROM_NAME          = MAIL_FROM_NAME
 
 APP_NAME = "ConEco"
-APP_URL  = os.environ.get("APP_URL", "https://con-eco-app-production.up.railway.app")
+APP_URL  = os.environ.get("APP_URL", "https://con-eco-app-w78g.onrender.com")
 
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
