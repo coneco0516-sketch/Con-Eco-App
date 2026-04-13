@@ -155,3 +155,12 @@ def get_profile(request: Request):
 def logout(response: Response):
     response.delete_cookie("session_token")
     return {"status": "success"}
+
+@router.get("/maintenance-mode")
+def get_maintenance_mode():
+    return {"status": "success", "maintenance": False}
+
+@router.post("/subscribe-push")
+def subscribe_push(request: Request):
+    # Mock implementation for now to prevent 404s
+    return {"status": "success", "message": "Subscribed"}
