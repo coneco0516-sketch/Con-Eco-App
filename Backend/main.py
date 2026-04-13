@@ -106,6 +106,9 @@ async def log_requests(request: Request, call_next):
 
 @app.exception_handler(401)
 async def not_authorized_handler(request: Request, exc):
+    # Overrides 401 exceptions to return 200 JSON with status='not_logged_in' 
+    # to perfectly match our existing frontend JS logic!
+    return JSONResponse(status_code=200, content={"status": "not_logged_in", "detail": "Session expired or not logged in"})
 
 from pydantic import BaseModel
 from email_service import send_contact_form, send_contact_acknowledgment
