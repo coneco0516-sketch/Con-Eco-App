@@ -50,6 +50,7 @@ if BREVO_API_KEY:
 elif MAIL_USERNAME and MAIL_PASSWORD:
     print(f"INFO: Email -> Gmail SMTP fallback ({MAIL_USERNAME})")
 else:
+    print(f"DEBUG: BREVO_API_KEY length: {len(BREVO_API_KEY)}")
     print("WARNING: No email provider configured. Emails will be skipped.")
 
 
