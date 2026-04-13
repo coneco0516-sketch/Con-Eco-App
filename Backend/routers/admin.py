@@ -14,8 +14,8 @@ def check_admin(user = Depends(get_current_user_from_cookie)):
 
 # ===== PLATFORM SETTINGS =====
 
-@router.get("/platformsettings")
-def get_platformsettings(user = Depends(check_admin)):
+@router.get("/platform_settings")
+def get_platform_settings(user = Depends(check_admin)):
     """Fetch all platform-wide settings from the database."""
     conn = get_db_connection()
     try:
@@ -54,8 +54,8 @@ def get_platformsettings(user = Depends(check_admin)):
     finally:
         conn.close()
 
-@router.post("/platformsettings")
-def update_platformsettings(settings: dict, user = Depends(check_admin)):
+@router.post("/platform_settings")
+def update_platform_settings(settings: dict, user = Depends(check_admin)):
     """Update platform-wide settings."""
     conn = get_db_connection()
     try:
