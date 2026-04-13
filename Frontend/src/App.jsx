@@ -45,6 +45,8 @@ import VendorProfile from './pages/VendorProfile';
 import VendorBilling from './pages/VendorBilling';
 import './index.css';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 // Role-based route protection component
 function ProtectedRoute({ children, allowedRoles }) {
   const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
@@ -98,7 +100,7 @@ function AppContent() {
         await navigator.serviceWorker.ready;
 
         // Check if push is enabled in platform settings
-        const settingsResp = await fetch('/api/auth/maintenance-mode');
+        const settingsResp = await fetch(`${API}/api/auth/maintenance-mode`);
         const settingsData = await settingsResp.json();
         
         if (settingsData.status === 'success') {
@@ -119,7 +121,7 @@ function AppContent() {
             applicationServerKey: urlB64ToUint8Array('BMWUGlFCX4gbzFvuIVv-C0l6xRNm2ymMTnd3-mQqoCwAC7TOkheENAnxhPqXJk-dLZq4DzSwd6lFVY_7QWcFBOM') // SECURE VAPID KEY
           });
 
-          await fetch('/api/auth/subscribe-push', {
+          await fetch(`${API}/api/auth/subscribe-push`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ subscription }),
@@ -135,7 +137,7 @@ function AppContent() {
 
   const checkMaintenance = async () => {
     try {
-      const resp = await fetch('/api/auth/maintenance-mode');
+      const resp = await fetch(`${API}/api/auth/maintenance-mode`);
       const data = await resp.json();
       console.log("Maintenance Status Response:", data);
       if (data.status === 'success') {
@@ -164,7 +166,7 @@ function AppContent() {
   const handleMaintenanceOk = async () => {
     try {
       // Clear cookie session via backend
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch(`${API}/api/auth/logout`, { method: 'POST' });
     } catch (err) {
       console.error("Logout error during maintenance redirect:", err);
     }

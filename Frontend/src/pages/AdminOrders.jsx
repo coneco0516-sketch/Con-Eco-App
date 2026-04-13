@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,7 @@ function AdminOrders() {
   };
 
   useEffect(() => {
-    fetch('/api/admin/orders', { credentials: 'include' })
+    fetch(`${API}/api/admin/orders`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {

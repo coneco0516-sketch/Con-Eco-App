@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -28,7 +30,7 @@ function ResetPassword() {
     setMessage('');
 
     try {
-      const resp = await fetch('/api/auth/reset-password', {
+      const resp = await fetch(`${API}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, new_password: password })

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function VendorOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +13,7 @@ function VendorOrders() {
 
   const fetchOrders = () => {
     setLoading(true);
-    fetch('/api/vendor/orders', { credentials: 'include' })
+    fetch(`${API}/api/vendor/orders`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.orders) setOrders(data.orders);
@@ -22,7 +24,7 @@ function VendorOrders() {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const resp = await fetch('/api/vendor/orders/update_status', {
+      const resp = await fetch(`${API}/api/vendor/orders/update_status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_id: orderId, status: newStatus }),
@@ -51,7 +53,7 @@ function VendorOrders() {
 
   const handlePaymentStatusChange = async (orderId, newStatus) => {
     try {
-      const resp = await fetch('/api/vendor/orders/update_payment_status', {
+      const resp = await fetch(`${API}/api/vendor/orders/update_payment_status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_id: orderId, status: newStatus }),
@@ -71,7 +73,7 @@ function VendorOrders() {
 
   const handleBulkAction = async (orderId, action, price = null, message = '') => {
     try {
-      const resp = await fetch('/api/vendor/orders/bulk_action', {
+      const resp = await fetch(`${API}/api/vendor/orders/bulk_action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_id: orderId, action, negotiated_price: price, vendor_message: message }),

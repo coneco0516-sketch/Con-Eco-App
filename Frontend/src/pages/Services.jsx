@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomerSidebar from '../components/CustomerSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function Services() {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
@@ -12,7 +14,7 @@ function Services() {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    fetch('/api/customer/services', { credentials: 'include' })
+    fetch(`${API}/api/customer/services`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.items) setServices(data.items);
@@ -24,7 +26,7 @@ function Services() {
 
   const bookService = async (itemId, itemType, quantity) => {
     try {
-      const resp = await fetch('/api/customer/cart', {
+      const resp = await fetch(`${API}/api/customer/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item_type: itemType, item_id: itemId, quantity: quantity }),

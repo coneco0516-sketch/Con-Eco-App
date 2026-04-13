@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function AdminContactMessages() {
   const [messages, setMessages] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -24,7 +26,7 @@ function AdminContactMessages() {
   }, [navigate]);
 
   const fetchMessages = () => {
-    fetch('/api/admin/contact_messages', { credentials: 'include' })
+    fetch(`${API}/api/admin/contact_messages`, { credentials: 'include' })
       .then(res => {
         if (!res.ok) {
           return res.text().then(text => {
@@ -50,7 +52,7 @@ function AdminContactMessages() {
   };
 
   const handleMarkRead = (msgId) => {
-    fetch('/api/admin/contact_messages/update_status', {
+    fetch(`${API}/api/admin/contact_messages/update_status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -63,7 +65,7 @@ function AdminContactMessages() {
   const handleReply = () => {
     if (!replyText.trim()) return;
     setSending(true);
-    fetch('/api/admin/contact_messages/reply', {
+    fetch(`${API}/api/admin/contact_messages/reply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

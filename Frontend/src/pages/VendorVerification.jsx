@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function VendorVerification() {
   const [vendors, setVendors] = useState([]);
   const [qcScores, setQcScores] = useState({});
   const [editingVendor, setEditingVendor] = useState(null);
 
   const loadVendors = () => {
-    fetch('/api/admin/vendors', { credentials: 'include' })
+    fetch(`${API}/api/admin/vendors`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
@@ -28,7 +30,7 @@ function VendorVerification() {
   }, []);
 
   const updateStatus = (id, newStatus) => {
-    fetch('/api/admin/vendors/update_status', {
+    fetch(`${API}/api/admin/vendors/update_status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status: newStatus }),
@@ -44,7 +46,7 @@ function VendorVerification() {
   const updateQC = (vendorId, status) => {
     const qcScore = parseInt(qcScores[vendorId]) || 0;
     
-    fetch('/api/admin/vendors/update_qc', {
+    fetch(`${API}/api/admin/vendors/update_qc`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 

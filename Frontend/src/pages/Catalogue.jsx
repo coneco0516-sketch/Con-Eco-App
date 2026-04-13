@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function Catalogue() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +19,7 @@ function Catalogue() {
 
   const fetchCatalogue = () => {
     setLoading(true);
-    fetch('/api/vendor/catalogue', { credentials: 'include' })
+    fetch(`${API}/api/vendor/catalogue`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.items) setItems(data.items);
@@ -61,7 +63,7 @@ function Catalogue() {
       const uploadData = new FormData();
       uploadData.append('file', imageFile);
       try {
-        const upResp = await fetch('/api/vendor/upload_image', {
+        const upResp = await fetch(`${API}/api/vendor/upload_image`, {
           method: 'POST',
           body: uploadData,
           credentials: 'include'
@@ -99,7 +101,7 @@ function Catalogue() {
     }
 
     try {
-      const resp = await fetch('/api/vendor/catalogue', {
+      const resp = await fetch(`${API}/api/vendor/catalogue`, {
         method: editingItem ? 'PUT' : 'POST',
         body: formData,
         credentials: 'include'

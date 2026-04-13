@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './NotificationSettings.css';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 export default function NotificationSettings() {
   const [preferences, setPreferences] = useState({
     login_alerts: true,
@@ -24,7 +26,7 @@ export default function NotificationSettings() {
 
   const fetchPreferences = async () => {
     try {
-      const response = await fetch('/api/auth/notification-preferences');
+      const response = await fetch(`${API}/api/auth/notification-preferences`);
       const data = await response.json();
       if (data.status === 'success') {
         setPreferences(data.preferences);
@@ -38,7 +40,7 @@ export default function NotificationSettings() {
 
   const fetchLoginActivity = async () => {
     try {
-      const response = await fetch('/api/auth/login-activity');
+      const response = await fetch(`${API}/api/auth/login-activity`);
       const data = await response.json();
       if (data.status === 'success') {
         setLoginActivity(data.activities || []);
@@ -58,7 +60,7 @@ export default function NotificationSettings() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch('/api/auth/notification-preferences', {
+      const response = await fetch(`${API}/api/auth/notification-preferences`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import CustomerSidebar from '../components/CustomerSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -8,7 +10,7 @@ function Cart() {
 
   const loadCart = (isInitial = false) => {
     if (isInitial) setLoading(true);
-    fetch('/api/customer/cart', { credentials: 'include' })
+    fetch(`${API}/api/customer/cart`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.items) setCartItems(data.items);
@@ -27,7 +29,7 @@ function Cart() {
     setCartItems(cartItems.filter(item => item.cart_id !== cartId));
 
     try {
-      const resp = await fetch('/api/customer/cart', {
+      const resp = await fetch(`${API}/api/customer/cart`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cart_id: cartId }),
@@ -57,7 +59,7 @@ function Cart() {
     ));
 
     try {
-      const resp = await fetch('/api/customer/cart', {
+      const resp = await fetch(`${API}/api/customer/cart`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cart_id: cartId, quantity: newQuantity }),

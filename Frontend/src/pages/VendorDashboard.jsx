@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import VendorSidebar from '../components/VendorSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function VendorDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
@@ -21,7 +23,7 @@ function VendorDashboard() {
       }
 
       // Fetch vendor stats including verification status
-      fetch('/api/vendor/dashboard', { credentials: 'include' })
+      fetch(`${API}/api/vendor/dashboard`, { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
           if (data.status === 'success') {

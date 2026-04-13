@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function Contact() {
   const [formData, setFormData] = useState({
     name: '',
@@ -28,7 +30,7 @@ function Contact() {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch(`${API}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

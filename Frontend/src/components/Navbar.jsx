@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,7 +18,7 @@ function Navbar() {
     localStorage.removeItem('is_logged_in');
     localStorage.removeItem('user_role');
 
-    fetch('/api/auth/logout', {
+    fetch(`${API}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include'
     }).then(() => {

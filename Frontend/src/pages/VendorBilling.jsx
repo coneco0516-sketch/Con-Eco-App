@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function VendorBilling() {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ function VendorBilling() {
 
   const fetchInvoices = () => {
     setLoading(true);
-    fetch('/api/vendor/invoices', { credentials: 'include' })
+    fetch(`${API}/api/vendor/invoices`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.invoices) setInvoices(data.invoices);
@@ -48,7 +50,7 @@ function VendorBilling() {
     const amountVal = parseFloat(invoice.amount);
     const amountPaise = Math.round(amountVal * 100);
 
-    const res = await fetch('/api/payment/create_order', {
+    const res = await fetch(`${API}/api/payment/create_order`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -70,7 +72,7 @@ function VendorBilling() {
       description: `Platform Commission Payment (Receipt #${invoice.invoice_id})`,
       order_id: orderData.order_id,
       handler: async function (response) {
-        const verifyRes = await fetch('/api/payment/verify_invoice', {
+        const verifyRes = await fetch(`${API}/api/payment/verify_invoice`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function AdminCommissions() {
   const [data, setData] = useState({ invoices: [], outstanding: 0, collected: 0 });
   const [loading, setLoading] = useState(true);
@@ -9,7 +11,7 @@ function AdminCommissions() {
 
   const fetchInvoices = () => {
     setLoading(true);
-    fetch('/api/admin/weekly_invoices', { credentials: 'include' })
+    fetch(`${API}/api/admin/weekly_invoices`, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.status === 'success') {

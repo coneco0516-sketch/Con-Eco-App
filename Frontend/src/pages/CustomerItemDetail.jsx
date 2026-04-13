@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CustomerSidebar from '../components/CustomerSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function CustomerItemDetail() {
   const { type, id } = useParams();
   const navigate = useNavigate();
@@ -14,7 +16,7 @@ function CustomerItemDetail() {
   const [submittingReview, setSubmittingReview] = useState(false);
 
   const isProduct = type.toLowerCase() === 'product';
-  const endpoint = isProduct ? '/api/customer/products' : '/api/customer/services';
+  const endpoint = isProduct ? `${API}/api/customer/products` : `${API}/api/customer/services`;
 
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkData, setBulkData] = useState({ address: '', city: '', state: '', message: '' });
@@ -49,7 +51,7 @@ function CustomerItemDetail() {
 
   const handleAction = async () => {
     try {
-      const resp = await fetch('/api/customer/cart', {
+      const resp = await fetch(`${API}/api/customer/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -79,7 +81,7 @@ function CustomerItemDetail() {
     }
     setSubmittingBulk(true);
     try {
-      const resp = await fetch('/api/customer/bulk-request', {
+      const resp = await fetch(`${API}/api/customer/bulk-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -111,7 +113,7 @@ function CustomerItemDetail() {
     e.preventDefault();
     setSubmittingReview(true);
     try {
-      const resp = await fetch('/api/customer/reviews', {
+      const resp = await fetch(`${API}/api/customer/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

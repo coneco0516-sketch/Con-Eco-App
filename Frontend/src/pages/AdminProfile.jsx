@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 import { useNavigate } from 'react-router-dom';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function AdminProfile() {
   const [profile, setProfile] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -16,7 +18,7 @@ function AdminProfile() {
 
   const fetchProfile = async () => {
     try {
-      const resp = await fetch('/api/auth/profile', { credentials: 'include' });
+      const resp = await fetch(`${API}/api/auth/profile`, { credentials: 'include' });
       const data = await resp.json();
       if (data.status === 'success') {
         setProfile(data.profile);
@@ -39,7 +41,7 @@ function AdminProfile() {
     e.preventDefault();
     setMsg('Updating...');
     try {
-      const resp = await fetch('/api/auth/profile', {
+      const resp = await fetch(`${API}/api/auth/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -61,7 +63,7 @@ function AdminProfile() {
   const handleLogout = () => {
     localStorage.removeItem('is_logged_in');
     localStorage.removeItem('user_role');
-    fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).then(() => navigate('/login'));
+    fetch(`${API}/api/auth/logout`, { method: 'POST', credentials: 'include' }).then(() => navigate('/login'));
   };
 
   return (

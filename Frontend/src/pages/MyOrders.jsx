@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import CustomerSidebar from '../components/CustomerSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = () => {
     setLoading(true);
-    fetch('/api/customer/my_orders', { credentials: 'include' })
+    fetch(`${API}/api/customer/my_orders`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.orders) setOrders(data.orders);
@@ -25,7 +27,7 @@ function MyOrders() {
   const handlePayNow = async (order) => {
     try {
       // 1. Create Razorpay order
-      const resp = await fetch('/api/payment/create_order', {
+      const resp = await fetch(`${API}/api/payment/create_order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount_paise: Math.round(order.amount * 100) }),
@@ -48,7 +50,7 @@ function MyOrders() {
         order_id: orderData.order_id,
         handler: async (response) => {
           // 3. Verify on backend
-          const verifyResp = await fetch('/api/payment/verify_settlement', {
+          const verifyResp = await fetch(`${API}/api/payment/verify_settlement`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -80,7 +82,7 @@ function MyOrders() {
     if (!window.confirm("Are you sure you want to cancel this order? For online payments, a 100% refund will be initiated.")) return;
 
     try {
-      const resp = await fetch('/api/customer/orders/cancel', {
+      const resp = await fetch(`${API}/api/customer/orders/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_id: orderId }),

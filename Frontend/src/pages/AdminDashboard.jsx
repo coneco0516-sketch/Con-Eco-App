@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function AdminDashboard() {
   const [stats, setStats] = useState({
     pending_vendors: '...',
@@ -21,7 +23,7 @@ function AdminDashboard() {
       return;
     }
 
-    fetch('/api/admin/dashboard_stats', { credentials: 'include' })
+    fetch(`${API}/api/admin/dashboard_stats`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.status === 'not_logged_in') {
@@ -98,7 +100,7 @@ function AdminDashboard() {
                 style={{ background: '#238636', fontSize: '0.85rem' }}
                 onClick={async () => {
                   if (!window.confirm("Generate Weekly Invoices for COD commissions?")) return;
-                  const res = await fetch('/api/admin/generate_weekly_invoices', { method: 'POST', credentials: 'include' });
+                  const res = await fetch(`${API}/api/admin/generate_weekly_invoices`, { method: 'POST', credentials: 'include' });
                   const data = await res.json();
                   alert(data.message);
                 }}

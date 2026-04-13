@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function Earnings() {
   const [earnings, setEarnings] = useState({ total: 0, online_total: 0, cod_total: 0, pending_online: 0, pending_cod: 0, breakdowns: [] });
   const [loading, setLoading] = useState(true);
@@ -13,7 +15,7 @@ function Earnings() {
 
   const fetchEarnings = () => {
     setLoading(true);
-    fetch('/api/vendor/earnings', { credentials: 'include' })
+    fetch(`${API}/api/vendor/earnings`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.stats) {
@@ -43,7 +45,7 @@ function Earnings() {
   const processWithdraw = async (e) => {
     e.preventDefault();
     try {
-      const resp = await fetch('/api/vendor/withdraw', {
+      const resp = await fetch(`${API}/api/vendor/withdraw`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: earnings.online_total, account_number: bankDetails.accountNumber, ifsc: bankDetails.ifsc }),

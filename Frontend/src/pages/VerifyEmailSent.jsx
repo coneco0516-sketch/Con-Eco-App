@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './VerifyEmailSent.css';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 export default function VerifyEmailSent() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ export default function VerifyEmailSent() {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/resend-verification', {
+      const response = await fetch(`${API}/api/auth/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

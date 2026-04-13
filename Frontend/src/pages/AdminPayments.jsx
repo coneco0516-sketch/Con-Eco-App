@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function AdminPayments() {
   const [stats, setStats] = useState({ total_revenue: 0, vendor_collected: 0 });
   const [transactions, setTransactions] = useState([]);
@@ -9,7 +11,7 @@ function AdminPayments() {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/admin/payments', { credentials: 'include' })
+    fetch(`${API}/api/admin/payments`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {

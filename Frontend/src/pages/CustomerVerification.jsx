@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function CustomerVerification() {
   const [customers, setCustomers] = useState([]);
 
   const loadCustomers = () => {
-    fetch('/api/admin/customers', { credentials: 'include' })
+    fetch(`${API}/api/admin/customers`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
@@ -20,7 +22,7 @@ function CustomerVerification() {
   }, []);
 
   const updateStatus = (id, newStatus) => {
-    fetch('/api/admin/customers/update_status', {
+    fetch(`${API}/api/admin/customers/update_status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status: newStatus }),

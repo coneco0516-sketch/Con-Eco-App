@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 import { useNavigate } from 'react-router-dom';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 const PUSH_VAPID_KEY = 'BMWUGlFCX4gbzFvuIVv-C0l6xRNm2ymMTnd3-mQqoCwAC7TOkheENAnxhPqXJk-dLZq4DzSwd6lFVY_7QWcFBOM';
 
 
@@ -19,7 +21,7 @@ function VendorProfile() {
 
   const fetchProfile = async () => {
     try {
-      const resp = await fetch('/api/auth/profile', { credentials: 'include' });
+      const resp = await fetch(`${API}/api/auth/profile`, { credentials: 'include' });
       const data = await resp.json();
       if (data.status === 'success') {
         setProfile(data.profile);
@@ -42,7 +44,7 @@ function VendorProfile() {
     e.preventDefault();
     setMsg('Updating...');
     try {
-      const resp = await fetch('/api/auth/profile', {
+      const resp = await fetch(`${API}/api/auth/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -64,7 +66,7 @@ function VendorProfile() {
   const handleLogout = () => {
     localStorage.removeItem('is_logged_in');
     localStorage.removeItem('user_role');
-    fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).then(() => navigate('/login'));
+    fetch(`${API}/api/auth/logout`, { method: 'POST', credentials: 'include' }).then(() => navigate('/login'));
   };
 
   const [pushStatus, setPushStatus] = useState('Checking...');
@@ -104,7 +106,7 @@ function VendorProfile() {
         userVisibleOnly: true,
         applicationServerKey: urlB64ToUint8Array(PUSH_VAPID_KEY)
       });
-      const resp = await fetch('/api/auth/subscribe-push', {
+      const resp = await fetch(`${API}/api/auth/subscribe-push`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subscription: sub }),

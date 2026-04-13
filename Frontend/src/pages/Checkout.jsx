@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import CustomerSidebar from '../components/CustomerSidebar';
 import { useNavigate } from 'react-router-dom';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 // Dynamically load the Razorpay checkout script
 function loadRazorpayScript() {
   return new Promise((resolve) => {
@@ -30,7 +32,7 @@ function Checkout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('/api/customer/cart', { credentials: 'include' })
+    fetch(`${API}/api/customer/cart`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.items) setCart(data.items);
@@ -66,7 +68,7 @@ function Checkout() {
 
     if (paymentMethod === 'COD') {
         try {
-            const res = await fetch('/api/payment/place_order_offline', {
+            const res = await fetch(`${API}/api/payment/place_order_offline`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -100,7 +102,7 @@ function Checkout() {
 
     // 2. Ask our backend to create a Razorpay order
     const amountPaise = Math.round(total * 100); // Convert ₹ to paise
-    const res = await fetch('/api/payment/create_order', {
+    const res = await fetch(`${API}/api/payment/create_order`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -124,7 +126,7 @@ function Checkout() {
       order_id: orderData.order_id,
       handler: async function (response) {
         // 4. Verify payment signature with our backend → place orders in DB
-        const verifyRes = await fetch('/api/payment/verify', {
+        const verifyRes = await fetch(`${API}/api/payment/verify`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -181,7 +183,7 @@ function Checkout() {
     });
 
     try {
-      const resp = await fetch('/api/customer/cart', {
+      const resp = await fetch(`${API}/api/customer/cart`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cart_id: cartId, quantity: newQuantity }),
@@ -194,7 +196,7 @@ function Checkout() {
         setTotal(prevTotal);
       } else {
         // Fetch accurate fresh totals from cart endpoint
-        fetch('/api/customer/cart', { credentials: 'include' })
+        fetch(`${API}/api/customer/cart`, { credentials: 'include' })
           .then(res => res.json())
           .then(data => {
             if (data.total) setTotal(data.total);

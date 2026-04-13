@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 import { useNavigate } from 'react-router-dom';
 
+const API = process.env.REACT_APP_API_URL || '';
+
 function PlatformSettings() {
   const [settings, setSettings] = useState({
     enable_vendor_registration: true,
@@ -27,7 +29,7 @@ function PlatformSettings() {
 
   const fetchSettings = async () => {
     try {
-      const resp = await fetch('/api/admin/platform_settings', { credentials: 'include' });
+      const resp = await fetch(`${API}/api/admin/platform_settings`, { credentials: 'include' });
       const data = await resp.json();
       if (data.status === 'success') {
         // Merge defaults with DB values if they exist
@@ -53,7 +55,7 @@ function PlatformSettings() {
   const handleSave = async () => {
     setMsg('Saving changes...');
     try {
-      const resp = await fetch('/api/admin/platform_settings', {
+      const resp = await fetch(`${API}/api/admin/platform_settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
