@@ -297,7 +297,7 @@ def get_payments(user = Depends(check_admin)):
             JOIN Orders o ON p.order_id = o.order_id 
             WHERE p.status='Completed' 
               AND o.payment_method != 'COD' 
-              AND COALESCE(o.vendor_credited, 0) = 0
+              AND COALESCE(o.vendor_credited, FALSE) = FALSE
         """)
         res = cursor.fetchone()
         if res:
@@ -327,7 +327,7 @@ def get_payments(user = Depends(check_admin)):
         # Added columns: payment_method, vendor_credited, order_id, base_amount
         sql = """
         SELECT TO_CHAR(p.transaction_date, 'DD Mon YYYY') as date, p.txn_id, u_cust.name as customer_name,
-               v.company_name as vendor_name, p.amount, (p.amount - o.base_amount) as commission, p.status, o.payment_method, COALESCE(o.vendor_credited, 0) as vendor_credited, o.order_id, o.base_amount
+               v.company_name as vendor_name, p.amount, (p.amount - o.base_amount) as commission, p.status, o.payment_method, COALESCE(o.vendor_credited, FALSE) as vendor_credited, o.order_id, o.base_amount
         FROM Payments p
         JOIN Orders o ON p.order_id = o.order_id
         JOIN Customers c ON o.customer_id = c.customer_id

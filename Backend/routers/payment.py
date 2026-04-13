@@ -175,12 +175,13 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             cursor.execute(
                 """INSERT INTO Orders 
                    (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                   RETURNING order_id""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"],
                  total_amount, base_amount, gst_amount, commission_amount, total_amount,
                  order_status, delivery_address, payment_method)
             )
-            order_db_id = cursor.lastrowid
+            order_db_id = cursor.fetchone()['order_id']
             
             cursor.execute(
                 "INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,%s)",

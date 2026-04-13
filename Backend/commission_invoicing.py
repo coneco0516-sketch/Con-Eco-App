@@ -69,7 +69,7 @@ def enforce_penalties():
         SELECT i.*, v.commission_strikes 
         FROM weekly_invoices i
         JOIN Vendors v ON i.vendor_id = v.vendor_id
-        WHERE i.status = 'Unpaid' AND i.due_date < CURRENT_DATE()
+        WHERE i.status = 'Unpaid' AND i.due_date < CURRENT_DATE
     """)
     overdue = cursor.fetchall()
     
@@ -88,7 +88,7 @@ def enforce_penalties():
             print(f"Vendor {vendor_id} unverified.")
         elif new_strikes >= 2:
             # Second time: Block
-            cursor.execute("UPDATE Users SET is_blocked = 1 WHERE user_id = %s", (vendor_id,))
+            cursor.execute("UPDATE Users SET is_blocked = TRUE WHERE user_id = %s", (vendor_id,))
             print(f"Vendor {vendor_id} blocked.")
             
         # Optional: Mark this invoice as 'Penalty Applied' so we don't count it again or keep increasing strikes indefinitely for the same invoice

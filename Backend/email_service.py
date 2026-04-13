@@ -61,7 +61,7 @@ def log_email_attempt(to_email: str, subject: str, status: str, error: str = Non
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS email_logs (
-                id INT AUTO_INCREMENT PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 to_email VARCHAR(255),
                 subject VARCHAR(255),
                 status VARCHAR(50),
@@ -491,13 +491,13 @@ def save_notification_preference(user_id: int, user_type: str, preferences: dict
                  profile_update_alerts, product_update_alerts, order_alerts,
                  qc_status_alerts, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
-            ON DUPLICATE KEY UPDATE
-                login_alerts=VALUES(login_alerts),
-                password_change_alerts=VALUES(password_change_alerts),
-                profile_update_alerts=VALUES(profile_update_alerts),
-                product_update_alerts=VALUES(product_update_alerts),
-                order_alerts=VALUES(order_alerts),
-                qc_status_alerts=VALUES(qc_status_alerts),
+            ON CONFLICT (user_id) DO UPDATE SET
+                login_alerts=EXCLUDED.login_alerts,
+                password_change_alerts=EXCLUDED.password_change_alerts,
+                profile_update_alerts=EXCLUDED.profile_update_alerts,
+                product_update_alerts=EXCLUDED.product_update_alerts,
+                order_alerts=EXCLUDED.order_alerts,
+                qc_status_alerts=EXCLUDED.qc_status_alerts,
                 updated_at=NOW()
         """, (
             user_id, user_type,

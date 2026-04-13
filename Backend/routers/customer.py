@@ -209,8 +209,12 @@ def checkout(data: CheckoutData, user = Depends(check_customer)):
             cursor.execute("""
                 INSERT INTO Orders (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending', %s, %s)
+                RETURNING order_id
             """, (cust_id, item['vendor_id'], item['item_type'], item['item_id'], item['quantity'], total_amount, base_amount, gst_amount, commission_amount, total_amount, f"{data.address}, {data.city}, {data.state}", data.payment_method))
-            order_id = cursor.lastrowid
+            order_id = cursor.fetchone()['order_id'] if isinstance(cursor.fetchone, dict) or cursor.description else cursor.fetchone()[0]
+            # Since I'm using RealDictCursor for dictionary=True, I should handle it correctly.
+            # However, cursor.fetchone() might return a dict or tuple depending on internal wrapper.
+            # My current wrapper handles cursor(dictionary=True).
             
             # Track commission for financial reporting
             cursor.execute(
@@ -470,11 +474,12 @@ def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
                 amount, base_amount, gst_amount, commission_amount, total_amount,
                 status, delivery_address, payment_method, 
                 is_bulk_request, customer_message
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Bulk Requested', %s, 'Negotiable', 1, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Bulk Requested', %s, 'Negotiable', TRUE, %s)
+            RETURNING order_id
         """, (cust_id, item['vendor_id'], item_type, data.item_id, data.quantity, 
               total_amount, base_amount, gst_amount, commission_amount, total_amount, full_address, data.message))
         
-        order_id = cursor.lastrowid
+        order_id = cursor.fetchone()['order_id']
         
         # Track commission for financial reporting
         cursor.execute(

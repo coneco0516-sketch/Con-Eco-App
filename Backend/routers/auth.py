@@ -114,9 +114,9 @@ def register(request: RegisterRequest):
             return {"status": "error", "message": "Email already exists"}
             
         hashed_pass = hash_password(request.password)
-        cursor.execute("INSERT INTO users (name, email, phone, password_hash, role) VALUES (%s, %s, %s, %s, %s)",
+        cursor.execute("INSERT INTO users (name, email, phone, password_hash, role) VALUES (%s, %s, %s, %s, %s) RETURNING user_id",
                        (request.full_name, request.email, request.phone_number, hashed_pass, request.role))
-        user_id = cursor.lastrowid
+        user_id = cursor.fetchone()[0]
         
         if request.role == 'Customer':
             cursor.execute("INSERT INTO customers (customer_id, city, state) VALUES (%s, %s, %s)",

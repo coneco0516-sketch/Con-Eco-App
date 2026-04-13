@@ -173,6 +173,28 @@ app.include_router(vendor.router,  prefix="/api/vendor",  tags=["vendor"])
 app.include_router(payment.router, prefix="/api/payment", tags=["payment"])
 app.include_router(invoice.router, prefix="/api/invoice", tags=["invoice"])
 
+@app.get("/db-check")
+def db_check():
+    """Verify database connectivity (Render/Neon diagnostic)."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT version();")
+        version = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return {
+            "status": "success",
+            "message": "Connected to PostgreSQL successfully!",
+            "database": "Neon PostgreSQL",
+            "version": version
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Connection failed: {str(e)}"
+        }
+
 @app.get("/api/health")
 def api_health():
     try:
