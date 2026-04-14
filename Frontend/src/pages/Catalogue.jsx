@@ -130,7 +130,7 @@ function Catalogue() {
 
   const handleDelete = async (item) => {
     try {
-      const resp = await fetch(`/api/vendor/catalogue?id=${item.id}&type=${item.type}`, {
+      const resp = await fetch(`${API}/api/vendor/catalogue?id=${item.id}&type=${item.type}`, {
         method: 'DELETE',
         credentials: 'include'
       });

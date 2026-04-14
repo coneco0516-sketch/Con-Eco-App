@@ -24,7 +24,7 @@ function CustomerItemDetail() {
 
   const fetchReviews = () => {
     // Reviews are fetched optionally from public or authenticated.
-    fetch(`/api/customer/reviews/${type.toLowerCase()}/${id}`)
+    fetch(`${API}/api/customer/reviews/${type.toLowerCase()}/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {

@@ -105,7 +105,7 @@ function VendorBilling() {
   const handleDownloadReceipt = async (invoiceId) => {
     setDownloading(invoiceId);
     try {
-      const response = await fetch(`/api/invoice/commission_gst/${invoiceId}`, {
+      const response = await fetch(`${API}/api/invoice/commission_gst/${invoiceId}`, {
         credentials: 'include'
       });
 

@@ -101,7 +101,7 @@ function MyBookedServices() {
 
   const handleDownloadSummary = async (orderId) => {
     try {
-      const response = await fetch(`/api/invoice/download/${orderId}`, { credentials: 'include' });
+      const response = await fetch(`${API}/api/invoice/download/${orderId}`, { credentials: 'include' });
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ detail: 'Server Error' }));
