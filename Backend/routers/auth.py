@@ -78,6 +78,10 @@ def login(request: LoginRequest, response: Response, http_request: Request, back
         if not user or not verify_password(request.password, user['password_hash']):
             return {"status": "error", "message": "Invalid credentials"}
             
+        # Check email verification before allowing login
+        if user.get('email_verified') is False:
+            return {"status": "error", "message": "Please verify your email before logging in. Check your inbox.", "requires_verification": True}
+            
         token = create_access_token({"user_id": user['user_id'], "role": user['role']})
         # Use SameSite=None and Secure=True for cross-domain support on Render
         response.set_cookie(
@@ -112,7 +116,7 @@ class RegisterRequest(BaseModel):
     address: Optional[str] = None
 
 @router.post("/register")
-def register(request: RegisterRequest):
+def register(request: RegisterRequest, background_tasks: BackgroundTasks):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -121,9 +125,14 @@ def register(request: RegisterRequest):
             return {"status": "error", "message": "Email already exists"}
             
         hashed_pass = hash_password(request.password)
-        cursor.execute("INSERT INTO users (name, email, phone, password_hash, role) VALUES (%s, %s, %s, %s, %s) RETURNING user_id",
-                       (request.full_name, request.email, request.phone_number, hashed_pass, request.role))
-        user_id = cursor.fetchone()[0]
+        token = secrets.token_hex(20)
+        cursor.execute("INSERT INTO users (name, email, phone, password_hash, role, email_verified, email_verification_token, email_verification_sent_at) VALUES (%s, %s, %s, %s, %s, FALSE, %s, NOW()) RETURNING user_id",
+                       (request.full_name, request.email, request.phone_number, hashed_pass, request.role, token))
+        res = cursor.fetchone()
+        user_id = res['user_id'] if isinstance(res, dict) else res[0]
+        
+        # Dispatch the verification email in background
+        background_tasks.add_task(send_email_verification, request.email, request.full_name, token)
         
         if request.role == 'Customer':
             cursor.execute("INSERT INTO customers (customer_id, city, state) VALUES (%s, %s, %s)",
@@ -134,6 +143,51 @@ def register(request: RegisterRequest):
         
         conn.commit()
         return {"status": "success", "message": "Registration successful"}
+    finally:
+        conn.close()
+
+class ResendVerificationRequest(BaseModel):
+    email: str
+
+@router.post("/resend-verification")
+def resend_verification(request: ResendVerificationRequest, background_tasks: BackgroundTasks):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT user_id, name, email_verified, email_verification_token FROM users WHERE email=%s", (request.email,))
+        user = cursor.fetchone()
+        
+        if not user:
+            return {"status": "error", "message": "Email not found"}
+        if user.get('email_verified'):
+            return {"status": "error", "message": "Email is already verified"}
+            
+        token = user.get('email_verification_token')
+        if not token:
+            token = secrets.token_hex(20)
+            cursor.execute("UPDATE users SET email_verification_token=%s, email_verification_sent_at=NOW() WHERE user_id=%s", (token, user['user_id']))
+            conn.commit()
+            
+        background_tasks.add_task(send_email_verification, request.email, user['name'], token)
+        return {"status": "success", "message": "Verification email sent"}
+    finally:
+        conn.close()
+
+@router.get("/verify-email")
+def verify_email(token: str):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT user_id FROM users WHERE email_verification_token=%s AND email_verified=FALSE", (token,))
+        user = cursor.fetchone()
+        
+        if not user:
+            return {"status": "error", "message": "Invalid or expired verification token."}
+            
+        cursor.execute("UPDATE users SET email_verified=TRUE, email_verification_token=NULL WHERE user_id=%s", (user['user_id'],))
+        conn.commit()
+        
+        return {"status": "success", "message": "Email successfully verified!"}
     finally:
         conn.close()
 
@@ -155,6 +209,29 @@ def get_profile(request: Request):
             user.update(cursor.fetchone() or {})
             
         return {"status": "success", "profile": user}
+    finally:
+        conn.close()
+
+@router.put("/profile")
+def update_profile(request: Request, data: dict):
+    user_info = get_current_user_from_cookie(request)
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        # Update core user info
+        cursor.execute("UPDATE users SET name=%s, phone=%s WHERE user_id=%s", 
+                       (data.get('name'), data.get('phone'), user_info['user_id']))
+        
+        # Update role-specific info
+        if user_info['role'] == 'Customer':
+            cursor.execute("UPDATE customers SET city=%s, state=%s WHERE customer_id=%s",
+                           (data.get('city'), data.get('state'), user_info['user_id']))
+        elif user_info['role'] == 'Vendor':
+            cursor.execute("UPDATE vendors SET company_name=%s, gst_number=%s, address=%s, city=%s, state=%s WHERE vendor_id=%s",
+                           (data.get('company_name'), data.get('gst_number'), data.get('address'), data.get('city'), data.get('state'), user_info['user_id']))
+        
+        conn.commit()
+        return {"status": "success", "message": "Profile updated successfully"}
     finally:
         conn.close()
 

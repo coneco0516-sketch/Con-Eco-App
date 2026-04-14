@@ -53,11 +53,15 @@ def dashboard(user = Depends(check_vendor)):
         
         stats = {'catalogue_size': 0, 'pending_orders': 0, 'total_earnings': 0, 'verification_status': 'Pending', 'commission_strikes': 0, 'outstanding_commission': 0}
         
-        cursor.execute("SELECT verification_status, commission_strikes FROM Vendors WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT verification_status, commission_strikes FROM vendors WHERE vendor_id=%s", (vendor_id,))
         res = cursor.fetchone()
         if res: 
             stats['verification_status'] = res['verification_status']
             stats['commission_strikes'] = res['commission_strikes']
+        
+        # Ensure Vendor Wallet exists for this vendor
+        cursor.execute("INSERT INTO vendorwallets (vendor_id, balance) VALUES (%s, 0.00) ON CONFLICT (vendor_id) DO NOTHING", (vendor_id,))
+        conn.commit()
         
         cursor.execute("SELECT (SELECT COUNT(*) FROM Products WHERE vendor_id=%s) + (SELECT COUNT(*) FROM Services WHERE vendor_id=%s) as c", (vendor_id, vendor_id))
         res = cursor.fetchone()
@@ -588,12 +592,9 @@ def vendor_earnings(user = Depends(check_vendor)):
         # For backward compatibility with the frontend if it uses 'total'
         stats['total'] = stats['total_gross']
         
-        try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS Payouts (payout_id SERIAL PRIMARY KEY, vendor_id INT, amount DECIMAL(10,2), account_name VARCHAR(100), account_number VARCHAR(100), ifsc VARCHAR(50), status VARCHAR(20) DEFAULT 'Pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id))")
-            conn.commit()
-        except:
-            pass
-            
+        # For backward compatibility with the frontend if it uses 'total'
+        stats['total'] = stats['total_gross']
+        
         sql_payments = """
             SELECT TO_CHAR(o.created_at, 'DD Mon YYYY') as date, 
                    CONCAT('Order #', o.order_id) as description, 

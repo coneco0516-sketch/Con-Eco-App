@@ -271,7 +271,7 @@ def setup_database():
                 name VARCHAR(100) NOT NULL,
                 email VARCHAR(100) NOT NULL,
                 message TEXT NOT NULL,
-                status VARCHAR(20) DEFAULT 'Unread' CHECK (status IN ('Unread', 'Read', 'Replied')),
+                status VARCHAR(20) DEFAULT 'Unread',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -363,8 +363,11 @@ def setup_database():
         print("All tables created successfully in Neon!")
         
         # 11. Initial Platform Settings Seeds
-        cursor.execute("INSERT INTO platformsettings (setting_key, setting_value) VALUES ('product_commission_pct', '3.0') ON CONFLICT DO NOTHING")
-        cursor.execute("INSERT INTO platformsettings (setting_key, setting_value) VALUES ('service_commission_pct', '3.0') ON CONFLICT DO NOTHING")
+        cursor.execute("INSERT INTO platformsettings (setting_key, setting_value) VALUES ('product_commission_pct', '3.0') ON CONFLICT (setting_key) DO NOTHING")
+        cursor.execute("INSERT INTO platformsettings (setting_key, setting_value) VALUES ('service_commission_pct', '3.0') ON CONFLICT (setting_key) DO NOTHING")
+        cursor.execute("INSERT INTO platformsettings (setting_key, setting_value) VALUES ('enable_vendor_registration', 'true') ON CONFLICT (setting_key) DO NOTHING")
+        cursor.execute("INSERT INTO platformsettings (setting_key, setting_value) VALUES ('enable_customer_registration', 'true') ON CONFLICT (setting_key) DO NOTHING")
+        cursor.execute("INSERT INTO platformsettings (setting_key, setting_value) VALUES ('auto_vendor_approval', 'false') ON CONFLICT (setting_key) DO NOTHING")
         print("Default platform settings seeded.")
 
         cursor.close()
