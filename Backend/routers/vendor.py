@@ -595,19 +595,29 @@ def vendor_earnings(user = Depends(check_vendor)):
         # For backward compatibility with the frontend if it uses 'total'
         stats['total'] = stats['total_gross']
         
+        # Fetch current rates for the frontend to show in headers
+        from routers.auth import get_commission_rates
+        current_rates = get_commission_rates()
+
         sql_payments = """
             SELECT TO_CHAR(o.created_at, 'DD Mon YYYY') as date, 
-                   CONCAT('Order #', o.order_id) as description, 
-                   p.amount as gross,
+                   CONCAT('Order #', o.order_id, ' (', o.order_type, ')') as description, 
+                   o.amount as gross,
                    o.gst_amount as gst,
                    o.commission_amount as commission,
+                   cm.commission_rate,
                    o.base_amount as net,
-                   p.status,
+                   CASE 
+                     WHEN o.payment_method = 'COD' THEN p.status
+                     WHEN COALESCE(o.vendor_credited, False) = True THEN 'Credited to Wallet'
+                     ELSE 'Pending Audit'
+                   END as status,
                    o.created_at as raw_date
-            FROM Payments p
-            JOIN Orders o ON p.order_id = o.order_id
+            FROM Orders o
+            LEFT JOIN Payments p ON o.order_id = p.order_id
+            LEFT JOIN commissions cm ON o.order_id = cm.order_id
             WHERE o.vendor_id=%s 
-              AND (o.payment_method IN ('COD', 'Negotiable') OR COALESCE(o.vendor_credited, False) = True)
+              AND (o.payment_method IN ('COD', 'Negotiable') OR p.status = 'Completed')
         """
         
         sql_payouts = """
@@ -616,6 +626,7 @@ def vendor_earnings(user = Depends(check_vendor)):
                    amount as gross,
                    0 as gst,
                    0 as commission,
+                   0 as commission_rate,
                    -amount as net,
                    status,
                    created_at as raw_date
@@ -644,12 +655,18 @@ def vendor_earnings(user = Depends(check_vendor)):
                 'gross': float(t['gross'] or 0),
                 'gst': float(t.get('gst') or 0),
                 'commission': float(t.get('commission') or 0),
+                'commission_rate': float(t.get('commission_rate') or 0),
                 'net': float(t['net'] or 0),
                 'status': t['status']
             })
         
         cursor.close()
-        return {"status": "success", "stats": stats, "transactions": cleaned}
+        return {
+            "status": "success", 
+            "stats": stats, 
+            "transactions": cleaned,
+            "rates": current_rates
+        }
     finally:
         conn.close()
 

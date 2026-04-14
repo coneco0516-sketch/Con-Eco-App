@@ -4,7 +4,16 @@ import VendorSidebar from '../components/VendorSidebar';
 const API = process.env.REACT_APP_API_URL || '';
 
 function Earnings() {
-  const [earnings, setEarnings] = useState({ total: 0, online_total: 0, cod_total: 0, pending_online: 0, pending_cod: 0, breakdowns: [] });
+  const [earnings, setEarnings] = useState({ 
+    total: 0, 
+    total_net: 0, 
+    online_total: 0, 
+    cod_total: 0, 
+    pending_online: 0, 
+    pending_cod: 0, 
+    breakdowns: [],
+    rates: { product_commission_pct: 3, service_commission_pct: 5 }
+  });
   const [loading, setLoading] = useState(true);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [bankDetails, setBankDetails] = useState({ accountName: '', accountNumber: '', ifsc: '' });
@@ -26,7 +35,8 @@ function Earnings() {
                 cod_total: data.stats.cod_total || 0,
                 pending_online: data.stats.pending_online || 0,
                 pending_cod: data.stats.pending_cod || 0,
-                breakdowns: data.transactions 
+                breakdowns: data.transactions,
+                rates: data.rates || { product_commission_pct: 3, service_commission_pct: 5 }
             });
         }
         setLoading(false);
@@ -71,6 +81,13 @@ function Earnings() {
       <main style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Earnings</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Monitor your platform balance and request payouts.</p>
+        
+        <div style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid var(--surface-border)', marginBottom: '1.5rem', display: 'flex', gap: '1.5rem' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Current Rates:</span>
+          <span style={{ fontSize: '0.85rem', color: 'white' }}>Products: <strong style={{color: 'var(--primary-color)'}}>{earnings.rates.product_commission_pct}%</strong></span>
+          <span style={{ fontSize: '0.85rem', color: 'white' }}>Services: <strong style={{color: 'var(--primary-color)'}}>{earnings.rates.service_commission_pct}%</strong></span>
+        </div>
+
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
         {loading ? (
@@ -102,10 +119,10 @@ function Earnings() {
                       <tr>
                         <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Date</th>
                         <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Details</th>
-                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Gross (Collected)</th>
-                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>GST (Product)</th>
-                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Platform Commission</th>
-                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Vendor Net</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Gross</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>GST (18%)</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Comm.</th>
+                        <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Net</th>
                         <th style={{ padding: '12px', borderBottom: '1px solid var(--surface-border)' }}>Status</th>
                       </tr>
                     </thead>
@@ -116,14 +133,16 @@ function Earnings() {
                           <td style={{ padding: '12px', color: 'white' }}>{b.description}</td>
                           <td style={{ padding: '12px', color: 'white', fontWeight: 'bold' }}>₹{b.gross}</td>
                           <td style={{ padding: '12px', color: '#3498db' }}>₹{b.gst}</td>
-                          <td style={{ padding: '12px', color: '#da3633' }}>-₹{b.commission}</td>
+                          <td style={{ padding: '12px', color: '#da3633' }}>
+                             {b.commission > 0 ? `-₹${b.commission} (${b.commission_rate}%)` : '-'}
+                          </td>
                           <td style={{ padding: '12px', color: b.net >= 0 ? '#3fb950' : '#da3633', fontWeight: 'bold' }}>
                             {b.net >= 0 ? '+' : ''}₹{b.net}
                           </td>
                           <td style={{ padding: '12px' }}>
                             <span style={{ 
-                                background: b.status === 'Completed' || b.status === 'Paid' ? 'rgba(63, 185, 80, 0.15)' : 'rgba(212, 162, 11, 0.15)',
-                                color: b.status === 'Completed' || b.status === 'Paid' ? '#3fb950' : '#d4a20b',
+                                background: b.status === 'Completed' || b.status === 'Paid' || b.status === 'Credited to Wallet' ? 'rgba(63, 185, 80, 0.15)' : 'rgba(212, 162, 11, 0.15)',
+                                color: b.status === 'Completed' || b.status === 'Paid' || b.status === 'Credited to Wallet' ? '#3fb950' : '#d4a20b',
                                 padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold'
                             }}>
                                 {b.status}
