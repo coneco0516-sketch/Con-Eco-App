@@ -20,7 +20,7 @@ export default function VerifyEmail() {
     }
 
     // Verify email with token
-    fetch(`/api/auth/verify-email?token=${token}`)
+    fetch(`${API}/api/auth/verify-email?token=${token}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
