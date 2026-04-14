@@ -12,7 +12,9 @@ from email_service import (
     send_login_notification,
     send_email_verification,
     send_profile_update_notification,
-    get_notification_preferences
+    get_notification_preferences,
+    send_password_reset_email,
+    send_password_change_notification
 )
 
 load_dotenv = lambda: None # Mock
@@ -188,6 +190,53 @@ def verify_email(token: str):
         conn.commit()
         
         return {"status": "success", "message": "Email successfully verified!"}
+    finally:
+        conn.close()
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+@router.post("/forgot-password")
+def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT user_id, email FROM users WHERE email=%s", (request.email,))
+        user = cursor.fetchone()
+        
+        if user:
+            token = secrets.token_hex(20)
+            cursor.execute("UPDATE users SET reset_password_token=%s, reset_password_expires_at=NOW() + INTERVAL '1 hour' WHERE user_id=%s", (token, user['user_id']))
+            conn.commit()
+            background_tasks.add_task(send_password_reset_email, user['email'], token)
+            
+        # We return success even if user doesn't exist to prevent email enumeration
+        return {"status": "success", "message": "If the account exists, a reset link has been sent."}
+    finally:
+        conn.close()
+
+@router.post("/reset-password")
+def reset_password(request: ResetPasswordRequest, background_tasks: BackgroundTasks):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT user_id, email, name, role FROM users WHERE reset_password_token=%s AND reset_password_expires_at > NOW()", (request.token,))
+        user = cursor.fetchone()
+        
+        if not user:
+            return {"status": "error", "message": "Invalid or expired password reset token."}
+            
+        hashed_pass = hash_password(request.new_password)
+        cursor.execute("UPDATE users SET password_hash=%s, reset_password_token=NULL, reset_password_expires_at=NULL WHERE user_id=%s", (hashed_pass, user['user_id']))
+        conn.commit()
+        
+        background_tasks.add_task(send_password_change_notification, user['email'], user['name'], user['role'])
+        
+        return {"status": "success", "message": "Password has been successfully reset."}
     finally:
         conn.close()
 
