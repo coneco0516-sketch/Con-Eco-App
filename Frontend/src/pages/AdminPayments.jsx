@@ -137,7 +137,7 @@ function AdminPayments() {
               <tbody>
                 {filteredTxns.length === 0 ? (
                   <tr>
-                    <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <td colSpan="10" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                       No offline transactions found.
                     </td>
                   </tr>
