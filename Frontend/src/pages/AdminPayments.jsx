@@ -127,7 +127,8 @@ function AdminPayments() {
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Vendor</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Total Amount</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Base Amount</th>
-                  <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Commission ({settings.product_commission_pct}%)</th>
+                  <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>GST (18%)</th>
+                  <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Commission</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Method</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Payment Status</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Date</th>
@@ -165,6 +166,9 @@ function AdminPayments() {
                       </td>
                       <td style={{ padding: '13px 15px', color: '#3fb950', fontWeight: '500' }}>
                         ₹{parseFloat(p.base_amount || 0).toFixed(2)}
+                      </td>
+                      <td style={{ padding: '13px 15px', color: '#3498db', fontWeight: '500' }}>
+                        ₹{parseFloat(p.gst_amount || 0).toFixed(2)}
                       </td>
                       <td style={{ padding: '13px 15px', color: '#da3633', fontWeight: '500' }}>
                         ₹{parseFloat(p.commission || 0).toFixed(2)}

@@ -159,7 +159,7 @@ function VendorDashboard() {
           {/* Row 2 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Total Earnings</h4>
+              <h4 style={{ color: 'white', marginBottom: '10px' }}>Total Earnings (Net)</h4>
               <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats ? stats.total_earnings : '...'}</p>
               <Link to="/vendor/earnings" className="btn" style={{ background: '#d26d0e' }}>View Detailed Breakdown</Link>
             </div>

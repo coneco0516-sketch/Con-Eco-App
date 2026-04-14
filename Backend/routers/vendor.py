@@ -67,24 +67,27 @@ def dashboard(user = Depends(check_vendor)):
         res = cursor.fetchone()
         if res: stats['catalogue_size'] = res['c'] or 0
         
-        cursor.execute("SELECT COUNT(*) as c FROM Orders WHERE vendor_id=%s AND status='Pending'", (vendor_id,))
+        # Include Bulk Requested in pending orders
+        cursor.execute("SELECT COUNT(*) as c FROM Orders WHERE vendor_id=%s AND status IN ('Pending', 'Bulk Requested')", (vendor_id,))
         res = cursor.fetchone()
         if res: stats['pending_orders'] = res['c'] or 0
         
-        # Count gross sales for all orders with successful payments OR completed status
+        # Count Net earnings (Base Amount)
         cursor.execute("""
-            SELECT SUM(o.amount) as s 
+            SELECT SUM(o.base_amount) as net, SUM(o.amount) as gross
             FROM Orders o 
             LEFT JOIN Payments p ON o.order_id = p.order_id 
             WHERE o.vendor_id=%s AND (o.status='Completed' OR p.status IN ('Completed', 'Paid'))
         """, (vendor_id,))
         res = cursor.fetchone()
-        if res: stats['total_earnings'] = res['s'] or 0
+        if res: 
+            stats['total_earnings'] = float(res['net'] or 0)
+            stats['total_gross'] = float(res['gross'] or 0)
         
         # Outstanding COD Invoices
         cursor.execute("SELECT SUM(amount) as total FROM weekly_invoices WHERE vendor_id=%s AND status='Unpaid'", (vendor_id,))
         res = cursor.fetchone()
-        stats['outstanding_commission'] = res['total'] or 0.0
+        stats['outstanding_commission'] = float(res['total'] or 0)
 
         cursor.close()
         return {"status": "success", "stats": stats}
@@ -467,9 +470,9 @@ def vendor_withdraw(data: WithdrawRequest, user = Depends(check_vendor)):
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
-        cursor.execute("SELECT wallet_balance FROM Vendors WHERE vendor_id=%s", (vendor_id,))
+        cursor.execute("SELECT balance FROM VendorWallets WHERE vendor_id=%s", (vendor_id,))
         res = cursor.fetchone()
-        bal = res['wallet_balance'] if res and res['wallet_balance'] else 0
+        bal = res['balance'] if res and res['balance'] else 0
         
         if bal < data.amount or data.amount <= 0:
             return {"status": "error", "message": "Insufficient wallet balance"}
@@ -491,7 +494,7 @@ def vendor_withdraw(data: WithdrawRequest, user = Depends(check_vendor)):
         except:
             pass
         
-        cursor.execute("UPDATE Vendors SET wallet_balance = wallet_balance - %s WHERE vendor_id=%s", (data.amount, vendor_id))
+        cursor.execute("UPDATE VendorWallets SET balance = balance - %s WHERE vendor_id=%s", (data.amount, vendor_id))
         
         cursor.execute("INSERT INTO Payouts (vendor_id, amount, account_name, account_number, ifsc) VALUES (%s, %s, %s, %s, %s)",
                        (vendor_id, data.amount, data.account_name, data.account_number, data.ifsc))
