@@ -40,6 +40,8 @@ def setup_database():
                 email_verified BOOLEAN DEFAULT FALSE,
                 email_verification_token VARCHAR(255) UNIQUE,
                 email_verification_sent_at TIMESTAMP,
+                reset_password_token VARCHAR(255),
+                reset_password_expires_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -141,6 +143,7 @@ def setup_database():
                 customer_message TEXT,
                 vendor_message TEXT,
                 negotiated_price DECIMAL(12,2),
+                delivered_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
