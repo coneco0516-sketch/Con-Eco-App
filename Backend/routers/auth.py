@@ -291,7 +291,8 @@ def logout(response: Response):
 
 @router.get("/maintenance-mode")
 def get_maintenance_mode():
-    return {"status": "success", "maintenance": False}
+    is_maintenance = get_platform_setting("maintenance_mode", False)
+    return {"status": "success", "maintenance": is_maintenance}
 
 @router.post("/subscribe-push")
 def subscribe_push(request: Request):
