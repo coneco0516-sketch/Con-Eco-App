@@ -31,7 +31,7 @@ async def get_order_summary(order_id: int, user=Depends(get_current_user_from_co
 
         sql = """
         SELECT o.order_id, o.customer_id, o.order_type, o.quantity, o.amount, o.base_amount,
-               o.gst_amount, o.commission_amount, o.status, o.payment_method, o.delivery_address,
+               o.gst_amount, o.commission_amount, cm.commission_rate, o.status, o.payment_method, o.delivery_address,
                pvt.status as payment_status,
                COALESCE(p.name, s.name) as item_name,
                v.company_name as vendor_name,
@@ -42,6 +42,7 @@ async def get_order_summary(order_id: int, user=Depends(get_current_user_from_co
         FROM Orders o
         LEFT JOIN Products p ON o.order_type = 'Product' AND o.item_id = p.product_id
         LEFT JOIN Services s ON o.order_type = 'Service' AND o.item_id = s.service_id
+        LEFT JOIN commissions cm ON o.order_id = cm.order_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
         JOIN Users u_vend ON v.vendor_id = u_vend.user_id
         JOIN Users u_cust ON o.customer_id = u_cust.user_id
@@ -115,7 +116,8 @@ async def get_commission_gst_invoice(invoice_id: int, user=Depends(get_current_u
                   AND o.payment_method IN ('COD','Pay Later (Cash)','Negotiable')
                   AND c.status = 'Pending'
                   AND c.created_at BETWEEN wi.billing_period_start AND wi.billing_period_end
-               ) as orders_count
+               ) as orders_count,
+               (SELECT commission_rate FROM commissions WHERE vendor_id = wi.vendor_id AND created_at BETWEEN wi.billing_period_start AND wi.billing_period_end LIMIT 1) as commission_rate
         FROM weekly_invoices wi
         JOIN Vendors v ON wi.vendor_id = v.vendor_id
         JOIN Users u ON v.vendor_id = u.user_id
@@ -165,6 +167,7 @@ async def get_commission_gst_invoice(invoice_id: int, user=Depends(get_current_u
             'sgst':            sgst,
             'igst':            0.0,
             'orders_count':    inv['orders_count'] or 0,
+            'commission_rate': inv['commission_rate'] or 3.0,
         }
 
         fd, path = tempfile.mkstemp(suffix=".pdf")

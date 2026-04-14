@@ -142,7 +142,14 @@ def generate_order_summary_pdf(order_data, output_path):
     pdf.cell(30, 7, f"INR {gst_amount:.2f}", align='R', ln=True)
 
     pdf.set_x(130)
-    pdf.cell(30, 7, 'Platform Fee (3%):', align='L')
+    # Calculate % based on actual amounts if not provided
+    rate_pct = order_data.get('commission_rate')
+    if rate_pct is None and base_amount > 0:
+        rate_pct = round((commission_amt / base_amount) * 100, 1) or 0
+    else:
+        rate_pct = rate_pct or 0
+
+    pdf.cell(30, 7, f'Platform Fee ({rate_pct}%):', align='L')
     pdf.cell(30, 7, f"INR {commission_amt:.2f}", align='R', ln=True)
 
     pdf.set_x(130)
@@ -270,7 +277,7 @@ def generate_commission_gst_invoice_pdf(invoice_data, output_path):
     pdf.set_font('helvetica', '', 10)
     pdf.cell(90,  10, 'Platform Marketplace Commission', border=1)
     pdf.cell(30,  10, '998314',                           border=1, align='C')   # SAC for online marketplace
-    pdf.cell(30,  10, '5%',                               border=1, align='C')
+    pdf.cell(30,  10, f"{invoice_data.get('commission_rate', '-')}%", border=1, align='C')
     pdf.cell(40,  10, f"INR {base_comm:.2f}",             border=1, align='R')
     pdf.ln(12)
 

@@ -9,9 +9,18 @@ function AdminPayments() {
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
 
+  const [settings, setSettings] = useState({ product_commission_pct: 3.0 });
+
   useEffect(() => {
     setLoading(true);
-    fetch(`${API}/api/admin/payments`, { credentials: 'include' })
+    // Fetch settings first
+    fetch(`${API}/api/admin/platform_settings`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(sData => {
+        if (sData.status === 'success') setSettings(prev => ({ ...prev, ...sData.settings }));
+        
+        return fetch(`${API}/api/admin/payments`, { credentials: 'include' });
+      })
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
@@ -118,7 +127,7 @@ function AdminPayments() {
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Vendor</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Total Amount</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Base Amount</th>
-                  <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Commission (3%)</th>
+                  <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Commission ({settings.product_commission_pct}%)</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Method</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Payment Status</th>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Date</th>

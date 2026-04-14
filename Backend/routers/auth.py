@@ -302,6 +302,16 @@ def get_maintenance_mode():
     is_maintenance = get_platform_setting("server_maintenance_mode", False)
     return {"status": "success", "maintenance_active": is_maintenance}
 
+@router.get("/commission-rates")
+def get_commission_rates():
+    product_rate = get_platform_setting("product_commission_pct", 3.0)
+    service_rate = get_platform_setting("service_commission_pct", 3.0)
+    return {
+        "status": "success", 
+        "product_commission_pct": product_rate,
+        "service_commission_pct": service_rate
+    }
+
 @router.post("/subscribe-push")
 def subscribe_push(request: Request):
     # Mock implementation for now to prevent 404s

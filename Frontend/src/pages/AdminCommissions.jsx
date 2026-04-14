@@ -9,9 +9,18 @@ function AdminCommissions() {
   const [actionMessage, setActionMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const [settings, setSettings] = useState({ product_commission_pct: 3.0 });
+
   const fetchInvoices = () => {
     setLoading(true);
-    fetch(`${API}/api/admin/weekly_invoices`, { credentials: 'include' })
+    // Fetch settings first
+    fetch(`${API}/api/admin/platform_settings`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(sData => {
+        if (sData.status === 'success') setSettings(prev => ({ ...prev, ...sData.settings }));
+        
+        return fetch(`${API}/api/admin/weekly_invoices`, { credentials: 'include' });
+      })
       .then(res => res.json())
       .then(result => {
         if (result.status === 'success') {
@@ -58,7 +67,7 @@ function AdminCommissions() {
           Platform Commissions
         </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          Monitor vendor weekly commission payments (3% of sales).
+          Monitor vendor weekly commission payments ({settings.product_commission_pct}% of sales).
         </p>
 
         {actionMessage && (
@@ -119,7 +128,7 @@ function AdminCommissions() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h3 style={{ color: 'white', margin: 0 }}>Weekly Commission Billings</h3>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-              3% Platform Fee on Offline Sales
+              {settings.product_commission_pct}% Platform Fee on Offline Sales
             </span>
           </div>
 
@@ -191,7 +200,7 @@ function AdminCommissions() {
         }}>
           <p style={{ color: '#3498db', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>ℹ Platform Fee Note</p>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: '1.6' }}>
-            The platform charges a flat <strong style={{ color: 'white' }}>3% commission</strong> on all offline sales (COD). 
+            The platform charges a flat <strong style={{ color: 'white' }}>{settings.product_commission_pct}% commission</strong> on all offline sales (COD). 
             Vendors are billed weekly and must pay within 3 days. Accumulating 2 unpaid billings will result in an automatic account suspension.
           </p>
         </div>
