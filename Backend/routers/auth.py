@@ -101,6 +101,14 @@ def login(request: LoginRequest, response: Response, http_request: Request, back
                        (user['user_id'], user['email'], user['role'], ip, ua))
         conn.commit()
         
+        # Dispatch login notification email
+        try:
+            prefs = get_notification_preferences(user['user_id'])
+            if prefs.get('login_alerts', True):
+                background_tasks.add_task(send_login_notification, user['email'], user['role'], user['name'], ip, ua)
+        except Exception as e:
+            print(f"Error queuing login notification: {e}")
+        
         return {"status": "success", "role": user['role']}
     finally:
         conn.close()
