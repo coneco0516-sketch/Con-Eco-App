@@ -610,8 +610,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             all_s = get_all_platform_settings()
             current_rates = {
                 "product_commission_pct": float(all_s.get("product_commission_pct", 3.0)),
-                "service_commission_pct": float(all_s.get("service_commission_pct", 3.0)),
-                "v": 100
+                "service_commission_pct": float(all_s.get("service_commission_pct", 3.0))
             }
         except Exception as rate_err:
             print(f"[EARNINGS] Could not fetch platform rates: {rate_err}")

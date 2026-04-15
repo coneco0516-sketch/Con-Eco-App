@@ -27,7 +27,6 @@ function Earnings() {
     fetch(`${API}/api/vendor/earnings`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
-        console.log('[Earnings API] Full:', JSON.stringify({rates: data?.rates, msg: data?.message, status: data?.status}));
         if (data.stats) {
             setEarnings({ 
                 total: data.stats.total || 0, 
@@ -42,7 +41,7 @@ function Earnings() {
         } else if (data.status === 'success' && data.rates) {
             setEarnings(prev => ({ ...prev, rates: data.rates }));
         } else {
-            console.warn('[Earnings API] Unexpected response:', data);
+            console.warn('[Earnings API] Unexpected response shape - rates not updated');
         }
         setLoading(false);
       })
@@ -94,7 +93,6 @@ function Earnings() {
           <span style={{ fontSize: '0.85rem', color: '#ffd700', fontWeight: 'bold' }}>Live Platform Rates:</span>
           <span style={{ fontSize: '0.85rem', color: 'white' }}>Services: <strong style={{color: '#ffd700'}}>{earnings.rates.service_commission_pct}%</strong></span>
           <span style={{ fontSize: '0.85rem', color: 'white' }}>Products: <strong style={{color: '#ffd700'}}>{earnings.rates.product_commission_pct}%</strong></span>
-          <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>v{earnings.rates.v || 1}</span>
           <button onClick={fetchEarnings} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #ffd700', color: '#ffd700', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>Refresh Rates</button>
         </div>
 

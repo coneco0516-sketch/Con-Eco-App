@@ -168,11 +168,6 @@ app.include_router(vendor.router,  prefix="/api/vendor",  tags=["vendor"])
 app.include_router(payment.router, prefix="/api/payment", tags=["payment"])
 app.include_router(invoice.router, prefix="/api/invoice", tags=["invoice"])
 
-@app.get("/api/debug/db_settings")
-def debug_db_settings():
-    from database import get_all_platform_settings
-    return {"status": "debug", "settings": get_all_platform_settings()}
-
 @app.get("/db-check")
 def db_check():
     """Verify database connectivity (Render/Neon diagnostic)."""
