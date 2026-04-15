@@ -597,10 +597,14 @@ def vendor_earnings(user = Depends(check_vendor)):
         # For backward compatibility with the frontend if it uses 'total'
         stats['total'] = stats['total_gross']
         
-        # Fetch current rates for the frontend to show in headers
+        # Fetch all settings for direct visibility
+        from database import get_all_platform_settings
+        all_s = get_all_platform_settings()
+        
         current_rates = {
-            "product_commission_pct": float(get_platform_setting("product_commission_pct", 3.0)),
-            "service_commission_pct": float(get_platform_setting("service_commission_pct", 3.0))
+            "product_commission_pct": float(all_s.get("product_commission_pct", 3.0)),
+            "service_commission_pct": float(all_s.get("service_commission_pct", 3.0)),
+            "raw": all_s
         }
 
         sql_payments = """
