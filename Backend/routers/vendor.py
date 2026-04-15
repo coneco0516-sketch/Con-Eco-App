@@ -549,14 +549,18 @@ def vendor_earnings(user = Depends(check_vendor)):
         stats['cod_total'] = float(cod_res['s']) if cod_res and cod_res['s'] else 0
         
         # 3. Pending Online (Not credited yet / needs admin audit)
-        cursor.execute("""
-            SELECT SUM(o.base_amount) as s 
-            FROM Orders o 
-            JOIN Payments p ON o.order_id = p.order_id
-            WHERE o.vendor_id=%s AND o.payment_method != 'COD' AND COALESCE(o.vendor_credited, 0) = 0 AND p.status='Completed'
-        """, (vendor_id,))
-        ponline = cursor.fetchone()
-        stats['pending_online'] = float(ponline['s']) if ponline and ponline['s'] else 0
+        try:
+            cursor.execute("""
+                SELECT SUM(COALESCE(o.base_amount, o.amount)) as s 
+                FROM Orders o 
+                JOIN Payments p ON o.order_id = p.order_id
+                WHERE o.vendor_id=%s AND o.payment_method != 'COD' 
+                  AND COALESCE(o.vendor_credited, false) = false AND p.status='Completed'
+            """, (vendor_id,))
+            ponline = cursor.fetchone()
+            stats['pending_online'] = float(ponline['s']) if ponline and ponline['s'] else 0
+        except Exception as e:
+            print(f"[EARNINGS] pending_online query failed: {e}")
         
         # 4. Pending COD (Not collected yet)
         cursor.execute("""
@@ -569,14 +573,17 @@ def vendor_earnings(user = Depends(check_vendor)):
         stats['pending_cod'] = float(pcod['s']) if pcod and pcod['s'] else 0
         
         # Calculate Net COD (Subtracting commission)
-        cursor.execute("""
-            SELECT SUM(o.base_amount) as s 
-            FROM Orders o 
-            JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable')
-        """, (vendor_id,))
-        cod_net_res = cursor.fetchone()
-        stats['cod_net'] = float(cod_net_res['s']) if cod_net_res and cod_net_res['s'] else 0
+        try:
+            cursor.execute("""
+                SELECT SUM(COALESCE(o.base_amount, o.amount)) as s 
+                FROM Orders o 
+                JOIN Payments p ON o.order_id = p.order_id 
+                WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable')
+            """, (vendor_id,))
+            cod_net_res = cursor.fetchone()
+            stats['cod_net'] = float(cod_net_res['s']) if cod_net_res and cod_net_res['s'] else 0
+        except Exception as e:
+            print(f"[EARNINGS] cod_net query failed: {e}")
         
         # Total for the stats panel
         stats['total_net'] = stats['online_total'] + stats['cod_net']

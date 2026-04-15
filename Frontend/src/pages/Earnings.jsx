@@ -27,7 +27,7 @@ function Earnings() {
     fetch(`${API}/api/vendor/earnings`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
-        console.log('[Earnings API] Response:', JSON.stringify(data?.rates));
+        console.log('[Earnings API] Full:', JSON.stringify({rates: data?.rates, msg: data?.message, status: data?.status}));
         if (data.stats) {
             setEarnings({ 
                 total: data.stats.total || 0, 
