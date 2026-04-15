@@ -622,8 +622,11 @@ def vendor_earnings(user = Depends(check_vendor)):
                    COALESCE(o.amount, 0) as gross,
                    COALESCE(o.gst_amount, 0) as gst,
                    COALESCE(o.commission_amount, 0) as commission,
-                   CASE WHEN COALESCE(o.amount, 0) > 0 
-                        THEN ROUND(COALESCE(o.commission_amount, 0) * 100.0 / o.amount, 2)
+                   CASE WHEN COALESCE(o.base_amount, 0) > 0 
+                        THEN ROUND(COALESCE(o.commission_amount, 0) * 100.0 / o.base_amount, 2)
+                        WHEN COALESCE(o.amount, 0) > 0
+                        THEN ROUND(COALESCE(o.commission_amount, 0) * 100.0 / 
+                             NULLIF(o.amount - COALESCE(o.gst_amount,0) - COALESCE(o.commission_amount,0), 0), 2)
                         ELSE 0 END as commission_rate,
                    COALESCE(o.base_amount, 0) as net,
                    CASE 
