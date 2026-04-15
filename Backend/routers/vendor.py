@@ -597,15 +597,18 @@ def vendor_earnings(user = Depends(check_vendor)):
         # For backward compatibility with the frontend if it uses 'total'
         stats['total'] = stats['total_gross']
         
-        # Fetch all settings for direct visibility
-        from database import get_all_platform_settings
-        all_s = get_all_platform_settings()
-        
-        current_rates = {
-            "product_commission_pct": float(all_s.get("product_commission_pct", 3.0)),
-            "service_commission_pct": float(all_s.get("service_commission_pct", 3.0)),
-            "v": 100
-        }
+        # Fetch current rates with fallback
+        try:
+            from database import get_all_platform_settings
+            all_s = get_all_platform_settings()
+            current_rates = {
+                "product_commission_pct": float(all_s.get("product_commission_pct", 3.0)),
+                "service_commission_pct": float(all_s.get("service_commission_pct", 3.0)),
+                "v": 100
+            }
+        except Exception as rate_err:
+            print(f"[EARNINGS] Could not fetch platform rates: {rate_err}")
+            current_rates = { "product_commission_pct": 3.0, "service_commission_pct": 3.0, "v": -1 }
 
         sql_payments = """
             SELECT TO_CHAR(o.created_at, 'DD Mon YYYY') as date, 

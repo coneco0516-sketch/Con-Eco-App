@@ -24,9 +24,10 @@ function Earnings() {
 
   const fetchEarnings = () => {
     setLoading(true);
-    fetch(`${API}/api/vendor/earnings?t=${Date.now()}`, { credentials: 'include' })
+    fetch(`${API}/api/vendor/earnings`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
+        console.log('[Earnings API] Response:', JSON.stringify(data?.rates));
         if (data.stats) {
             setEarnings({ 
                 total: data.stats.total || 0, 
@@ -39,12 +40,16 @@ function Earnings() {
                 rates: data.rates || { product_commission_pct: 3.0, service_commission_pct: 3.0 }
             });
         } else if (data.status === 'success' && data.rates) {
-            // Even if stats are missing, we still want to update the rates
             setEarnings(prev => ({ ...prev, rates: data.rates }));
+        } else {
+            console.warn('[Earnings API] Unexpected response:', data);
         }
         setLoading(false);
       })
-      .catch(err => setLoading(false));
+      .catch(err => {
+        console.error('[Earnings API] FAILED:', err);
+        setLoading(false);
+      });
   };
 
   const handleWithdrawClick = () => {
