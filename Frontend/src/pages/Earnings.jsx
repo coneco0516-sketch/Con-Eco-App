@@ -89,7 +89,7 @@ function Earnings() {
           <span style={{ fontSize: '0.85rem', color: '#ffd700', fontWeight: 'bold' }}>Live Platform Rates:</span>
           <span style={{ fontSize: '0.85rem', color: 'white' }}>Services: <strong style={{color: '#ffd700'}}>{earnings.rates.service_commission_pct}%</strong></span>
           <span style={{ fontSize: '0.85rem', color: 'white' }}>Products: <strong style={{color: '#ffd700'}}>{earnings.rates.product_commission_pct}%</strong></span>
-          <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>v{earnings.rates.v || 1}</span>
+          <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>v{earnings.rates.v || 1} | API: {API || 'Relative'}</span>
           <button onClick={fetchEarnings} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #ffd700', color: '#ffd700', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>Refresh Rates</button>
         </div>
 
