@@ -10,14 +10,22 @@ function VendorBilling() {
   const [downloading, setDownloading] = useState(null); // invoice_id downloading receipt
   const [message, setMessage] = useState('');
 
-  const [settings, setSettings] = useState({ product_commission_pct: 3.0 });
+  const [settings, setSettings] = useState({ 
+    product_commission_pct: 3.0,
+    service_commission_pct: 3.0
+  });
 
   const fetchInvoices = () => {
     setLoading(true);
     fetch(`${API}/api/auth/commission-rates`)
       .then(res => res.json())
       .then(sData => {
-        if (sData.status === 'success') setSettings({ product_commission_pct: sData.product_commission_pct });
+        if (sData.status === 'success') {
+          setSettings({ 
+            product_commission_pct: sData.product_commission_pct,
+            service_commission_pct: sData.service_commission_pct
+          });
+        }
         return fetch(`${API}/api/vendor/invoices`, { credentials: 'include' });
       })
       .then(res => res.json())
@@ -143,7 +151,7 @@ function VendorBilling() {
       <main style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Commission Billing</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          View and pay your weekly platform commissions ({settings.product_commission_pct}% of offline sales).
+          View and pay your weekly platform commissions (Product: {settings.product_commission_pct}%, Service: {settings.service_commission_pct}%).
         </p>
 
         {message && (
@@ -230,7 +238,7 @@ function VendorBilling() {
         }}>
           <h4 style={{ color: '#ffd700', marginBottom: '10px' }}>Platform Billing Policy</h4>
           <ul style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.8', margin: 0, paddingLeft: '1.2rem' }}>
-            <li>The platform charges a flat <strong style={{ color: 'white' }}>{settings.product_commission_pct}% commission</strong> on all completed offline (COD/Direct) orders.</li>
+            <li>The platform charges a commission of <strong style={{ color: 'white' }}>{settings.product_commission_pct}% for products</strong> and <strong style={{ color: 'white' }}>{settings.service_commission_pct}% for services</strong> on all completed offline (COD/Direct) orders.</li>
             <li>Invoices are generated every Monday for the previous week's collection and must be paid within <strong style={{ color: 'white' }}>3 days</strong>.</li>
             <li><strong style={{ color: '#f85149' }}>Penalty - Strike 1:</strong> Verification status will be revoked.</li>
             <li><strong style={{ color: '#f85149' }}>Penalty - Strike 2:</strong> Permanent account suspension.</li>

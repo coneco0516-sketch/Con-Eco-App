@@ -29,21 +29,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 router = APIRouter()
 
-def get_platform_setting(key, default):
-    conn = get_db_connection()
-    try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT setting_value FROM platformsettings WHERE setting_key = %s", (key,))
-        row = cursor.fetchone()
-        if row:
-            val = row['setting_value']
-            if str(val).lower() == 'true': return True
-            if str(val).lower() == 'false': return False
-            try: return float(val) if '.' in str(val) else int(val)
-            except: return val
-        return default
-    except: return default
-    finally: conn.close()
+from database import get_db_connection, get_platform_setting
 
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=24)):
     to_encode = data.copy()

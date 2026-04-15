@@ -26,26 +26,7 @@ def check_user(user=Depends(get_current_user_from_cookie)):
         raise HTTPException(status_code=401, detail="Not logged in")
     return user
 
-def get_platform_setting(key, default):
-    """Helper to fetch a platform setting from the DB."""
-    conn = get_db_connection()
-    try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT setting_value FROM platformsettings WHERE setting_key = %s", (key,))
-        row = cursor.fetchone()
-        if row:
-            val = row['setting_value']
-            if val.lower() == 'true': return True
-            if val.lower() == 'false': return False
-            try:
-                if '.' in val: return float(val)
-                return int(val)
-            except: return val
-        return default
-    except:
-        return default
-    finally:
-        conn.close()
+from database import get_db_connection, get_platform_setting
 
 
 # ── 1. Create Razorpay Order ─────────────────────────────────────────────────

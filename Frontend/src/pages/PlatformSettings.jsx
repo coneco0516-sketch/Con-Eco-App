@@ -9,8 +9,8 @@ function PlatformSettings() {
     enable_vendor_registration: true,
     enable_customer_registration: true,
     auto_vendor_approval: false,
-    service_commission_pct: 10,
-    product_commission_pct: 5,
+    service_commission_pct: 3.0,
+    product_commission_pct: 3.0,
     allow_cod: true,
     enable_order_cancellation: true,
     auto_order_confirmation: false,
@@ -64,6 +64,7 @@ function PlatformSettings() {
       const data = await resp.json();
       if (data.status === 'success') {
         setMsg('Settings saved successfully!');
+        // Keep message visible for 3 seconds
         setTimeout(() => setMsg(''), 3000);
       } else {
         setMsg('Failed to save: ' + (data.message || 'Unknown error'));

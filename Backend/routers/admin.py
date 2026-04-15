@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
-from database import get_db_connection
+from database import get_db_connection, get_all_platform_settings
 from routers.auth import get_current_user_from_cookie
 from pydantic import BaseModel
 from typing import Optional
@@ -16,43 +16,13 @@ def check_admin(user = Depends(get_current_user_from_cookie)):
 
 @router.get("/platform_settings")
 def get_platform_settings(user = Depends(check_admin)):
-    """Fetch all platform-wide settings from the database."""
-    conn = get_db_connection()
-    try:
-        cursor = conn.cursor(dictionary=True)
-        # Ensure table exists
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS platformsettings (
-                setting_key VARCHAR(100) PRIMARY KEY,
-                setting_value TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        conn.commit()
-        
-        cursor.execute("SELECT setting_key, setting_value FROM platformsettings")
-        rows = cursor.fetchall()
-        
-        settings = {}
-        for row in rows:
-            val = row['setting_value']
-            # Simple type conversion
-            if val.lower() == 'true': val = True
-            elif val.lower() == 'false': val = False
-            else:
-                try:
-                    if '.' in val: val = float(val)
-                    else: val = int(val)
-                except: pass
-            settings[row['setting_key']] = val
-            
-        cursor.close()
-        return {"status": "success", "settings": settings}
-    except Exception as e:
-        print(f"Error fetching platform settings: {e}")
-        return {"status": "error", "message": str(e)}
-    finally:
-        conn.close()
+    """Fetches all platform settings."""
+    settings = get_all_platform_settings()
+    # Ensure default commission values if not present
+    if 'service_commission_pct' not in settings: settings['service_commission_pct'] = 3.0
+    if 'product_commission_pct' not in settings: settings['product_commission_pct'] = 3.0
+    
+    return {"status": "success", "settings": settings}
 
 @router.post("/platform_settings")
 def update_platform_settings(settings: dict, user = Depends(check_admin)):
@@ -61,12 +31,14 @@ def update_platform_settings(settings: dict, user = Depends(check_admin)):
     try:
         cursor = conn.cursor()
         for key, value in settings.items():
-            # Convert boolean to string for storage
+            # Convert boolean/number to string for storage
             val_str = str(value)
             cursor.execute("""
-                INSERT INTO platformsettings (setting_key, setting_value)
-                VALUES (%s, %s)
-                ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
+                INSERT INTO platformsettings (setting_key, setting_value, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (setting_key) DO UPDATE SET 
+                    setting_value = EXCLUDED.setting_value,
+                    updated_at = CURRENT_TIMESTAMP
             """, (key, val_str))
         
         conn.commit()

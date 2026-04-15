@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- PostgreSQL Configuration (Neon/Render Compatible) ---
-# DATABASE_URL should be set in the environment or .env file
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 # --- PostgreSQL Connection Pool ---
@@ -19,8 +18,6 @@ class PostgreSQLPool:
             return
 
         try:
-            # Using ThreadedConnectionPool for FastAPI (async/multi-threaded)
-            # Neon recommends using the -pooler connection string which the user provided
             self._pool = psycopg2.pool.ThreadedConnectionPool(
                 minconn=1,
                 maxconn=20,
@@ -33,7 +30,6 @@ class PostgreSQLPool:
 
     def get_connection(self):
         if not self._pool:
-            # Attempt to re-initialize if pool is missing (e.g. env var was set late)
             self.__init__()
             if not self._pool:
                 raise RuntimeError("PostgreSQL connection pool is unavailable. Check your DATABASE_URL.")
@@ -51,7 +47,6 @@ class PooledConnection:
         self._pool = pool
 
     def cursor(self, dictionary=False):
-        # RealDictCursor makes results behave like dictionaries (compatible with previous MySQL logic)
         if dictionary:
             return self._conn.cursor(cursor_factory=RealDictCursor)
         return self._conn.cursor()
@@ -64,12 +59,10 @@ class PooledConnection:
 
     def close(self):
         if self._pool and self._conn:
-            # Returns the connection back to the pool instead of closing the physical connection
             self._pool.putconn(self._conn)
             self._conn = None
 
     def __getattr__(self, name):
-        # Proxy other attributes to the underlying psycopg2 connection
         return getattr(self._conn, name)
 
 # Global pool instance
@@ -82,4 +75,66 @@ def get_db_connection():
 def release_db_connection(conn):
     """Explicitly releases a connection back to the pool."""
     if conn:
+        conn.close()
+
+def get_platform_setting(key, default=None):
+    """
+    Common helper to fetch platform settings from the DB with type conversion.
+    """
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT setting_value FROM platformsettings WHERE setting_key = %s", (key,))
+        row = cursor.fetchone()
+        if row:
+            val = row['setting_value']
+            if str(val).lower() == 'true': return True
+            if str(val).lower() == 'false': return False
+            try:
+                if '.' in str(val): return float(val)
+                return int(val)
+            except:
+                return val
+        return default
+    except Exception as e:
+        print(f"Error fetching platform setting {key}: {e}")
+        return default
+    finally:
+        conn.close()
+
+def get_all_platform_settings():
+    """
+    Returns all platform settings as a dictionary.
+    """
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # Ensure table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS platformsettings (
+                setting_key VARCHAR(100) PRIMARY KEY,
+                setting_value TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        
+        cursor.execute("SELECT setting_key, setting_value FROM platformsettings")
+        rows = cursor.fetchall()
+        settings = {}
+        for row in rows:
+            val = row['setting_value']
+            if str(val).lower() == 'true': val = True
+            elif str(val).lower() == 'false': val = False
+            else:
+                try:
+                    if '.' in str(val): val = float(val)
+                    else: val = int(val)
+                except: pass
+            settings[row['setting_key']] = val
+        return settings
+    except Exception as e:
+        print(f"Error fetching all platform settings: {e}")
+        return {}
+    finally:
         conn.close()

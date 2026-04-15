@@ -203,9 +203,9 @@ function CustomerItemDetail() {
                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
                   <h3 style={{ color: 'var(--text-secondary)', marginTop: 0 }}>Pricing Details</h3>
                   <p style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>Base: ₹{item.price} {item.unit ? `/ ${item.unit}` : ''}</p>
-                  <p style={{ color: '#ffd700', margin: '0.5rem 0' }}>Est. Commission: ₹{(item.price * commRate / 100).toFixed(2)} ({commRate}%)</p>
+                  <p style={{ color: '#ffd700', margin: '0.5rem 0' }}>Est. Commission: ₹{(item.price * parseFloat(commRate) / 100).toFixed(2)} ({commRate}%)</p>
                   <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.5rem', margin: '1rem 0 0 0', borderTop: '1px solid var(--surface-border)', paddingTop: '1rem' }}>
-                    Est. Total: ₹{(parseFloat(item.price) * (1 + commRate / 100)).toFixed(2)} (+ applicable taxes)
+                    Est. Total: ₹{(parseFloat(item.price) * (1 + parseFloat(commRate) / 100)).toFixed(2)} (+ applicable taxes)
                   </p>
                 </div>
 

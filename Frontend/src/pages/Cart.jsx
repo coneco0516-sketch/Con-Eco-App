@@ -98,7 +98,7 @@ function Cart() {
                 const baseSubtotal = item.price * item.quantity;
                 const gstSubtotal = baseSubtotal * 0.18;
                 const rate = item.commission_rate !== undefined ? item.commission_rate : 3.0;
-                const commissionSubtotal = baseSubtotal * (rate / 100);
+                const commissionSubtotal = baseSubtotal * (parseFloat(rate) / 100);
                 const totalSubtotal = baseSubtotal + gstSubtotal + commissionSubtotal;
                 return (
                 <li key={item.cart_id} style={{ padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem' }}>
@@ -108,7 +108,7 @@ function Cart() {
                     <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
                       <p style={{ color: 'var(--text-secondary)', margin: '0 0 0.25rem 0', fontSize: '0.8rem' }}>Base: ₹{baseSubtotal.toFixed(2)}</p>
                       <p style={{ color: '#3498db', margin: '0 0 0.25rem 0', fontSize: '0.8rem' }}>+ GST (18%): ₹{gstSubtotal.toFixed(2)}</p>
-                      <p style={{ color: '#ffd700', margin: 0, fontSize: '0.8rem' }}>+ Platform Commission ({item.commission_rate !== undefined ? item.commission_rate : 3}%): ₹{commissionSubtotal.toFixed(2)}</p>
+                      <p style={{ color: '#ffd700', margin: 0, fontSize: '0.8rem' }}>+ Platform Commission ({item.commission_rate}%): ₹{commissionSubtotal.toFixed(2)}</p>
                     </div>
                   </div>
                   

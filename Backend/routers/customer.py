@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from database import get_db_connection
-from routers.auth import get_current_user_from_cookie, get_platform_setting
+from database import get_db_connection, get_platform_setting
+from routers.auth import get_current_user_from_cookie
 from pydantic import BaseModel
 from typing import Optional
 import random

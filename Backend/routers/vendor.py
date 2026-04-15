@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Form, File, UploadFile, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
-from database import get_db_connection
+from database import get_db_connection, get_platform_setting, get_all_platform_settings
 from routers.auth import get_current_user_from_cookie
 import datetime
 import os
@@ -369,7 +369,6 @@ def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor), backgroun
             base_amount = float(data.negotiated_price) * qty
             gst_amount = round(base_amount * 0.18, 2)
             
-            from routers.auth import get_platform_setting
             comm_key = 'product_commission_pct' if order_type == 'Product' else 'service_commission_pct'
             commission_rate = float(get_platform_setting(comm_key, 3.0))
             
@@ -599,8 +598,10 @@ def vendor_earnings(user = Depends(check_vendor)):
         stats['total'] = stats['total_gross']
         
         # Fetch current rates for the frontend to show in headers
-        from routers.auth import get_commission_rates
-        current_rates = get_commission_rates()
+        current_rates = {
+            "product_commission_pct": get_platform_setting("product_commission_pct", 3.0),
+            "service_commission_pct": get_platform_setting("service_commission_pct", 3.0)
+        }
 
         sql_payments = """
             SELECT TO_CHAR(o.created_at, 'DD Mon YYYY') as date, 

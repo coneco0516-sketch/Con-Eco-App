@@ -9,7 +9,10 @@ function AdminCommissions() {
   const [actionMessage, setActionMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const [settings, setSettings] = useState({ product_commission_pct: 3.0 });
+  const [settings, setSettings] = useState({ 
+    product_commission_pct: 3.0,
+    service_commission_pct: 3.0
+  });
 
   const fetchInvoices = () => {
     setLoading(true);
@@ -67,7 +70,7 @@ function AdminCommissions() {
           Platform Commissions
         </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          Monitor vendor weekly commission payments ({settings.product_commission_pct}% of sales).
+          Monitor vendor weekly commission payments (Product: {settings.product_commission_pct}%, Service: {settings.service_commission_pct}%).
         </p>
 
         {actionMessage && (
@@ -200,7 +203,7 @@ function AdminCommissions() {
         }}>
           <p style={{ color: '#3498db', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>ℹ Platform Fee Note</p>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: '1.6' }}>
-            The platform charges a flat <strong style={{ color: 'white' }}>{settings.product_commission_pct}% commission</strong> on all offline sales (COD). 
+            The platform charges commission on all sales: <strong style={{ color: 'white' }}>{settings.product_commission_pct}% for Products</strong> and <strong style={{ color: 'white' }}>{settings.service_commission_pct}% for Services</strong>. 
             Vendors are billed weekly and must pay within 3 days. Accumulating 2 unpaid billings will result in an automatic account suspension.
           </p>
         </div>

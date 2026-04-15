@@ -122,8 +122,8 @@ function Products() {
                   <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{p.name}</h3>
                   <div style={{ marginBottom: '1rem' }}>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0' }}>Base: ₹{p.price} {p.unit ? `/ ${p.unit}` : ''}</p>
-                    <p style={{ color: '#ffd700', fontSize: '0.85rem', margin: '0.25rem 0' }}>Commission ({commissionRate}%): ₹{(p.price * (commissionRate / 100)).toFixed(2)}</p>
-                    <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0.5rem 0 0 0' }}>Total: ₹{(parseFloat(p.price) + parseFloat(p.price) * (commissionRate / 100)).toFixed(2)}</p>
+                    <p style={{ color: '#ffd700', fontSize: '0.85rem', margin: '0.25rem 0' }}>Commission ({commissionRate}%): ₹{(p.price * (parseFloat(commissionRate) / 100)).toFixed(2)}</p>
+                    <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', margin: '0.5rem 0 0 0' }}>Total: ₹{(parseFloat(p.price) + parseFloat(p.price) * (parseFloat(commissionRate) / 100)).toFixed(2)}</p>
                   </div>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'auto' }}>Vendor: {p.vendor_name}</p>
                   <button
