@@ -599,9 +599,8 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         # Fetch current rates for the frontend to show in headers
         current_rates = {
-            "product_commission_pct": 99.0,
-            "service_commission_pct": 99.0,
-            "v": "DEBUG_FORCE_99"
+            "product_commission_pct": float(get_platform_setting("product_commission_pct", 3.0)),
+            "service_commission_pct": float(get_platform_setting("service_commission_pct", 3.0))
         }
 
         sql_payments = """

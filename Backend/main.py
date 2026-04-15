@@ -168,10 +168,6 @@ app.include_router(vendor.router,  prefix="/api/vendor",  tags=["vendor"])
 app.include_router(payment.router, prefix="/api/payment", tags=["payment"])
 app.include_router(invoice.router, prefix="/api/invoice", tags=["invoice"])
 
-@app.get("/api/debug/rates")
-def debug_rates():
-    return {"status": "debug", "p": 77, "s": 77, "msg": "If you see this, the code I am editing IS LIVE"}
-
 @app.get("/db-check")
 def db_check():
     """Verify database connectivity (Render/Neon diagnostic)."""
