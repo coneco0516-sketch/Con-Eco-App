@@ -109,16 +109,6 @@ def get_all_platform_settings():
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
-        # Ensure table exists
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS platformsettings (
-                setting_key VARCHAR(100) PRIMARY KEY,
-                setting_value TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        conn.commit()
-        
         cursor.execute("SELECT setting_key, setting_value FROM platformsettings")
         rows = cursor.fetchall()
         settings = {}
