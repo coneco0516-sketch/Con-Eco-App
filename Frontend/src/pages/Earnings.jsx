@@ -35,9 +35,12 @@ function Earnings() {
                 cod_total: data.stats.cod_total || 0,
                 pending_online: data.stats.pending_online || 0,
                 pending_cod: data.stats.pending_cod || 0,
-                breakdowns: data.transactions,
+                breakdowns: data.transactions || [],
                 rates: data.rates || { product_commission_pct: 3.0, service_commission_pct: 3.0 }
             });
+        } else if (data.status === 'success' && data.rates) {
+            // Even if stats are missing, we still want to update the rates
+            setEarnings(prev => ({ ...prev, rates: data.rates }));
         }
         setLoading(false);
       })

@@ -599,8 +599,8 @@ def vendor_earnings(user = Depends(check_vendor)):
         
         # Fetch current rates for the frontend to show in headers
         current_rates = {
-            "product_commission_pct": get_platform_setting("product_commission_pct", 3.0),
-            "service_commission_pct": get_platform_setting("service_commission_pct", 3.0)
+            "product_commission_pct": float(get_platform_setting("product_commission_pct", 3.0)),
+            "service_commission_pct": float(get_platform_setting("service_commission_pct", 3.0))
         }
 
         sql_payments = """
@@ -621,7 +621,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             LEFT JOIN Payments p ON o.order_id = p.order_id
             LEFT JOIN commissions cm ON o.order_id = cm.order_id
             WHERE o.vendor_id=%s 
-              AND (o.payment_method IN ('COD', 'Negotiable') OR p.status = 'Completed')
+              AND (o.payment_method IN ('COD', 'Negotiable') OR p.status IN ('Completed', 'Paid'))
         """
         
         sql_payouts = """
