@@ -612,21 +612,22 @@ def vendor_earnings(user = Depends(check_vendor)):
 
         sql_payments = """
             SELECT TO_CHAR(o.created_at, 'DD Mon YYYY') as date, 
-                   CONCAT('Order #', o.order_id, ' (', o.order_type, ')') as description, 
-                   o.amount as gross,
-                   o.gst_amount as gst,
-                   o.commission_amount as commission,
-                   cm.commission_rate,
-                   o.base_amount as net,
+                   CONCAT('Order #', CAST(o.order_id AS TEXT), ' (', COALESCE(o.order_type, 'Order'), ')') as description, 
+                   COALESCE(o.amount, 0) as gross,
+                   COALESCE(o.gst_amount, 0) as gst,
+                   COALESCE(o.commission_amount, 0) as commission,
+                   CASE WHEN COALESCE(o.amount, 0) > 0 
+                        THEN ROUND(COALESCE(o.commission_amount, 0) * 100.0 / o.amount, 2)
+                        ELSE 0 END as commission_rate,
+                   COALESCE(o.base_amount, 0) as net,
                    CASE 
-                     WHEN o.payment_method = 'COD' THEN p.status
-                     WHEN COALESCE(o.vendor_credited, False) = True THEN 'Credited to Wallet'
+                     WHEN o.payment_method = 'COD' THEN COALESCE(p.status, 'Pending')
+                     WHEN COALESCE(o.vendor_credited, false) = true THEN 'Credited to Wallet'
                      ELSE 'Pending Audit'
                    END as status,
                    o.created_at as raw_date
             FROM Orders o
             LEFT JOIN Payments p ON o.order_id = p.order_id
-            LEFT JOIN commissions cm ON o.order_id = cm.order_id
             WHERE o.vendor_id=%s 
               AND (o.payment_method IN ('COD', 'Negotiable') OR p.status IN ('Completed', 'Paid'))
         """
@@ -677,6 +678,15 @@ def vendor_earnings(user = Depends(check_vendor)):
             "stats": stats, 
             "transactions": cleaned,
             "rates": current_rates
+        }
+    except Exception as e:
+        print(f"[EARNINGS ERROR] {type(e).__name__}: {e}")
+        return {
+            "status": "error",
+            "message": str(e),
+            "stats": {"online_total":0,"cod_total":0,"pending_online":0,"pending_cod":0,"cod_net":0,"total_net":0,"total_gross":0,"total":0},
+            "transactions": [],
+            "rates": {"product_commission_pct": 3.0, "service_commission_pct": 3.0, "v": -99}
         }
     finally:
         conn.close()
