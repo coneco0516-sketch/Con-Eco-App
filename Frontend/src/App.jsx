@@ -223,7 +223,14 @@ function AppContent() {
       )}
       
       {/* Rest of the App only renders if not in maintenance (or as background blurred) */}
-      <div style={{ filter: showMaintenancePopup ? 'blur(15px)' : 'none', pointerEvents: showMaintenancePopup ? 'none' : 'auto', transition: 'filter 0.3s ease' }}>
+      <div style={{ 
+        filter: showMaintenancePopup ? 'blur(15px)' : 'none', 
+        pointerEvents: showMaintenancePopup ? 'none' : 'auto', 
+        transition: 'filter 0.3s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh'
+      }}>
         <Navbar />
         <main className="main-content">
         <Routes>
