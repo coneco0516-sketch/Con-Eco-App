@@ -9,7 +9,7 @@ function AdminPayments() {
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
 
-  const [settings, setSettings] = useState({ product_commission_pct: 3.0 });
+  const [settings, setSettings] = useState({ product_commission_pct: 3.0, service_commission_pct: 3.0 });
 
   useEffect(() => {
     setLoading(true);

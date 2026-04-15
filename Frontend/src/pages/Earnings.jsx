@@ -12,7 +12,7 @@ function Earnings() {
     pending_online: 0, 
     pending_cod: 0, 
     breakdowns: [],
-    rates: { product_commission_pct: 3, service_commission_pct: 5 }
+    rates: { product_commission_pct: 3.0, service_commission_pct: 3.0 }
   });
   const [loading, setLoading] = useState(true);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -36,7 +36,7 @@ function Earnings() {
                 pending_online: data.stats.pending_online || 0,
                 pending_cod: data.stats.pending_cod || 0,
                 breakdowns: data.transactions,
-                rates: data.rates || { product_commission_pct: 3, service_commission_pct: 5 }
+                rates: data.rates || { product_commission_pct: 3.0, service_commission_pct: 3.0 }
             });
         }
         setLoading(false);
