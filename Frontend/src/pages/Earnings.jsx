@@ -24,7 +24,7 @@ function Earnings() {
 
   const fetchEarnings = () => {
     setLoading(true);
-    fetch(`${API}/api/vendor/earnings`, { credentials: 'include' })
+    fetch(`${API}/api/vendor/earnings?cb=${Date.now()}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.stats) {

@@ -601,7 +601,7 @@ def vendor_earnings(user = Depends(check_vendor)):
         current_rates = {
             "product_commission_pct": float(get_platform_setting("product_commission_pct", 3.0)),
             "service_commission_pct": float(get_platform_setting("service_commission_pct", 3.0)),
-            "v": 2
+            "v": 3
         }
 
         sql_payments = """
