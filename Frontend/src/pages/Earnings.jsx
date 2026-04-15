@@ -85,10 +85,11 @@ function Earnings() {
         <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Earnings</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Monitor your platform balance and request payouts.</p>
         
-        <div style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid var(--surface-border)', marginBottom: '1.5rem', display: 'flex', gap: '1.5rem' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Current Rates:</span>
-          <span style={{ fontSize: '0.85rem', color: 'white' }}>Products: <strong style={{color: 'var(--primary-color)'}}>{earnings.rates.product_commission_pct}%</strong></span>
-          <span style={{ fontSize: '0.85rem', color: 'white' }}>Services: <strong style={{color: 'var(--primary-color)'}}>{earnings.rates.service_commission_pct}%</strong></span>
+        <div style={{ padding: '0.82rem', background: 'rgba(255,215,0,0.05)', borderRadius: '8px', border: '1px solid rgba(255,215,0,0.2)', marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.85rem', color: '#ffd700', fontWeight: 'bold' }}>Live Platform Rates:</span>
+          <span style={{ fontSize: '0.85rem', color: 'white' }}>Services: <strong style={{color: '#ffd700'}}>{earnings.rates.service_commission_pct}%</strong></span>
+          <span style={{ fontSize: '0.85rem', color: 'white' }}>Products: <strong style={{color: '#ffd700'}}>{earnings.rates.product_commission_pct}%</strong></span>
+          <button onClick={fetchEarnings} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #ffd700', color: '#ffd700', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>Refresh Rates</button>
         </div>
 
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
