@@ -16,6 +16,43 @@
 
   --glass-blur: blur(12px);
   --transition-speed: 0.3s;
+
+  /* Theme-specific Variables */
+  --text-highlight: #ffffff;
+  --navbar-bg: rgba(13, 17, 23, 0.8);
+  --stat-gradient-start: #fff;
+  --input-bg: rgba(0, 0, 0, 0.2);
+  --footer-bg: rgba(13, 17, 23, 0.5);
+  --quantity-bg: rgba(255, 255, 255, 0.03);
+  --quantity-hover-bg: rgba(255, 255, 255, 0.1);
+  --quantity-active-bg: rgba(255, 255, 255, 0.15);
+  --bg-gradient-top: rgba(46, 160, 67, 0.15);
+  --bg-gradient-bottom: rgba(248, 81, 73, 0.1);
+}
+
+body.light-mode {
+  --bg-color: #f6f8fa;
+  --surface-color: rgba(255, 255, 255, 0.85);
+  --surface-border: rgba(0, 0, 0, 0.1);
+  --primary-color: #1a7f37;
+  --primary-hover: #116329;
+  --text-primary: #24292f;
+  --text-secondary: #57606a;
+  --accent-glow: rgba(26, 127, 55, 0.3);
+
+  --success-color: #2da44e;
+  --danger-color: #cf222e;
+
+  --text-highlight: #000000;
+  --navbar-bg: rgba(255, 255, 255, 0.85);
+  --stat-gradient-start: #24292f;
+  --input-bg: rgba(255, 255, 255, 0.6);
+  --footer-bg: rgba(246, 248, 250, 0.7);
+  --quantity-bg: rgba(0, 0, 0, 0.03);
+  --quantity-hover-bg: rgba(0, 0, 0, 0.08);
+  --quantity-active-bg: rgba(0, 0, 0, 0.12);
+  --bg-gradient-top: rgba(26, 127, 55, 0.1);
+  --bg-gradient-bottom: rgba(207, 34, 46, 0.05);
 }
 
 body {
@@ -24,8 +61,8 @@ body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
   background-image:
-    radial-gradient(circle at top left, rgba(46, 160, 67, 0.15), transparent 40%),
-    radial-gradient(circle at bottom right, rgba(248, 81, 73, 0.1), transparent 40%);
+    radial-gradient(circle at top left, var(--bg-gradient-top), transparent 40%),
+    radial-gradient(circle at bottom right, var(--bg-gradient-bottom), transparent 40%);
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
@@ -69,7 +106,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(13, 17, 23, 0.8);
+  background: var(--navbar-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--surface-border);
 }
@@ -77,7 +114,7 @@ body {
 .nav-brand {
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: var(--text-highlight);
   text-decoration: none;
   background: linear-gradient(90deg, #2ea043, #7ee787);
   -webkit-background-clip: text;
@@ -120,7 +157,7 @@ body {
 }
 
 .nav-item:hover {
-  color: white;
+  color: var(--text-highlight);
 }
 
 .nav-item:hover::after {
@@ -160,9 +197,9 @@ body {
 .input-field {
   width: 100%;
   padding: 0.8rem 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--input-bg);
   border: 1px solid var(--surface-border);
-  color: white;
+  color: var(--text-primary);
   border-radius: 6px;
   font-family: inherit;
   font-size: 1rem;
@@ -195,7 +232,7 @@ body {
 .auth-title {
   font-size: 2rem;
   margin-bottom: 2rem;
-  color: white;
+  color: var(--text-highlight);
 }
 
 /* Dashboard Cards */
@@ -233,8 +270,8 @@ body {
   font-size: 2.5rem;
   font-weight: 700;
   margin: 1rem 0 0;
-  color: white;
-  background: linear-gradient(90deg, #fff, var(--primary-color));
+  color: var(--text-highlight);
+  background: linear-gradient(90deg, var(--stat-gradient-start), var(--primary-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -257,7 +294,7 @@ footer {
   padding: 1.5rem;
   border-top: 1px solid var(--surface-border);
   color: var(--text-secondary);
-  background: rgba(13, 17, 23, 0.5);
+  background: var(--footer-bg);
   font-size: 0.9rem;
 }
 
@@ -265,7 +302,7 @@ footer {
 .quantity-selector {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--quantity-bg);
   border: 1px solid var(--surface-border);
   border-radius: 8px;
   overflow: hidden;
@@ -296,12 +333,12 @@ footer {
 }
 
 .quantity-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: var(--quantity-hover-bg);
+  color: var(--text-highlight);
 }
 
 .quantity-btn:active {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--quantity-active-bg);
 }
 
 .quantity-input {
@@ -311,7 +348,7 @@ footer {
   border: none;
   border-left: 1px solid var(--surface-border);
   border-right: 1px solid var(--surface-border);
-  color: white;
+  color: var(--text-primary);
   text-align: center;
   font-family: inherit;
   font-size: 0.95rem;
