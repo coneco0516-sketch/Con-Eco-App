@@ -31,28 +31,28 @@
 }
 
 body.light-mode {
-  --bg-color: #f6f8fa;
-  --surface-color: rgba(255, 255, 255, 0.85);
-  --surface-border: rgba(0, 0, 0, 0.1);
-  --primary-color: #1a7f37;
-  --primary-hover: #116329;
-  --text-primary: #24292f;
-  --text-secondary: #57606a;
-  --accent-glow: rgba(26, 127, 55, 0.3);
+  --bg-color: #faf9f6; /* Elegant pearl/off-white */
+  --surface-color: rgba(255, 255, 255, 0.55); /* Frosted premium glass */
+  --surface-border: rgba(148, 163, 184, 0.2); 
+  --primary-color: #059669; /* Emerald Green */
+  --primary-hover: #047857; /* Darker Emerald */
+  --text-primary: #1e293b; /* Slate Dark */
+  --text-secondary: #64748b; /* Slate Muted */
+  --accent-glow: rgba(5, 150, 105, 0.25);
 
-  --success-color: #2da44e;
-  --danger-color: #cf222e;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
 
-  --text-highlight: #000000;
-  --navbar-bg: rgba(255, 255, 255, 0.85);
-  --stat-gradient-start: #24292f;
-  --input-bg: rgba(255, 255, 255, 0.6);
-  --footer-bg: rgba(246, 248, 250, 0.7);
-  --quantity-bg: rgba(0, 0, 0, 0.03);
-  --quantity-hover-bg: rgba(0, 0, 0, 0.08);
-  --quantity-active-bg: rgba(0, 0, 0, 0.12);
-  --bg-gradient-top: rgba(26, 127, 55, 0.1);
-  --bg-gradient-bottom: rgba(207, 34, 46, 0.05);
+  --text-highlight: #0f172a; /* Deepest slate for headers and logos */
+  --navbar-bg: rgba(250, 249, 246, 0.75);
+  --stat-gradient-start: #0f172a;
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --footer-bg: rgba(250, 249, 246, 0.6);
+  --quantity-bg: rgba(255, 255, 255, 0.6);
+  --quantity-hover-bg: rgba(255, 255, 255, 0.9);
+  --quantity-active-bg: rgba(241, 245, 249, 1);
+  --bg-gradient-top: rgba(5, 150, 105, 0.08); /* Soft emerald splash */
+  --bg-gradient-bottom: rgba(245, 158, 11, 0.06); /* Soft warm amber splash */
 }
 
 body {
