@@ -26,8 +26,9 @@
   --quantity-bg: rgba(255, 255, 255, 0.03);
   --quantity-hover-bg: rgba(255, 255, 255, 0.1);
   --quantity-active-bg: rgba(255, 255, 255, 0.15);
-  --bg-gradient-top: rgba(46, 160, 67, 0.15);
-  --bg-gradient-bottom: rgba(248, 81, 73, 0.1);
+  --bg-gradient-1: rgba(46, 160, 67, 0.15); /* Green */
+  --bg-gradient-2: rgba(56, 112, 224, 0.1); /* Deep Blue */
+  --bg-gradient-3: rgba(248, 81, 73, 0.1); /* Red */
 }
 
 body.light-mode {
@@ -51,8 +52,9 @@ body.light-mode {
   --quantity-bg: rgba(255, 255, 255, 0.6);
   --quantity-hover-bg: rgba(255, 255, 255, 0.9);
   --quantity-active-bg: rgba(241, 245, 249, 1);
-  --bg-gradient-top: rgba(5, 150, 105, 0.08); /* Soft emerald splash */
-  --bg-gradient-bottom: rgba(245, 158, 11, 0.06); /* Soft warm amber splash */
+  --bg-gradient-1: rgba(5, 150, 105, 0.08); /* Soft emerald splash */
+  --bg-gradient-2: rgba(14, 165, 233, 0.1); /* Sky Blue */
+  --bg-gradient-3: rgba(245, 158, 11, 0.07); /* Soft warm amber splash */
 }
 
 body {
@@ -61,8 +63,9 @@ body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
   background-image:
-    radial-gradient(circle at top left, var(--bg-gradient-top), transparent 40%),
-    radial-gradient(circle at bottom right, var(--bg-gradient-bottom), transparent 40%);
+    radial-gradient(ellipse at 15% 20%, var(--bg-gradient-1), transparent 50%),
+    radial-gradient(ellipse at 85% 30%, var(--bg-gradient-2), transparent 45%),
+    radial-gradient(ellipse at 50% 90%, var(--bg-gradient-3), transparent 60%);
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
