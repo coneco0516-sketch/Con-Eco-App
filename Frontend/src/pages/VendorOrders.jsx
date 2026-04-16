@@ -97,7 +97,7 @@ function VendorOrders() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <VendorSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Incoming Orders</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Incoming Orders</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Track requests, update shipping statuses, and process deliveries.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
@@ -115,7 +115,7 @@ function VendorOrders() {
               <div key={o.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem' }}>
                 <div style={{ flex: '1 1 300px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
-                    <h4 style={{ color: 'white', margin: 0 }}>Order #{o.order_id} - {o.customer_name}</h4>
+                    <h4 style={{ color: 'var(--text-highlight)', margin: 0 }}>Order #{o.order_id} - {o.customer_name}</h4>
                     {o.status === 'Bulk Requested' && (
                       <span style={{ background: 'rgba(52, 152, 219, 0.2)', color: '#3498db', padding: '2px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid #3498db' }}>
                         BULK PRICE REQUESTED
@@ -131,7 +131,7 @@ function VendorOrders() {
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>Ordered on: {o.date}</p>
                   
                   <div style={{ background: 'rgba(0,0,0,0.1)', padding: '0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--primary-color)', marginBottom: '0.8rem' }}>
-                    <p style={{ color: 'white', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Delivery Address:</p>
+                    <p style={{ color: 'var(--text-highlight)', fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.25rem 0' }}>Delivery Address:</p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{o.delivery_address || 'No address provided'}</p>
                   </div>
 
@@ -143,7 +143,7 @@ function VendorOrders() {
                   )}
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
-                    <p style={{ color: 'white', fontSize: '0.9rem', margin: 0 }}>
+                    <p style={{ color: 'var(--text-highlight)', fontSize: '0.9rem', margin: 0 }}>
                       Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method || 'N/A'}</span> 
                       <span style={{ marginLeft: '10px', fontSize: '0.8rem', padding: '2px 8px', borderRadius: '4px', background: o.payment_status === 'Completed' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: o.payment_status === 'Completed' ? '#22c55e' : '#f59e0b' }}>
                         {o.payment_status || 'Pending'}
@@ -218,7 +218,7 @@ function VendorOrders() {
                       onChange={(e) => handleStatusChange(o.order_id, e.target.value)}
                       style={{
                         background: 'rgba(0,0,0,0.3)',
-                        color: 'white',
+                        color: 'var(--text-highlight)',
                         border: '1px solid var(--surface-border)',
                         padding: '10px',
                         borderRadius: '4px',

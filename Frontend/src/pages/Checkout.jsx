@@ -222,7 +222,7 @@ function Checkout() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Checkout</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Checkout</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Review your order and select a payment method.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
@@ -234,12 +234,12 @@ function Checkout() {
           </div>
         ) : (
           <div className="glass-panel" style={{ padding: '2rem', maxWidth: '600px' }}>
-            <h3 style={{ color: 'white', marginBottom: '1rem' }}>Order Summary</h3>
+            <h3 style={{ color: 'var(--text-highlight)', marginBottom: '1rem' }}>Order Summary</h3>
             <ul style={{ listStyle: 'none', padding: 0, marginBottom: '1.5rem' }}>
               {cart.map((item, idx) => (
                 <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', gap: '1rem' }}>
                   <div style={{ flex: 1 }}>
-                    <span style={{ color: 'white', display: 'block' }}>{item.name}</span>
+                    <span style={{ color: 'var(--text-highlight)', display: 'block' }}>{item.name}</span>
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>₹{item.price} each</span>
                   </div>
                   
@@ -284,7 +284,7 @@ function Checkout() {
               ))}
             </ul>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 'bold' }}>
-              <span style={{ color: 'white' }}>Subtotal (Base Prices)</span>
+              <span style={{ color: 'var(--text-highlight)' }}>Subtotal (Base Prices)</span>
               <span style={{ color: 'var(--text-secondary)' }}>₹{baseTotal.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '1rem' }}>
@@ -296,12 +296,12 @@ function Checkout() {
               <span style={{ color: '#ffd700' }}>₹{commissionTotal.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 'bold', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
-              <span style={{ color: 'white' }}>Total Amount</span>
+              <span style={{ color: 'var(--text-highlight)' }}>Total Amount</span>
               <span style={{ color: 'var(--primary-color)' }}>₹{total.toFixed(2)}</span>
             </div>
 
             <div style={{ marginBottom: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
-              <label style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Delivery Address (Site Location) <span style={{ color: 'var(--danger-color)' }}>*</span></label>
+              <label style={{ color: 'var(--text-highlight)', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Delivery Address (Site Location) <span style={{ color: 'var(--danger-color)' }}>*</span></label>
               <textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
@@ -313,7 +313,7 @@ function Checkout() {
                   borderRadius: '6px',
                   border: '1px solid var(--surface-border)',
                   background: 'rgba(0, 0, 0, 0.2)',
-                  color: 'white',
+                  color: 'var(--text-highlight)',
                   fontFamily: 'inherit',
                   resize: 'vertical',
                   marginBottom: '1rem'
@@ -335,7 +335,7 @@ function Checkout() {
             </div>
 
             <div style={{ marginBottom: '2rem' }}>
-              <label style={{ color: 'white', display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>Select Payment Method</label>
+              <label style={{ color: 'var(--text-highlight)', display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>Select Payment Method</label>
 
 
 

@@ -64,7 +64,7 @@ function ResetPassword() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
       <div className="auth-card glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem' }}>
-        <h2 style={{ color: 'white', marginBottom: '1rem', textAlign: 'center' }}>Reset Password</h2>
+        <h2 style={{ color: 'var(--text-highlight)', marginBottom: '1rem', textAlign: 'center' }}>Reset Password</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', textAlign: 'center' }}>Enter your new password below.</p>
 
         {message && <p style={{ color: 'var(--success-color)', marginBottom: '1.5rem', textAlign: 'center', background: 'rgba(46, 160, 67, 0.1)', padding: '0.8rem', borderRadius: '4px' }}>{message}</p>}

@@ -48,7 +48,7 @@ function Services() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Services</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Services</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Browse available services from providers.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
@@ -117,7 +117,7 @@ function Services() {
                 ) : (
                   <div style={{ width: '100%', height: '180px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>No Image</div>
                 )}
-                <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{s.name}</h3>
+                <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>{s.name}</h3>
                 <div style={{ marginBottom: '1rem' }}>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0' }}>Base: ₹{s.price}</p>
                   <p style={{ color: '#ffd700', fontSize: '0.85rem', margin: '0.25rem 0' }}>Commission ({commissionRate}%): ₹{(s.price * (parseFloat(commissionRate) / 100)).toFixed(2)}</p>

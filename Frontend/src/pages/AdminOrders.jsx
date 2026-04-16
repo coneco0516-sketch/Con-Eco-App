@@ -50,7 +50,7 @@ function AdminOrders() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <AdminSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>All Orders Overview</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>All Orders Overview</h2>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
         <section className="glass-panel" style={{ overflow: 'hidden' }}>
@@ -78,7 +78,7 @@ function AdminOrders() {
                   <tr key={order.order_id} style={{ borderBottom: idx !== orders.length -1 ? '1px solid var(--surface-border)' : 'none' }}>
                     <td style={{ padding: '15px' }}>#{order.order_id}</td>
                     <td style={{ padding: '15px' }}>
-                      <div style={{ color: 'white' }}>{order.customer_name}</div>
+                      <div style={{ color: 'var(--text-highlight)' }}>{order.customer_name}</div>
                     </td>
                     <td style={{ padding: '15px', color: 'var(--primary-color)' }}>{order.vendor_name}</td>
                     <td style={{ padding: '15px' }}>{order.order_type}</td>

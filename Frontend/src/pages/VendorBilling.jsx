@@ -149,13 +149,13 @@ function VendorBilling() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <VendorSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Commission Billing</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Commission Billing</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
           View and pay your weekly platform commissions (Product: {settings.product_commission_pct}%, Service: {settings.service_commission_pct}%).
         </p>
 
         {message && (
-          <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1.5rem', background: 'rgba(46, 160, 67, 0.15)', color: 'white', textAlign: 'center' }}>
+          <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1.5rem', background: 'rgba(46, 160, 67, 0.15)', color: 'var(--text-highlight)', textAlign: 'center' }}>
             {message}
           </div>
         )}
@@ -180,7 +180,7 @@ function VendorBilling() {
               <tbody>
                 {invoices.map(inv => (
                   <tr key={inv.invoice_id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                    <td style={{ padding: '1rem', color: 'white', fontWeight: 'bold' }}>#{inv.invoice_id}</td>
+                    <td style={{ padding: '1rem', color: 'var(--text-highlight)', fontWeight: 'bold' }}>#{inv.invoice_id}</td>
                     <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{inv.start} – {inv.end}</td>
                     <td style={{ padding: '1rem', color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.1rem' }}>
                       ₹{parseFloat(inv.amount).toFixed(2)}
@@ -238,8 +238,8 @@ function VendorBilling() {
         }}>
           <h4 style={{ color: '#ffd700', marginBottom: '10px' }}>Platform Billing Policy</h4>
           <ul style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.8', margin: 0, paddingLeft: '1.2rem' }}>
-            <li>The platform charges a commission of <strong style={{ color: 'white' }}>{settings.product_commission_pct}% for products</strong> and <strong style={{ color: 'white' }}>{settings.service_commission_pct}% for services</strong> on all completed offline (COD/Direct) orders.</li>
-            <li>Invoices are generated every Monday for the previous week's collection and must be paid within <strong style={{ color: 'white' }}>3 days</strong>.</li>
+            <li>The platform charges a commission of <strong style={{ color: 'var(--text-highlight)' }}>{settings.product_commission_pct}% for products</strong> and <strong style={{ color: 'var(--text-highlight)' }}>{settings.service_commission_pct}% for services</strong> on all completed offline (COD/Direct) orders.</li>
+            <li>Invoices are generated every Monday for the previous week's collection and must be paid within <strong style={{ color: 'var(--text-highlight)' }}>3 days</strong>.</li>
             <li><strong style={{ color: '#f85149' }}>Penalty - Strike 1:</strong> Verification status will be revoked.</li>
             <li><strong style={{ color: '#f85149' }}>Penalty - Strike 2:</strong> Permanent account suspension.</li>
           </ul>

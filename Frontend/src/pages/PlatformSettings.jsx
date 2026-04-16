@@ -79,7 +79,7 @@ function PlatformSettings() {
       <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
         <AdminSidebar />
         <main style={{ flex: 1 }}>
-          <h2 style={{ color: 'white' }}>Loading Platform Settings...</h2>
+          <h2 style={{ color: 'var(--text-highlight)' }}>Loading Platform Settings...</h2>
         </main>
       </div>
     );
@@ -89,7 +89,7 @@ function PlatformSettings() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <AdminSidebar />
       <main style={{ flex: 1, paddingBottom: '3rem' }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Platform Settings</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Platform Settings</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Configure marketplace preferences, commissions, and system-wide controls.</p>
         
         {msg && (
@@ -102,7 +102,7 @@ function PlatformSettings() {
           
           {/* User & Vendor Control */}
           <section className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ color: 'white', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>🔐</span> User & Vendor Control
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -123,7 +123,7 @@ function PlatformSettings() {
 
           {/* Commission Settings */}
           <section className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ color: 'white', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>💰</span> Commission Settings
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
@@ -140,7 +140,7 @@ function PlatformSettings() {
 
           {/* Order Settings */}
           <section className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ color: 'white', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>📦</span> Order Settings
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -161,7 +161,7 @@ function PlatformSettings() {
 
           {/* Notifications */}
           <section className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h3 style={{ color: 'white', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>🔔</span> Notifications
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -181,7 +181,7 @@ function PlatformSettings() {
 
           {/* Server Control */}
           <section className="glass-panel" style={{ padding: '1.5rem', border: settings.server_maintenance_mode ? '1px solid var(--danger-color)' : '1px solid var(--surface-border)' }}>
-            <h3 style={{ color: 'white', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>🖥️</span> Server Control
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

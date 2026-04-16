@@ -136,7 +136,7 @@ function VendorProfile() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <VendorSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Vendor Profile</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Vendor Profile</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Manage your business information and settings.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
@@ -209,7 +209,7 @@ function VendorProfile() {
                  </div>
 
                  <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                   <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>🔔 Browser Notifications</h4>
+                   <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>🔔 Browser Notifications</h4>
                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
                      Status: <span style={{ color: pushStatus === 'Subscribed' ? 'var(--primary-color)' : 'var(--warning-color)' }}>{pushStatus}</span>
                    </p>

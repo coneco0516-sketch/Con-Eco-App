@@ -201,7 +201,7 @@ function AppContent() {
             <h2 style={{ color: '#ef4444', fontSize: '2.5rem', marginBottom: '1.5rem', fontWeight: 800 }}>
               System Maintenance
             </h2>
-            <p style={{ color: 'white', fontSize: '1.3rem', marginBottom: '2.5rem', lineHeight: '1.8', opacity: 0.9 }}>
+            <p style={{ color: 'var(--text-highlight)', fontSize: '1.3rem', marginBottom: '2.5rem', lineHeight: '1.8', opacity: 0.9 }}>
               ConEco Marketplace is currently undergoing scheduled maintenance to improve our services. We'll be back online shortly!
             </p>
             <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', marginBottom: '2.5rem' }}>

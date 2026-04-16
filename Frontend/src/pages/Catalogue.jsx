@@ -152,7 +152,7 @@ function Catalogue() {
       <main style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <div>
-            <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Catalogue</h2>
+            <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>My Catalogue</h2>
             <p style={{ color: 'var(--text-secondary)', margin: 0 }}>View and manage the items you have listed.</p>
           </div>
           <button className="btn" onClick={openAddModal} style={{ background: 'var(--primary-color)', height: 'fit-content' }}>+ Add New Item</button>
@@ -163,7 +163,7 @@ function Catalogue() {
         {showModal && (
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div className="glass-panel" style={{ width: '440px', maxWidth: '90vw', padding: '2rem', boxShadow: '0 0 20px rgba(0,0,0,0.5)', maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3 style={{ color: 'white', marginBottom: '1.5rem', marginTop: 0 }}>
+              <h3 style={{ color: 'var(--text-highlight)', marginBottom: '1.5rem', marginTop: 0 }}>
                 {editingItem ? '✏️ Edit Item' : '➕ Add New Item'}
               </h3>
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
@@ -273,9 +273,9 @@ function Catalogue() {
         {deleteConfirm && (
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div className="glass-panel" style={{ width: '400px', padding: '2rem', textAlign: 'center' }}>
-              <h3 style={{ color: 'white', marginTop: 0 }}>Delete Item?</h3>
+              <h3 style={{ color: 'var(--text-highlight)', marginTop: 0 }}>Delete Item?</h3>
               <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                Are you sure you want to delete <strong style={{ color: 'white' }}>"{deleteConfirm.name}"</strong>? This action cannot be undone.
+                Are you sure you want to delete <strong style={{ color: 'var(--text-highlight)' }}>"{deleteConfirm.name}"</strong>? This action cannot be undone.
               </p>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <button className="btn danger" onClick={() => handleDelete(deleteConfirm)} style={{ flex: 1 }}>Yes, Delete</button>
@@ -296,7 +296,7 @@ function Catalogue() {
                 ) : (
                   <div style={{ width: '100%', height: '150px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>No Image</div>
                 )}
-                <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>{i.name}</h3>
+                <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>{i.name}</h3>
                 <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '0.5rem' }}>₹{i.price} <span style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>{i.unit ? `/ ${i.unit}` : ''}</span></p>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.25rem', flex: 1 }}>{i.description}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>

@@ -73,7 +73,7 @@ function VendorVerification() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <AdminSidebar />
       <main className="verification" style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Vendor QC Verification</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Vendor QC Verification</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Approve vendors and set QC scores (0-100). Only verified vendors' products will be shown to customers.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
@@ -86,7 +86,7 @@ function VendorVerification() {
             
             return (
               <div key={vendor.vendor_id} className="vendor-card glass-panel" style={{ padding: '15px', width: '300px' }}>
-                <h3 style={{ color: 'white', margin: '0 0 10px 0' }}>{vendor.company_name}</h3>
+                <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 10px 0' }}>{vendor.company_name}</h3>
                 <p><strong>Owner:</strong> <span style={{ color: 'var(--text-primary)' }}>{vendor.name}</span></p>
                 <p><strong>Email:</strong> <span style={{ color: 'var(--text-primary)' }}>{vendor.email}</span></p>
                 <p><strong>Phone:</strong> <span style={{ color: 'var(--text-primary)' }}>{vendor.phone}</span></p>
@@ -121,7 +121,7 @@ function VendorVerification() {
                           marginLeft: '8px',
                           padding: '5px',
                           background: '#0d1117',
-                          color: 'white',
+                          color: 'var(--text-highlight)',
                           border: '1px solid #30363d',
                           borderRadius: '4px',
                           width: '60px'

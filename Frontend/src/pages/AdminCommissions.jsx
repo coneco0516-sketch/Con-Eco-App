@@ -66,7 +66,7 @@ function AdminCommissions() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <AdminSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0, marginBottom: '0.5rem' }}>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0, marginBottom: '0.5rem' }}>
           Platform Commissions
         </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
@@ -74,7 +74,7 @@ function AdminCommissions() {
         </p>
 
         {actionMessage && (
-          <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1.5rem', background: 'rgba(9, 105, 218, 0.15)', color: 'white' }}>
+          <div className="glass-panel" style={{ padding: '1rem', marginBottom: '1.5rem', background: 'rgba(9, 105, 218, 0.15)', color: 'var(--text-highlight)' }}>
             {actionMessage}
           </div>
         )}
@@ -93,7 +93,7 @@ function AdminCommissions() {
           </div>
           <div className="glass-panel" style={{ padding: '1.25rem' }}>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.4rem 0' }}>Active Billings</p>
-            <div style={{ fontSize: '1.6rem', color: 'white', fontWeight: 'bold' }}>{data.invoices.length}</div>
+            <div style={{ fontSize: '1.6rem', color: 'var(--text-highlight)', fontWeight: 'bold' }}>{data.invoices.length}</div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: '4px 0 0 0' }}>Total billing cycles</p>
           </div>
         </div>
@@ -101,7 +101,7 @@ function AdminCommissions() {
         {/* Manual Controls */}
         <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <h3 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>Manual Controls</h3>
+            <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>Manual Controls</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
               These tasks run automatically. Use only if a manual override is needed.
             </p>
@@ -129,7 +129,7 @@ function AdminCommissions() {
         {/* Billings Table */}
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <h3 style={{ color: 'white', margin: 0 }}>Weekly Commission Billings</h3>
+            <h3 style={{ color: 'var(--text-highlight)', margin: 0 }}>Weekly Commission Billings</h3>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
               {settings.product_commission_pct}% Platform Fee on Offline Sales
             </span>
@@ -156,9 +156,9 @@ function AdminCommissions() {
                 <tbody>
                   {data.invoices.map(inv => (
                     <tr key={inv.invoice_id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                      <td style={{ padding: '1rem', color: 'white' }}>#{inv.invoice_id}</td>
+                      <td style={{ padding: '1rem', color: 'var(--text-highlight)' }}>#{inv.invoice_id}</td>
                       <td style={{ padding: '1rem' }}>
-                        <strong style={{ color: 'white' }}>{inv.company_name}</strong><br />
+                        <strong style={{ color: 'var(--text-highlight)' }}>{inv.company_name}</strong><br />
                         <span style={{ fontSize: '0.8rem' }}>{inv.vendor_name}</span>
                       </td>
                       <td style={{ padding: '1rem', fontSize: '0.85rem' }}>
@@ -203,7 +203,7 @@ function AdminCommissions() {
         }}>
           <p style={{ color: '#3498db', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>ℹ Platform Fee Note</p>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0, lineHeight: '1.6' }}>
-            The platform charges commission on all sales: <strong style={{ color: 'white' }}>{settings.product_commission_pct}% for Products</strong> and <strong style={{ color: 'white' }}>{settings.service_commission_pct}% for Services</strong>. 
+            The platform charges commission on all sales: <strong style={{ color: 'var(--text-highlight)' }}>{settings.product_commission_pct}% for Products</strong> and <strong style={{ color: 'var(--text-highlight)' }}>{settings.service_commission_pct}% for Services</strong>. 
             Vendors are billed weekly and must pay within 3 days. Accumulating 2 unpaid billings will result in an automatic account suspension.
           </p>
         </div>

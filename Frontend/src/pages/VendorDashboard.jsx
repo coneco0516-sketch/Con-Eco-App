@@ -69,7 +69,7 @@ function VendorDashboard() {
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
             <h3 style={{ color: '#ffd700', fontSize: '1.5rem', marginBottom: '1rem' }}>Test Version Active</h3>
             <p style={{
-              color: 'white',
+              color: 'var(--text-highlight)',
               fontSize: '1.05rem',
               lineHeight: '1.7',
               marginBottom: '2rem'
@@ -95,7 +95,7 @@ function VendorDashboard() {
       <VendorSidebar />
 
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Vendor Dashboard</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Vendor Dashboard</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Manage your materials, orders, and sales performance.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
@@ -144,13 +144,13 @@ function VendorDashboard() {
           {/* Row 1 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Catalogue {stats && stats.catalogue_size !== undefined ? <span style={{ color: 'var(--primary-color)' }}>({stats.catalogue_size})</span> : ''}</h3>
+              <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Catalogue {stats && stats.catalogue_size !== undefined ? <span style={{ color: 'var(--primary-color)' }}>({stats.catalogue_size})</span> : ''}</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Add or edit your product listings and services.</p>
               <Link to="/vendor/catalogue" className="btn" style={{ background: '#238636' }}>Manage Catalogue</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Orders {stats && stats.pending_orders > 0 ? <span style={{ color: '#f85149' }}>({stats.pending_orders} New)</span> : ''}</h3>
+              <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Orders {stats && stats.pending_orders > 0 ? <span style={{ color: '#f85149' }}>({stats.pending_orders} New)</span> : ''}</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Check requested materials and services.</p>
               <Link to="/vendor/orders" className="btn" style={{ background: '#1a7f37' }}>View Orders</Link>
             </div>
@@ -159,13 +159,13 @@ function VendorDashboard() {
           {/* Row 2 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Total Earnings (Net)</h4>
+              <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Total Earnings (Net)</h4>
               <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats ? stats.total_earnings : '...'}</p>
               <Link to="/vendor/earnings" className="btn" style={{ background: '#d26d0e' }}>View Detailed Breakdown</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Commission Bills</h4>
+              <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Commission Bills</h4>
               <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: stats && stats.outstanding_commission > 0 ? '#f85149' : 'var(--primary-color)' }}>
                 ₹{stats ? stats.outstanding_commission : '0'}
               </p>

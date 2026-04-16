@@ -186,15 +186,15 @@ function CustomerItemDetail() {
 
               {/* Details Section */}
               <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column' }}>
-                <h1 style={{ color: 'white', marginTop: 0, marginBottom: '0.5rem', fontSize: '2.5rem' }}>{item.name}</h1>
+                <h1 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '0.5rem', fontSize: '2.5rem' }}>{item.name}</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                   <p style={{ color: 'var(--primary-color)', fontSize: '1.2rem', margin: 0 }}>
-                    Provider: <span style={{ color: 'white' }}>{item.vendor_name}</span>
+                    Provider: <span style={{ color: 'var(--text-highlight)' }}>{item.vendor_name}</span>
                   </p>
                   {reviewsData.stats.total_reviews > 0 && (
                     <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,215,0,0.1)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
                       <span style={{ color: '#ffd700', fontSize: '1.1rem', marginRight: '0.3rem' }}>★</span>
-                      <span style={{ color: 'white', fontWeight: 'bold' }}>{reviewsData.stats.average_rating}</span>
+                      <span style={{ color: 'var(--text-highlight)', fontWeight: 'bold' }}>{reviewsData.stats.average_rating}</span>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginLeft: '0.4rem' }}>({reviewsData.stats.total_reviews} reviews)</span>
                     </div>
                   )}
@@ -210,14 +210,14 @@ function CustomerItemDetail() {
                 </div>
 
                 <div style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Description</h3>
+                  <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>Description</h3>
                   <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
                     {item.description || 'No description provided.'}
                   </p>
 
                   {item.specifications && (
                     <div style={{ marginTop: '1.5rem' }}>
-                      <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Specifications / Features</h3>
+                      <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>Specifications / Features</h3>
                       <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
                         {item.specifications}
                       </p>
@@ -313,8 +313,8 @@ function CustomerItemDetail() {
             {showBulkModal && (
               <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(10px)' }}>
                 <div className="glass-panel" style={{ width: '90%', maxWidth: '500px', padding: '2.5rem', position: 'relative' }}>
-                  <button onClick={() => setShowBulkModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
-                  <h2 style={{ color: 'white', marginTop: 0, marginBottom: '1rem' }}>Bulk Negotiation</h2>
+                  <button onClick={() => setShowBulkModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'var(--text-highlight)', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
+                  <h2 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '1rem' }}>Bulk Negotiation</h2>
                   <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Send a request to the vendor for a customized bulk price for {quantity} units.</p>
                   
                   <form onSubmit={sendBulkRequest} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
@@ -373,7 +373,7 @@ function CustomerItemDetail() {
 
             {/* Reviews Section */}
             <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
-              <h2 style={{ color: 'white', marginTop: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '1rem' }}>
+              <h2 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '1rem' }}>
                 Customer Reviews
               </h2>
 
@@ -382,7 +382,7 @@ function CustomerItemDetail() {
                   {reviewsData.reviews.map(review => (
                     <div key={review.review_id} style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                        <strong style={{ color: 'white' }}>{review.customer_name}</strong>
+                        <strong style={{ color: 'var(--text-highlight)' }}>{review.customer_name}</strong>
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{review.date}</span>
                       </div>
                       <div style={{ color: '#ffd700', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
@@ -402,7 +402,7 @@ function CustomerItemDetail() {
 
               {/* Write a Review Form */}
               <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-                <h3 style={{ color: 'white', marginTop: 0, marginBottom: '1rem' }}>Write a Review</h3>
+                <h3 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '1rem' }}>Write a Review</h3>
                 <form onSubmit={submitReview} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <label style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>Rating:</label>

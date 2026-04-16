@@ -6,7 +6,7 @@ function CustomerSidebar() {
 
   return (
     <aside className="glass-panel" style={{ width: '250px', padding: '1.5rem', height: 'fit-content' }}>
-      <h3 style={{ color: 'white', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem' }}>Customer Portal</h3>
+      <h3 style={{ color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem' }}>Customer Portal</h3>
       <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
         <li><Link to="/customer" className="nav-item">Dashboard</Link></li>
         <li><Link to="/customer/products" className="nav-item">Products</Link></li>

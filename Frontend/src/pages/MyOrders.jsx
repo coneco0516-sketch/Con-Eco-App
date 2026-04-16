@@ -134,7 +134,7 @@ function MyOrders() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Orders</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>My Orders</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>View your placed orders for products.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
@@ -145,7 +145,7 @@ function MyOrders() {
             {orders.map(o => (
               <div key={o.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ flex: 1 }}>
-                  <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>{o.item_name} (Order #{o.order_id})</h4>
+                  <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>{o.item_name} (Order #{o.order_id})</h4>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.25rem 0' }}>Vendor: {o.vendor_name}</p>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0 0 0.5rem 0' }}>
                     <span style={{ marginRight: '15px' }}>📧 {o.vendor_email}</span>
@@ -166,7 +166,7 @@ function MyOrders() {
                       {o.vendor_message && (
                         <div style={{ background: 'rgba(35, 134, 54, 0.1)', padding: '0.5rem', borderRadius: '4px', marginTop: '0.5rem' }}>
                            <p style={{ color: '#3fb950', fontSize: '0.8rem', fontWeight: 'bold', margin: '0 0 4px 0' }}>Vendor Reply:</p>
-                           <p style={{ color: 'white', fontSize: '0.8rem', margin: 0 }}>{o.vendor_message}</p>
+                           <p style={{ color: 'var(--text-highlight)', fontSize: '0.8rem', margin: 0 }}>{o.vendor_message}</p>
                            {o.negotiated_price && <p style={{ color: '#ffd700', fontSize: '0.85rem', fontWeight: 'bold', marginTop: '4px' }}>New Bulk Price: ₹{o.negotiated_price} / unit</p>}
                         </div>
                       )}

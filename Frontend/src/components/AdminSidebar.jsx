@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 function AdminSidebar() {
   return (
     <aside className="glass-panel" style={{ width: '250px', padding: '1.5rem', height: 'fit-content' }}>
-      <h3 style={{ color: 'white', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem' }}>Platform Control Center</h3>
+      <h3 style={{ color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem' }}>Platform Control Center</h3>
       <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
         <li><Link to="/admin/dashboard" className="nav-item">Dashboard</Link></li>
         <li><Link to="/admin/vendors" className="nav-item">Vendor Verification</Link></li>

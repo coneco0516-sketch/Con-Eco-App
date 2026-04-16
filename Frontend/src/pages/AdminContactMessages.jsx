@@ -115,7 +115,7 @@ function AdminContactMessages() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <AdminSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Contact Messages</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Contact Messages</h2>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
         {error && <p style={{ color: 'var(--danger-color)' }}>{error}</p>}
@@ -124,7 +124,7 @@ function AdminContactMessages() {
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
           <div className="glass-panel" style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>Total</p>
-            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: 'white', margin: '4px 0 0' }}>{totalCount}</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--text-highlight)', margin: '4px 0 0' }}>{totalCount}</p>
           </div>
           <div className="glass-panel" style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>Unread</p>
@@ -167,7 +167,7 @@ function AdminContactMessages() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
                 <div>
-                  <span style={{ fontWeight: '700', color: 'white', fontSize: '1.1rem' }}>{msg.name}</span>
+                  <span style={{ fontWeight: '700', color: 'var(--text-highlight)', fontSize: '1.1rem' }}>{msg.name}</span>
                   <span style={{ color: 'var(--text-secondary)', marginLeft: '1rem', fontSize: '0.9rem' }}>{msg.email}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
@@ -211,7 +211,7 @@ function AdminContactMessages() {
             justifyContent: 'center', zIndex: 1000
           }}>
             <div className="glass-panel" style={{ width: '600px', maxWidth: '90vw', padding: '2rem' }}>
-              <h3 style={{ color: 'white', marginTop: 0 }}>Reply to {replyModal.message?.name}</h3>
+              <h3 style={{ color: 'var(--text-highlight)', marginTop: 0 }}>Reply to {replyModal.message?.name}</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                 To: {replyModal.message?.email}
               </p>

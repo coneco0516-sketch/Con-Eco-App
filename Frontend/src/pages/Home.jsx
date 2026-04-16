@@ -17,7 +17,7 @@ function Home() {
 
   return (
     <div style={{ textAlign: 'center', marginTop: '10vh' }}>
-      <h1 style={{ fontSize: '4rem', color: 'white', marginBottom: '1rem', background: 'linear-gradient(90deg, #2ea043, #7ee787)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+      <h1 style={{ fontSize: '4rem', color: 'var(--text-highlight)', marginBottom: '1rem', background: 'linear-gradient(90deg, #2ea043, #7ee787)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
         Welcome to ConEco
       </h1>
       <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 3rem', lineHeight: '1.6' }}>

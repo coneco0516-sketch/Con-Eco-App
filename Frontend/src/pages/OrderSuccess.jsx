@@ -9,7 +9,7 @@ function OrderSuccess() {
       <main style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px', width: '100%' }}>
           <div style={{ fontSize: '4rem', color: 'var(--success-color)', marginBottom: '1rem' }}>✓</div>
-          <h2 style={{ fontSize: '2.5rem', color: 'white', marginBottom: '1rem' }}>Order Successful!</h2>
+          <h2 style={{ fontSize: '2.5rem', color: 'var(--text-highlight)', marginBottom: '1rem' }}>Order Successful!</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', fontSize: '1.2rem', lineHeight: '1.6' }}>
             Thank you for your purchase. Your payment has been securely processed and your vendor is preparing the shipment.
           </p>

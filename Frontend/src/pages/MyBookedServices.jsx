@@ -131,7 +131,7 @@ function MyBookedServices() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Booked Services</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>My Booked Services</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>View the services you have requested.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
@@ -142,7 +142,7 @@ function MyBookedServices() {
             {services.map(s => (
               <div key={s.order_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ flex: 1 }}>
-                  <h4 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>{s.item_name} (Booking #{s.order_id})</h4>
+                  <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>{s.item_name} (Booking #{s.order_id})</h4>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.25rem 0' }}>Vendor: {s.vendor_name}</p>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0 0 0.5rem 0' }}>
                     <span style={{ marginRight: '15px' }}>📧 {s.vendor_email}</span>

@@ -79,7 +79,7 @@ function Cart() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Cart</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>My Cart</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Review your items before checkout.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
@@ -103,7 +103,7 @@ function Cart() {
                 return (
                 <li key={item.cart_id} style={{ padding: '1rem 0', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem' }}>
                   <div style={{ flex: 1 }}>
-                    <p style={{ margin: 0, color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{item.name}</p>
+                    <p style={{ margin: 0, color: 'var(--text-highlight)', fontWeight: 'bold', fontSize: '1.1rem' }}>{item.name}</p>
                     <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Type: {item.item_type}</p>
                     <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
                       <p style={{ color: 'var(--text-secondary)', margin: '0 0 0.25rem 0', fontSize: '0.8rem' }}>Base: ₹{baseSubtotal.toFixed(2)}</p>

@@ -86,13 +86,13 @@ function Earnings() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <VendorSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>My Earnings</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>My Earnings</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Monitor your platform balance and request payouts.</p>
         
         <div style={{ padding: '0.82rem', background: 'rgba(255,215,0,0.05)', borderRadius: '8px', border: '1px solid rgba(255,215,0,0.2)', marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <span style={{ fontSize: '0.85rem', color: '#ffd700', fontWeight: 'bold' }}>Live Platform Rates:</span>
-          <span style={{ fontSize: '0.85rem', color: 'white' }}>Services: <strong style={{color: '#ffd700'}}>{earnings.rates.service_commission_pct}%</strong></span>
-          <span style={{ fontSize: '0.85rem', color: 'white' }}>Products: <strong style={{color: '#ffd700'}}>{earnings.rates.product_commission_pct}%</strong></span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-highlight)' }}>Services: <strong style={{color: '#ffd700'}}>{earnings.rates.service_commission_pct}%</strong></span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-highlight)' }}>Products: <strong style={{color: '#ffd700'}}>{earnings.rates.product_commission_pct}%</strong></span>
           <button onClick={fetchEarnings} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #ffd700', color: '#ffd700', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>Refresh Rates</button>
         </div>
 
@@ -104,10 +104,10 @@ function Earnings() {
           <div className="glass-panel" style={{ padding: '2rem' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                 <div>
-                  <h3 style={{ margin: 0, color: 'white', marginBottom: '0.25rem' }}>Withdrawable Balance (Online): <strong style={{color: 'var(--primary-color)'}}>₹{earnings.online_total || 0}</strong></h3>
+                  <h3 style={{ margin: 0, color: 'var(--text-highlight)', marginBottom: '0.25rem' }}>Withdrawable Balance (Online): <strong style={{color: 'var(--primary-color)'}}>₹{earnings.online_total || 0}</strong></h3>
                   <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pending Admin Audit: ₹{earnings.pending_online || 0}</p>
                   
-                  <h3 style={{ margin: 0, color: 'white', marginBottom: '0.25rem' }}>Collected Offline (COD): <strong style={{color: '#f59e0b'}}>₹{earnings.cod_total || 0}</strong></h3>
+                  <h3 style={{ margin: 0, color: 'var(--text-highlight)', marginBottom: '0.25rem' }}>Collected Offline (COD): <strong style={{color: '#f59e0b'}}>₹{earnings.cod_total || 0}</strong></h3>
                   <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pending COD Collections: ₹{earnings.pending_cod || 0}</p>
                   
                   <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
@@ -117,7 +117,7 @@ function Earnings() {
                 </div>
                 <button className="btn" onClick={handleWithdrawClick} style={{ background: '#238636' }}>Withdraw to Bank</button>
              </div>
-              <h2 style={{ fontSize: '1.5rem', color: 'white', marginTop: '2.5rem' }}>Transaction History</h2>
+              <h2 style={{ fontSize: '1.5rem', color: 'var(--text-highlight)', marginTop: '2.5rem' }}>Transaction History</h2>
               <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
               
               {earnings.breakdowns && earnings.breakdowns.length > 0 ? (
@@ -138,8 +138,8 @@ function Earnings() {
                       {earnings.breakdowns.map((b, idx) => (
                         <tr key={idx} style={{ borderBottom: idx !== earnings.breakdowns.length - 1 ? '1px solid var(--surface-border)' : 'none' }}>
                           <td style={{ padding: '12px', fontSize: '0.85rem' }}>{b.date}</td>
-                          <td style={{ padding: '12px', color: 'white' }}>{b.description}</td>
-                          <td style={{ padding: '12px', color: 'white', fontWeight: 'bold' }}>₹{b.gross}</td>
+                          <td style={{ padding: '12px', color: 'var(--text-highlight)' }}>{b.description}</td>
+                          <td style={{ padding: '12px', color: 'var(--text-highlight)', fontWeight: 'bold' }}>₹{b.gross}</td>
                           <td style={{ padding: '12px', color: '#3498db' }}>₹{b.gst}</td>
                           <td style={{ padding: '12px', color: '#da3633' }}>
                              {b.commission > 0 ? `-₹${b.commission} (${b.commission_rate}%)` : '-'}
@@ -175,7 +175,7 @@ function Earnings() {
           backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
         }}>
           <div className="glass-panel" style={{ padding: '2rem', width: '400px', maxWidth: '90%' }}>
-            <h3 style={{ color: 'white', marginBottom: '1.5rem' }}>Withdraw Funds</h3>
+            <h3 style={{ color: 'var(--text-highlight)', marginBottom: '1.5rem' }}>Withdraw Funds</h3>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>You are requesting to withdraw ₹{earnings.online_total}. Please enter your bank details.</p>
             <form onSubmit={processWithdraw} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>

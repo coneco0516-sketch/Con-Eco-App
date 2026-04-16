@@ -55,7 +55,7 @@ function Contact() {
 
   return (
     <div style={{ maxWidth: '800px', margin: '3rem auto', padding: '0 1rem', textAlign: 'center' }}>
-      <h2 style={{ fontSize: '2.5rem', color: 'white', marginBottom: '1rem' }}>Contact Us</h2>
+      <h2 style={{ fontSize: '2.5rem', color: 'var(--text-highlight)', marginBottom: '1rem' }}>Contact Us</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.2rem' }}>We're here to help. Reach out to the ConEco support team.</p>
       
       <div className="glass-panel" style={{ padding: '3rem', textAlign: 'left' }}>

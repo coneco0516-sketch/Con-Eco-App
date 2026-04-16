@@ -37,9 +37,9 @@ function AdminPayments() {
 
   const statusColor = (status) => {
     const s = (status || '').toLowerCase();
-    if (s === 'completed' || s === 'paid') return { background: '#238636', color: 'white' };
-    if (s === 'failed' || s === 'cancelled') return { background: '#da3633', color: 'white' };
-    return { background: '#d4a20b', color: 'white' };
+    if (s === 'completed' || s === 'paid') return { background: '#238636', color: 'var(--text-highlight)' };
+    if (s === 'failed' || s === 'cancelled') return { background: '#da3633', color: 'var(--text-highlight)' };
+    return { background: '#d4a20b', color: 'var(--text-highlight)' };
   };
 
   const filteredTxns = filter === 'All'
@@ -58,7 +58,7 @@ function AdminPayments() {
     <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
       <AdminSidebar />
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Payments Overview</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Payments Overview</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
           Offline payment transactions (COD) — Test phase only.
         </p>
@@ -78,7 +78,7 @@ function AdminPayments() {
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Transactions</h3>
-            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: 'white' }}>{transactions.length}</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: 'var(--text-highlight)' }}>{transactions.length}</p>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>All offline orders</p>
           </div>
         </section>
@@ -110,7 +110,7 @@ function AdminPayments() {
         {/* TRANSACTION HISTORY TABLE */}
         <section className="glass-panel" style={{ overflow: 'hidden' }}>
           <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ color: 'white', margin: 0 }}>Offline Transaction History</h3>
+            <h3 style={{ color: 'var(--text-highlight)', margin: 0 }}>Offline Transaction History</h3>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
               {filteredTxns.length} record{filteredTxns.length !== 1 ? 's' : ''}
             </span>
@@ -155,13 +155,13 @@ function AdminPayments() {
                       <td style={{ padding: '13px 15px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                         #{p.order_id || p.txn_id}
                       </td>
-                      <td style={{ padding: '13px 15px', color: 'white', fontWeight: '500' }}>
+                      <td style={{ padding: '13px 15px', color: 'var(--text-highlight)', fontWeight: '500' }}>
                         {p.customer_name}
                       </td>
                       <td style={{ padding: '13px 15px', color: 'var(--primary-color)' }}>
                         {p.vendor_name}
                       </td>
-                      <td style={{ padding: '13px 15px', fontWeight: 'bold', color: 'white' }}>
+                      <td style={{ padding: '13px 15px', fontWeight: 'bold', color: 'var(--text-highlight)' }}>
                         ₹{parseFloat(p.amount || 0).toFixed(2)}
                       </td>
                       <td style={{ padding: '13px 15px', color: '#3fb950', fontWeight: '500' }}>

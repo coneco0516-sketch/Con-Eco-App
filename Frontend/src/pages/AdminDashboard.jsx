@@ -46,7 +46,7 @@ function AdminDashboard() {
 
       {/* RIGHT CONTENT: Dashboard Cards */}
       <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'white', marginTop: 0 }}>Admin Dashboard</h2>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Admin Dashboard</h2>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
         {error && <p style={{ color: 'var(--danger-color)' }}>{error}</p>}
@@ -55,13 +55,13 @@ function AdminDashboard() {
           {/* Row 1 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Vendor Verification</h3>
+              <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Vendor Verification</h3>
               <p style={{ fontSize: '1.2rem', marginBottom: '15px' }}>Pending: <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{stats.pending_vendors}</span></p>
               <Link to="/admin/vendors" className="btn" style={{ background: '#238636' }}>Verify Vendor</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Customer Verification</h3>
+              <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Customer Verification</h3>
               <p style={{ fontSize: '1.2rem', marginBottom: '15px' }}>Pending: <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{stats.pending_customers}</span></p>
               <Link to="/admin/customers" className="btn" style={{ background: '#1a7f37' }}>Verify Customers</Link>
             </div>
@@ -70,19 +70,19 @@ function AdminDashboard() {
           {/* Row 2 */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Total Sales (Offline)</h4>
+              <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Total Sales (Offline)</h4>
               <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats.total_revenue}</p>
               <Link to="/admin/payments" className="btn" style={{ background: '#d26d0e' }}>Detailed Payments</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'white', marginBottom: '10px' }}>Pending Commissions Settlement</h4>
+              <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Pending Commissions Settlement</h4>
               <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: stats.pending_settlement > 0 ? '#f59e0b' : 'var(--text-secondary)' }}>₹{stats.pending_settlement || 0}</p>
               <Link to="/admin/commissions" className="btn" style={{ background: '#c1396a' }}>Check Commissions</Link>
             </div>
 
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'white', marginBottom: '10px' }}>Messages</h3>
+              <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Messages</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Check contact inquiries.</p>
               <Link to="/admin/contact-messages" className="btn" style={{ background: '#3498db' }}>View Inbox</Link>
             </div>
