@@ -367,6 +367,29 @@ footer {
   margin: 0;
 }
 
+/* --- New Dashboard Layouts for Responsive Design --- */
+.dashboard-layout {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  position: relative;
+}
+
+.dashboard-row {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.dashboard-row.wrap {
+  flex-wrap: wrap;
+}
+
+.dashboard-sidebar {
+  width: 250px;
+  padding: 1.5rem;
+  height: fit-content;
+}
+
 /* --- Responsive Media Queries for Mobile/Desktop Adaptability --- */
 @media (max-width: 768px) {
   /* Global Main Container */
@@ -374,22 +397,18 @@ footer {
     padding: 1rem !important;
   }
   
-  /* Force Dashboard root wrapper to stack */
-  .main-content > div {
-    display: flex !important;
+  /* Class-based strict layout reflows */
+  .dashboard-layout {
     flex-direction: column !important;
     gap: 1.5rem !important;
   }
 
-  /* Force any inline flex div acting as a Row of stat-cards to stack */
-  .main-content main div:has(> .stat-card) {
-    display: flex !important;
+  .dashboard-row {
     flex-direction: column !important;
     gap: 1.5rem !important;
   }
 
-  /* Make Sidebars scale */
-  aside.glass-panel {
+  .dashboard-sidebar {
     width: 100% !important;
     min-width: 100% !important;
     min-height: auto !important;
@@ -397,6 +416,7 @@ footer {
     box-sizing: border-box;
     margin-bottom: 2rem;
   }
+
 
   /* Make Stat Cards stretch horizontally full width */
   .stat-card {
