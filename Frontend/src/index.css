@@ -390,6 +390,10 @@ footer {
   height: fit-content;
 }
 
+.mobile-arrow {
+  display: none;
+}
+
 /* --- Responsive Media Queries for Mobile/Desktop Adaptability --- */
 @media (max-width: 768px) {
   /* Global Main Container */
@@ -397,6 +401,43 @@ footer {
     padding: 1rem !important;
   }
   
+  /* Sidebar Dropdown Logic */
+  .sidebar-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    cursor: pointer !important;
+  }
+
+  .sidebar-header h3 {
+    border-bottom: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1.2rem !important;
+  }
+
+  .mobile-arrow {
+    display: block !important;
+    font-size: 0.8rem !important;
+    color: var(--primary-color) !important;
+    transition: transform 0.3s ease !important;
+  }
+
+  .sidebar-links {
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transition: all 0.4s ease-in-out !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+  }
+
+  .sidebar-links.show {
+    max-height: 600px !important;
+    margin-top: 1.5rem !important;
+    opacity: 1 !important;
+  }
+
   /* Class-based strict layout reflows */
   .dashboard-layout {
     flex-direction: column !important;
