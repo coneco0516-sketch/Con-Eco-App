@@ -76,7 +76,7 @@ function PlatformSettings() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+      <div className="dashboard-layout">
         <AdminSidebar />
         <main style={{ flex: 1 }}>
           <h2 style={{ color: 'var(--text-highlight)' }}>Loading Platform Settings...</h2>
@@ -86,7 +86,7 @@ function PlatformSettings() {
   }
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <AdminSidebar />
       <main style={{ flex: 1, paddingBottom: '3rem' }}>
         <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Platform Settings</h2>

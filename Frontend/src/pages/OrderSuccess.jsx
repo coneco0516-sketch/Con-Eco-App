@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 function OrderSuccess() {
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <CustomerSidebar />
       <main style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px', width: '100%' }}>

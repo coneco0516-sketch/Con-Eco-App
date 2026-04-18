@@ -94,7 +94,7 @@ function VendorOrders() {
   const [bulkNegotiation, setBulkNegotiation] = useState({ orderId: null, price: '', message: '' });
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <VendorSidebar />
       <main style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Incoming Orders</h2>

@@ -31,7 +31,7 @@ function CustomerDashboard() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', position: 'relative' }}>
+    <div className="dashboard-layout">
 
       {/* Test Version Announcement Popup */}
       {showAnnouncement && (
@@ -93,7 +93,7 @@ function CustomerDashboard() {
 
 
           {/* Row 1 */}
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div className="dashboard-row">
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Top Products</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Explore the top construction materials.</p>
@@ -108,7 +108,7 @@ function CustomerDashboard() {
           </div>
 
           {/* Row 2 */}
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div className="dashboard-row">
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>My Orders</h4>
               <p style={{ fontSize: '1rem', marginBottom: '15px' }}>Track your requested materials.</p>

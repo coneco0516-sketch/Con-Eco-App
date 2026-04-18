@@ -45,7 +45,7 @@ function Products() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Products</h2>
@@ -88,7 +88,7 @@ function Products() {
         {loading ? (
           <p>Loading products...</p>
         ) : products.length > 0 ? (
-          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div className="dashboard-row wrap">
             {products
               .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.description?.toLowerCase().includes(searchTerm.toLowerCase()))
               .filter(p => {

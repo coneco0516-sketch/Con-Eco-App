@@ -76,7 +76,7 @@ function Cart() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>My Cart</h2>

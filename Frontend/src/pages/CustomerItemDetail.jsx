@@ -143,7 +143,7 @@ function CustomerItemDetail() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
         <button

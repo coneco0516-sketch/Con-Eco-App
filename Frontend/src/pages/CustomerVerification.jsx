@@ -36,7 +36,7 @@ function CustomerVerification() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <AdminSidebar />
       <main className="verification" style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Customer List</h2>

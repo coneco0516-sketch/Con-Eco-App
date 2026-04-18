@@ -147,7 +147,7 @@ function Catalogue() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <VendorSidebar />
       <main style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -288,7 +288,7 @@ function Catalogue() {
         {loading ? (
           <p>Loading catalogue...</p>
         ) : items.length > 0 ? (
-          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div className="dashboard-row wrap">
             {items.map(i => (
               <div key={`${i.type}-${i.id}`} className="glass-panel" style={{ padding: '1.5rem', flex: '1 1 280px', maxWidth: '350px', display: 'flex', flexDirection: 'column' }}>
                 {i.image_url ? (

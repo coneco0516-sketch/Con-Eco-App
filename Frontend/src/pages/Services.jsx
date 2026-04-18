@@ -45,7 +45,7 @@ function Services() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
       <CustomerSidebar />
       <main style={{ flex: 1 }}>
         <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Services</h2>
@@ -86,7 +86,7 @@ function Services() {
         {loading ? (
           <p>Loading services...</p>
         ) : services.length > 0 ? (
-          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div className="dashboard-row wrap">
             {services
               .filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.description?.toLowerCase().includes(searchTerm.toLowerCase()))
               .filter(s => {

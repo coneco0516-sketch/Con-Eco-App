@@ -39,7 +39,7 @@ function AdminDashboard() {
   }, [navigate]);
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+    <div className="dashboard-layout">
 
       {/* LEFT PANEL: Sidebar */}
       <AdminSidebar />
@@ -53,7 +53,7 @@ function AdminDashboard() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Row 1 */}
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div className="dashboard-row">
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Vendor Verification</h3>
               <p style={{ fontSize: '1.2rem', marginBottom: '15px' }}>Pending: <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{stats.pending_vendors}</span></p>
@@ -68,7 +68,7 @@ function AdminDashboard() {
           </div>
 
           {/* Row 2 */}
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div className="dashboard-row">
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Total Sales (Offline)</h4>
               <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats.total_revenue}</p>

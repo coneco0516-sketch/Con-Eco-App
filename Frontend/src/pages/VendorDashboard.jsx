@@ -44,7 +44,7 @@ function VendorDashboard() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', position: 'relative' }}>
+    <div className="dashboard-layout">
 
       {/* Test Version Announcement Popup */}
       {showAnnouncement && (
@@ -142,7 +142,7 @@ function VendorDashboard() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Row 1 */}
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div className="dashboard-row">
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Catalogue {stats && stats.catalogue_size !== undefined ? <span style={{ color: 'var(--primary-color)' }}>({stats.catalogue_size})</span> : ''}</h3>
               <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Add or edit your product listings and services.</p>
@@ -157,7 +157,7 @@ function VendorDashboard() {
           </div>
 
           {/* Row 2 */}
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div className="dashboard-row">
             <div className="stat-card glass-panel" style={{ flex: 1 }}>
               <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Total Earnings (Net)</h4>
               <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats ? stats.total_earnings : '...'}</p>
