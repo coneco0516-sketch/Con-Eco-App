@@ -2,7 +2,7 @@ import React from 'react';
 
 function About() {
   return (
-    <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 2rem' }}>
+    <div style={{ maxWidth: '800px', margin: 'var(--container-margin, 2rem auto)', padding: 'var(--container-padding, 0 2rem)' }}>
       <h2 style={{ fontSize: '2.5rem', color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '1rem' }}>About Us</h2>
       <p style={{ color: 'var(--text-secondary)' }}>Learn more about our mission, vision, and values</p>
 
@@ -17,13 +17,13 @@ function About() {
 
       <section className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
         <h3 style={{ color: 'var(--primary-color)', marginTop: 0 }}>Meet Our Team</h3>
-        <div style={{ display: 'flex', gap: '2rem', marginTop: '1.5rem' }}>
-          <div style={{ flex: 1, textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px' }}>
+        <div className="dashboard-row" style={{ marginTop: '1.5rem' }}>
+          <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', flex: '1' }}>
             <img src="/Project_Head.jpg" alt="Project Head" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
             <h4 style={{ color: 'var(--text-highlight)', margin: 0 }}>Hriday Demashetti - 2AG22CV006 - Civil Engineering Student</h4>
             <p style={{ color: 'var(--text-secondary)', margin: '5px 0 0' }}>Project Head</p>
           </div>
-          <div style={{ flex: 1, textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px' }}>
+          <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', flex: '1' }}>
             <img src="/team_member_1.jpg" alt="Team Member 01" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
             <h4 style={{ color: 'var(--text-highlight)', margin: 0 }}>Tulasi M Marennavar - 2AG22CS145 - Computer Science Engineering Student</h4>
             <p style={{ color: 'var(--text-secondary)', margin: '5px 0 0' }}>Team Member 01</p>

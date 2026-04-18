@@ -505,6 +505,12 @@ footer {
     font-size: 2.2rem !important;
   }
 
+  /* About Us / Generic Container Tweak */
+  :root {
+    --container-margin: 1rem auto;
+    --container-padding: 0 1rem;
+  }
+
   /* Footer Adjustment */
   footer > div {
     display: flex !important;
