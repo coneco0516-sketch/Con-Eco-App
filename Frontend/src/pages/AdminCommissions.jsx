@@ -99,7 +99,7 @@ function AdminCommissions() {
         </div>
 
         {/* Manual Controls */}
-        <div className="glass-panel" className="glass-panel dashboard-header-row" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+        <div className="glass-panel dashboard-header-row" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
           <div>
             <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>Manual Controls</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
