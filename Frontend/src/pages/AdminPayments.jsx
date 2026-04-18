@@ -65,7 +65,7 @@ function AdminPayments() {
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
         {/* SUMMARY CARDS */}
-        <section style={{ display: 'flex', gap: '20px', marginBottom: '2rem' }}>
+        <section className="dashboard-stats-grid">
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Sales (Offline)</h3>
             <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#3fb950' }}>₹{stats.total_revenue}</p>
@@ -84,7 +84,7 @@ function AdminPayments() {
         </section>
 
         {/* FILTER BAR */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', alignItems: 'center' }}>
+        <div className="dashboard-row wrap">
           <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Filter by status:</span>
           {['All', 'Pending', 'Paid', 'Completed'].map(f => (
             <button
@@ -109,7 +109,7 @@ function AdminPayments() {
 
         {/* TRANSACTION HISTORY TABLE */}
         <section className="glass-panel" style={{ overflow: 'hidden' }}>
-          <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="dashboard-header-row" style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--surface-border)' }}>
             <h3 style={{ color: 'var(--text-highlight)', margin: 0 }}>Offline Transaction History</h3>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
               {filteredTxns.length} record{filteredTxns.length !== 1 ? 's' : ''}
@@ -119,7 +119,7 @@ function AdminPayments() {
           {loading ? (
             <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading transactions...</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div className="table-responsive"><table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead style={{ background: 'rgba(0,0,0,0.3)' }}>
                 <tr>
                   <th style={{ padding: '12px 15px', borderBottom: '1px solid var(--surface-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Order #</th>
@@ -204,7 +204,7 @@ function AdminPayments() {
                   ))
                 )}
               </tbody>
-            </table>
+            </table></div>
           )}
         </section>
       </main>

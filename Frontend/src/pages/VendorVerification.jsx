@@ -77,7 +77,7 @@ function VendorVerification() {
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Approve vendors and set QC scores (0-100). Only verified vendors' products will be shown to customers.</p>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+        <div className="dashboard-stats-grid">
           {vendors.length === 0 ? <p style={{ color: 'var(--text-secondary)' }}>No vendors found.</p> : null}
           {vendors.map(vendor => {
             const isPending = vendor.verification_status === 'Pending';
@@ -85,7 +85,7 @@ function VendorVerification() {
             const qcScore = qcScores[vendor.vendor_id] ?? 0;
             
             return (
-              <div key={vendor.vendor_id} className="vendor-card glass-panel" style={{ padding: '15px', width: '300px' }}>
+              <div key={vendor.vendor_id} className="vendor-card glass-panel" style={{ padding: '15px',  }}>
                 <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 10px 0' }}>{vendor.company_name}</h3>
                 <p><strong>Owner:</strong> <span style={{ color: 'var(--text-primary)' }}>{vendor.name}</span></p>
                 <p><strong>Email:</strong> <span style={{ color: 'var(--text-primary)' }}>{vendor.email}</span></p>

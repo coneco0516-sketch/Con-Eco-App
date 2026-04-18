@@ -54,7 +54,7 @@ function AdminOrders() {
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
 
         <section className="glass-panel" style={{ overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div className="table-responsive"><table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead style={{ background: 'rgba(0,0,0,0.3)' }}>
               <tr>
                 <th style={{ padding: '15px', borderBottom: '1px solid var(--surface-border)' }}>Order ID</th>
@@ -147,7 +147,7 @@ function AdminOrders() {
                 ))
               )}
             </tbody>
-          </table>
+          </table></div>
         </section>
       </main>
     </div>

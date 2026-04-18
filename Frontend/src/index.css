@@ -438,7 +438,64 @@ footer {
     opacity: 1 !important;
   }
 
+/* --- New Responsive Utilities --- */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.table-responsive table {
+  min-width: 800px; /* Force scroll on mobile for data-heavy tables */
+}
+
+.dashboard-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
   /* Class-based strict layout reflows */
+  .dashboard-stats-grid {
+     grid-template-columns: 1fr !important;
+     gap: 1rem !important;
+  }
+
+  .vendor-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Generic form helper */
+  .inline-flex-mobile-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  
+  .dashboard-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+  
+  /* Modal adjustment */
+  .glass-panel[style*="width: '600px'"] {
+    width: 95vw !important;
+    padding: 1.5rem !important;
+  }
+}
   .dashboard-layout {
     flex-direction: column !important;
     gap: 1.5rem !important;

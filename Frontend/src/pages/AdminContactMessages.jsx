@@ -121,7 +121,7 @@ function AdminContactMessages() {
         {error && <p style={{ color: 'var(--danger-color)' }}>{error}</p>}
 
         {/* Stats */}
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="dashboard-stats-grid">
           <div className="glass-panel" style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>Total</p>
             <p style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--text-highlight)', margin: '4px 0 0' }}>{totalCount}</p>
@@ -133,7 +133,7 @@ function AdminContactMessages() {
         </div>
 
         {/* Filter */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        <div className="dashboard-row wrap">
           {['All', 'Unread', 'Read', 'Replied'].map(f => (
             <button
               key={f}
@@ -165,7 +165,7 @@ function AdminContactMessages() {
                 borderLeft: msg.status === 'Unread' ? '4px solid #e74c3c' : msg.status === 'Replied' ? '4px solid #2ecc71' : '4px solid #f1c40f'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+              <div className="dashboard-header-row" style={{ marginBottom: '0.8rem' }}>
                 <div>
                   <span style={{ fontWeight: '700', color: 'var(--text-highlight)', fontSize: '1.1rem' }}>{msg.name}</span>
                   <span style={{ color: 'var(--text-secondary)', marginLeft: '1rem', fontSize: '0.9rem' }}>{msg.email}</span>

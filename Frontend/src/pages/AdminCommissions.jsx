@@ -80,7 +80,7 @@ function AdminCommissions() {
         )}
 
         {/* Stats Row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div className="dashboard-stats-grid">
           <div className="glass-panel" style={{ padding: '1.25rem' }}>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.4rem 0' }}>Outstanding Commission</p>
             <div style={{ fontSize: '1.6rem', color: '#f85149', fontWeight: 'bold' }}>₹{data.outstanding.toFixed(2)}</div>
@@ -99,7 +99,7 @@ function AdminCommissions() {
         </div>
 
         {/* Manual Controls */}
-        <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="glass-panel" className="glass-panel dashboard-header-row" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
           <div>
             <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>Manual Controls</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
@@ -128,7 +128,7 @@ function AdminCommissions() {
 
         {/* Billings Table */}
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <div className="dashboard-header-row" style={{ marginBottom: '1.25rem' }}>
             <h3 style={{ color: 'var(--text-highlight)', margin: 0 }}>Weekly Commission Billings</h3>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
               {settings.product_commission_pct}% Platform Fee on Offline Sales
@@ -141,7 +141,7 @@ function AdminCommissions() {
             <p style={{ color: 'var(--text-secondary)' }}>No records found.</p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--text-secondary)', minWidth: '800px' }}>
+              <div className="table-responsive"><table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--text-secondary)', minWidth: '800px' }}>
                 <thead>
                   <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--surface-border)' }}>
                     <th style={{ padding: '1rem' }}>#</th>
@@ -191,7 +191,7 @@ function AdminCommissions() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           )}
         </div>

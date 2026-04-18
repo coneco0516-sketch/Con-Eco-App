@@ -42,12 +42,12 @@ function CustomerVerification() {
         <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Customer List</h2>
         <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
         
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+        <div className="dashboard-stats-grid">
           {customers.length === 0 ? <p style={{ color: 'var(--text-secondary)' }}>No customers found.</p> : null}
           {customers.map(cust => {
             const isPending = cust.verification_status === 'Pending';
             return (
-              <div key={cust.customer_id} className="customer-card glass-panel" style={{ padding: '15px', width: '250px' }}>
+              <div key={cust.customer_id} className="customer-card glass-panel" style={{ padding: '15px',  }}>
                 <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 10px 0' }}>{cust.name}</h3>
                 <p><strong>Email:</strong> <span style={{ color: 'var(--text-primary)' }}>{cust.email}</span></p>
                 <p><strong>Status:</strong> <span style={{ color: isPending ? '#d4a20b' : '#238636' }}>{cust.verification_status}</span></p>
