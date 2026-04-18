@@ -248,7 +248,7 @@ def get_profile(request: Request):
             cursor.execute("SELECT city, state FROM customers WHERE customer_id=%s", (user['user_id'],))
             user.update(cursor.fetchone() or {})
         elif user['role'] == 'Vendor':
-            cursor.execute("SELECT company_name, gst_number, address, city, state FROM vendors WHERE vendor_id=%s", (user['user_id'],))
+            cursor.execute("SELECT company_name, gst_number, address, city, state, verification_status, qc_score FROM vendors WHERE vendor_id=%s", (user['user_id'],))
             user.update(cursor.fetchone() or {})
             
         return {"status": "success", "profile": user}
