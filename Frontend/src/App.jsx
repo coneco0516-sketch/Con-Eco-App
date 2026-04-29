@@ -10,6 +10,7 @@ import AdminAnalytics from './pages/AdminAnalytics';
 import AdminProfile from './pages/AdminProfile';
 import AdminContactMessages from './pages/AdminContactMessages';
 import AdminCommissions from './pages/AdminCommissions';
+import AdminBulkPriceUpdater from './pages/AdminBulkPriceUpdater';
 import PlatformSettings from './pages/PlatformSettings';
 import Register from './pages/Register';
 import About from './pages/About';
@@ -260,6 +261,7 @@ function AppContent() {
           <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={['Admin']}><AdminProfile /></ProtectedRoute>} />
           <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['Admin']}><PlatformSettings /></ProtectedRoute>} />
           <Route path="/admin/contact-messages" element={<ProtectedRoute allowedRoles={['Admin']}><AdminContactMessages /></ProtectedRoute>} />
+          <Route path="/admin/bulk-pricing" element={<ProtectedRoute allowedRoles={['Admin']}><AdminBulkPriceUpdater /></ProtectedRoute>} />
           
           {/* Customer Routes */}
           <Route path="/customer" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerDashboard /></ProtectedRoute>} />

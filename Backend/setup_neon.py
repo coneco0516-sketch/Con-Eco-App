@@ -89,7 +89,8 @@ def setup_database():
                 specifications TEXT,
                 delivery_time VARCHAR(50),
                 stock_quantity INT DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
 

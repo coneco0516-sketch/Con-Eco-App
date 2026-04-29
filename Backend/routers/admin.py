@@ -664,3 +664,55 @@ def run_invoice_generation(user = Depends(check_admin)):
         return {"status": "success", "message": "Weekly invoices generated."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ===== BULK PRICING UPDATER =====
+
+@router.get("/vendors/{vendor_id}/products")
+def get_vendor_products_for_admin(vendor_id: int, user = Depends(check_admin)):
+    """Fetch all products for a specific vendor with pricing and updated_at."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT product_id, name, brand, category, price, 
+                   TO_CHAR(updated_at, 'DD Mon YYYY HH24:MI') as updated_at
+            FROM products
+            WHERE vendor_id = %s
+            ORDER BY category ASC, name ASC
+        """, (vendor_id,))
+        products = cursor.fetchall()
+        cursor.close()
+        return {"status": "success", "products": products}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+class PriceUpdate(BaseModel):
+    price: float
+
+@router.put("/products/{product_id}/price")
+def update_product_price_admin(product_id: int, data: PriceUpdate, user = Depends(check_admin)):
+    """Update a single product's price and its updated_at timestamp."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE products 
+            SET price = %s, updated_at = CURRENT_TIMESTAMP 
+            WHERE product_id = %s
+        """, (data.price, product_id))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Product not found.")
+            
+        conn.commit()
+        cursor.close()
+        return {"status": "success", "message": "Price updated successfully."}
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
