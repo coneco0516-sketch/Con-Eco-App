@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+
 
 const API = process.env.REACT_APP_API_URL || '';
 
@@ -105,6 +107,49 @@ function Register() {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!formData.role) {
+      setError("Please select an Account Role first before using Google Registration!");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const finalRole = formData.role.charAt(0).toUpperCase() + formData.role.slice(1);
+
+    try {
+      const response = await fetch(`${API}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          credential: credentialResponse.credential,
+          role: finalRole
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.status === 'success') {
+        localStorage.setItem('is_logged_in', 'true');
+        localStorage.setItem('user_role', data.role);
+        
+        // Success redirect
+        if (data.role === 'Admin') navigate('/admin-dashboard');
+        else if (data.role === 'Vendor') navigate('/vendor-dashboard');
+        else navigate('/catalogue');
+        
+        window.location.reload(); // Refresh to update navbar state
+      } else {
+        setError(data.message || "Google registration failed.");
+      }
+    } catch (err) {
+      setError("A network error occurred during Google registration.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-container glass-panel" style={{ maxWidth: '600px', margin: '2rem auto' }}>
       <h2 className="auth-title">Create Account</h2>
@@ -203,6 +248,28 @@ function Register() {
         <button type="submit" className="btn" disabled={loading} style={{ marginTop: '0.5rem' }}>
           {loading ? 'Registering...' : 'Register'}
         </button>
+
+        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '10px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>OR REGISTER WITH</div>
+            <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
+          </div>
+          
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google Registration Failed")}
+            theme="filled_blue"
+            shape="pill"
+            text="continue_with"
+          />
+          
+          {formData.role === 'vendor' && (
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '80%' }}>
+              Note: Vendors registering via Google can complete their business details (GST, Company Name) in their profile settings after login.
+            </p>
+          )}
+        </div>
       </form>
       <p style={{ marginTop: '1.5rem', color: 'var(--text-secondary)' }}>Already have an account? <Link to="/login" style={{ color: 'var(--primary-color)' }}>Login here</Link></p>
     </div>

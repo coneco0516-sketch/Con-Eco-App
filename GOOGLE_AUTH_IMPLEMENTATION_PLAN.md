@@ -158,6 +158,37 @@ const handleGoogleSuccess = async (credentialResponse) => {
 </div>
 ```
 
+### Register Page (`Frontend/src/pages/Register.jsx`)
+For registration, the user must select a role before clicking the Google button.
+
+```javascript
+import { GoogleLogin } from '@react-oauth/google';
+
+const handleGoogleSuccess = async (credentialResponse) => {
+  if (!formData.role) {
+    setError("Please select an Account Role first!");
+    return;
+  }
+
+  const response = await fetch(`${API}/api/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      credential: credentialResponse.credential,
+      role: formData.role.charAt(0).toUpperCase() + formData.role.slice(1) // 'Customer' or 'Vendor'
+    }),
+  });
+  
+  const data = await response.json();
+  if (data.status === 'success') {
+    localStorage.setItem('is_logged_in', 'true');
+    localStorage.setItem('user_role', data.role);
+    // Navigate based on role...
+  }
+};
+```
+
+
 ---
 
 ## 4. Verification
