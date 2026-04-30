@@ -675,7 +675,7 @@ def get_vendor_products_for_admin(vendor_id: int, user = Depends(check_admin)):
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT product_id, name, brand, category, price, 
-                   TO_CHAR(updated_at, 'DD Mon YYYY HH24:MI') as updated_at
+                   TO_CHAR(updated_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata', 'DD Mon YYYY HH24:MI') as updated_at
             FROM products
             WHERE vendor_id = %s
             ORDER BY category ASC, name ASC
