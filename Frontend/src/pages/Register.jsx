@@ -127,6 +127,7 @@ function Register() {
           credential: credentialResponse.credential,
           role: finalRole
         }),
+        credentials: 'include'
       });
       
       const data = await response.json();
