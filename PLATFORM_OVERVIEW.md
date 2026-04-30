@@ -13,7 +13,8 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 
 ### 🛍️ For Customers (Buyers)
 - **Bulk Price Negotiation**: Don't settle for retail prices. Request custom quotes for large orders directly from the vendor.
-- **Pay Later (Credit System)**: Boost your cash flow with 7-day or 14-day credit limits assigned by the Admin.
+- **Pay Later (Credit System)**: Boost your cash flow with 7-day or 14-day credit limits assigned by the Admin. (**NOTE**: In Future we are planning to give this feature to customers)
+
 - **Real-time Order Tracking**: Receive instant Web Push and Email notifications from "Order Placed" to "Delivered."
 - **PWA Experience**: Install ConEco on your phone's home screen for a fast, app-like experience.
 
