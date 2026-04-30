@@ -248,6 +248,13 @@ if (frontend_dir / "assets").exists():
 # Wildcard Catch-All to serve static files from root OR bounce to index.html
 @app.get("/{catchall:path}")
 async def serve_react_app(catchall: str):
+    # CRITICAL: Prevent the frontend catch-all from stealing API requests
+    if catchall.startswith("api/") or catchall.startswith("api"):
+        return JSONResponse(
+            status_code=404, 
+            content={"status": "error", "message": f"API endpoint '/{catchall}' not found on this server."}
+        )
+
     # Check if the requested file exists in the root of dist folder
     # e.g. /project_overview.mp4
     if catchall:
