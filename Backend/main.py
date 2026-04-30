@@ -89,9 +89,31 @@ async def log_requests(request: Request, call_next):
 
 @app.exception_handler(401)
 async def not_authorized_handler(request: Request, exc):
-    # Overrides 401 exceptions to return 200 JSON with status='not_logged_in' 
-    # to perfectly match our existing frontend JS logic!
     return JSONResponse(status_code=200, content={"status": "not_logged_in", "detail": "Session expired or not logged in"})
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    # Print the full error to Render logs for debugging
+    print(f"CRITICAL ERROR: {str(exc)}")
+    traceback.print_exc()
+    
+    response = JSONResponse(
+        status_code=500,
+        content={
+            "status": "error", 
+            "message": "An internal server error occurred.",
+            "error_detail": str(exc)
+        }
+    )
+    
+    # Force CORS headers even on crash so the frontend can read the error
+    origin = request.headers.get("origin")
+    if origin:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    
+    return response
 
 from pydantic import BaseModel
 from email_service import send_contact_form, send_contact_acknowledgment
