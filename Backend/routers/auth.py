@@ -65,8 +65,17 @@ class GoogleAuthRequest(BaseModel):
 @router.post("/google")
 def google_auth(request: GoogleAuthRequest, response: Response):
     token = request.credential
+    # Normalize role to CamelCase (e.g., 'vendor' -> 'Vendor')
     role_requested = request.role
-    
+    if role_requested:
+        role_requested = role_requested.capitalize()
+    else:
+        role_requested = "Customer"
+
+    if not GOOGLE_CLIENT_ID:
+        print("CRITICAL: GOOGLE_CLIENT_ID is not set in environment variables!")
+        raise HTTPException(status_code=500, detail="Backend configuration error: Missing Google Client ID")
+
     try:
         # 1. Verify the Google ID Token
         idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
