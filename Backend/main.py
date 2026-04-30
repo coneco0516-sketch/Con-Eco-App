@@ -246,6 +246,8 @@ async def serve_react_app(catchall: str):
     index_file = frontend_dir / "index.html"
     if index_file.exists():
         return FileResponse(index_file)
+    
+    return JSONResponse(status_code=404, content={"message": "Frontend build not found. Run 'npm run build' first."})
 
 # FINAL LAYER: Official CORS Middleware added LAST to be the OUTERMOST layer
 # This ensures it handles preflights and headers before any other code runs
@@ -262,7 +264,6 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
-    return JSONResponse(status_code=404, content={"message": "Frontend build not found. Run 'npm run build' first."})
 
 if __name__ == "__main__":
     import uvicorn
