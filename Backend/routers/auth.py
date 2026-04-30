@@ -113,7 +113,11 @@ def google_auth(request: GoogleAuthRequest, response: Response):
                 
                 # Add to role-specific tables (customers or vendors)
                 if role_requested == 'Vendor':
-                    cursor.execute("INSERT INTO vendors (vendor_id) VALUES (%s)", (user_id,))
+                    # Fix: Provide a placeholder company name to satisfy the NOT NULL constraint
+                    cursor.execute(
+                        "INSERT INTO vendors (vendor_id, company_name) VALUES (%s, %s)", 
+                        (user_id, f"{name}'s Business")
+                    )
                 else:
                     cursor.execute("INSERT INTO customers (customer_id) VALUES (%s)", (user_id,))
                 
