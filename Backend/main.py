@@ -84,10 +84,10 @@ import os
 # Production-Ready CORS configuration
 # Fetch allowed domains directly from the environment (.env)
 # e.g. ALLOWED_ORIGINS="https://coneco.com,https://www.coneco.com,http://localhost:5173"
-allowed_origins_env = os.environ.get(
-    "ALLOWED_ORIGINS", 
-    "http://localhost:5173,http://localhost:8000,http://127.0.0.1:5173,http://127.0.0.1:8000,https://con-eco-app-w78g.onrender.com,https://con-eco-frontend.onrender.com"
-)
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "").replace('"', '').replace("'", "")
+if not allowed_origins_env:
+    allowed_origins_env = "http://localhost:5173,http://localhost:8000,http://127.0.0.1:5173,http://127.0.0.1:8000,https://con-eco-app-w78g.onrender.com,https://con-eco-frontend.onrender.com"
+
 ALLOWED_ORIGINS = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
 
 app.add_middleware(
@@ -98,6 +98,13 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    # This header is REQUIRED for Google Identity Services popups to work
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+    return response
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     print(f"REQUEST: {request.method} {request.url.path} from {request.headers.get('origin')}")
