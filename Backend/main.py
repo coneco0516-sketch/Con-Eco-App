@@ -82,29 +82,10 @@ app = FastAPI(title="ConEco Backend API", lifespan=lifespan)
 import os
 
 @app.middleware("http")
-async def cors_and_security_middleware(request: Request, call_next):
-    # This middleware handles both CORS and COOP security headers robustly
-    origin = request.headers.get("origin")
-    
-    # 1. Handle Preflight OPTIONS requests
-    if request.method == "OPTIONS":
-        response = Response(content="OK", status_code=200)
-    else:
-        response = await call_next(request)
-    
-    # 2. Add CORS headers to EVERY response (including OPTIONS and Errors)
-    if origin:
-        # We mirror the origin to perfectly satisfy the 'allow_credentials=True' requirement
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With, X-CSRF-Token"
-        response.headers["Access-Control-Max-Age"] = "600"
-    
-    # 3. REQUIRED for Google Identity Services popups (COOP)
-    # This must be on both the backend responses and the frontend static pages
+async def add_security_headers(request: Request, call_next):
+    # This middleware handles ONLY the COOP header to avoid conflict with official CORS middleware
+    response = await call_next(request)
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
-    
     return response
 
 @app.middleware("http")
@@ -265,6 +246,22 @@ async def serve_react_app(catchall: str):
     index_file = frontend_dir / "index.html"
     if index_file.exists():
         return FileResponse(index_file)
+
+# FINAL LAYER: Official CORS Middleware added LAST to be the OUTERMOST layer
+# This ensures it handles preflights and headers before any other code runs
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://con-eco-frontend.onrender.com", 
+        "https://con-eco-app-w78g.onrender.com",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
     return JSONResponse(status_code=404, content={"message": "Frontend build not found. Run 'npm run build' first."})
 
 if __name__ == "__main__":
