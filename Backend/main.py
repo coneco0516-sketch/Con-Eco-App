@@ -97,6 +97,10 @@ if not cleaned_origins:
 else:
     ALLOWED_ORIGINS = [o.strip() for o in cleaned_origins.split(",") if o.strip()]
 
+# Brute force check for the specific frontend that is currently failing
+if "https://con-eco-frontend.onrender.com" not in ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS.append("https://con-eco-frontend.onrender.com")
+
 print(f"CORS_DEBUG: Allowing origins: {ALLOWED_ORIGINS}")
 
 app.add_middleware(
