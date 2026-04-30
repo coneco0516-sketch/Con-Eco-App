@@ -82,13 +82,22 @@ app = FastAPI(title="ConEco Backend API", lifespan=lifespan)
 import os
 
 # Production-Ready CORS configuration
-# Fetch allowed domains directly from the environment (.env)
-# e.g. ALLOWED_ORIGINS="https://coneco.com,https://www.coneco.com,http://localhost:5173"
-allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "").replace('"', '').replace("'", "")
-if not allowed_origins_env:
-    allowed_origins_env = "http://localhost:5173,http://localhost:8000,http://127.0.0.1:5173,http://127.0.0.1:8000,https://con-eco-app-w78g.onrender.com,https://con-eco-frontend.onrender.com"
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "")
+cleaned_origins = allowed_origins_env.replace('"', '').replace("'", "").strip()
 
-ALLOWED_ORIGINS = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+if not cleaned_origins:
+    ALLOWED_ORIGINS = [
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:8000",
+        "https://con-eco-app-w78g.onrender.com",
+        "https://con-eco-frontend.onrender.com"
+    ]
+else:
+    ALLOWED_ORIGINS = [o.strip() for o in cleaned_origins.split(",") if o.strip()]
+
+print(f"CORS_DEBUG: Allowing origins: {ALLOWED_ORIGINS}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -96,13 +105,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
-    # This header is REQUIRED for Google Identity Services popups to work
+    # REQUIRED for Google Identity Services popups
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
     return response
 @app.middleware("http")
@@ -189,12 +197,14 @@ def db_check():
             "status": "success",
             "message": "Connected to PostgreSQL successfully!",
             "database": "Neon PostgreSQL",
-            "version": version
+            "version": version,
+            "cors_allowed_origins": ALLOWED_ORIGINS
         }
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Connection failed: {str(e)}"
+            "message": f"Connection failed: {str(e)}",
+            "cors_allowed_origins": ALLOWED_ORIGINS
         }
 
 @app.get("/api/health")
