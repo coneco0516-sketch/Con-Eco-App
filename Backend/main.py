@@ -106,8 +106,8 @@ async def cors_and_security_middleware(request: Request, call_next):
     if origin and ("onrender.com" in origin or "localhost" in origin or "127.0.0.1" in origin):
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With"
     
     # 3. REQUIRED for Google Identity Services popups
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
