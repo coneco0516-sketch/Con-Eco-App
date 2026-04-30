@@ -226,7 +226,6 @@ app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 if (frontend_dir / "assets").exists():
     app.mount("/assets", StaticFiles(directory=frontend_dir / "assets"), name="assets")
 
-# Wildcard Catch-All to serve static files from root OR bounce to index.html
 @app.get("/{catchall:path}")
 async def serve_react_app(catchall: str):
     # CRITICAL: Prevent the frontend catch-all from stealing API requests
@@ -237,7 +236,6 @@ async def serve_react_app(catchall: str):
         )
 
     # Check if the requested file exists in the root of dist folder
-    # e.g. /project_overview.mp4
     if catchall:
         potential_file = frontend_dir / catchall
         if potential_file.is_file():
