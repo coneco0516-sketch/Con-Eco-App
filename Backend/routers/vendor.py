@@ -203,7 +203,7 @@ def update_catalogue_item(
             
         if item_type == 'product':
             cursor.execute(
-                "UPDATE Products SET name=%s, description=%s, price=%s, category=%s, image_url=%s, unit=%s, brand=%s, specifications=%s, delivery_time=%s WHERE product_id=%s AND vendor_id=%s",
+                "UPDATE Products SET name=%s, description=%s, price=%s, category=%s, image_url=%s, unit=%s, brand=%s, specifications=%s, delivery_time=%s, updated_at=CURRENT_TIMESTAMP WHERE product_id=%s AND vendor_id=%s",
                 (name, description, price, category, image_url, unit, brand, specifications, delivery_time, item_id, vendor_id)
             )
         else:
