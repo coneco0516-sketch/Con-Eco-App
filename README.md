@@ -29,7 +29,7 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - Secure registration with **email verification** via Brevo.
 - Role-based access: **Customer**, **Vendor**, and **Admin**.
 - Login activity monitoring with security alerts.
-- Modern background task processing for a responsive UI.
+- **Web Push Notifications**: Real-time alerts for orders and security events.
 
 ### 🛍️ Customers
 - Unified product & service catalogue with detailed overview pages.
@@ -37,17 +37,20 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - Direct order placement via **COD** (Cash on Delivery).
 - **Pay Later Credit Tab**: Place orders on credit, pay within 7–14 days.
 - Real-time order tracking with automated status updates.
+- **PWA Ready**: Installable on mobile and desktop for a native experience.
 
 ### 🏪 Vendors
 - Transparent **Earnings Dashboard** (Gross vs Commission vs Net).
-- Simplified product management and automated inventory tracking.
+- **Bulk Price Management**: Rapidly update prices across the entire catalogue.
+- **Vendor Wallet**: Automated earnings tracking with Bank Withdrawal (Payout) requests.
 - Weekly automated billing system with downloadable compliance receipts.
 - Professional QC verification system for platform-wide quality control.
 
 ### 🛡️ Admin Dashboard
 - Centralized management for all users, orders, and payments.
+- **Bulk Pricing Control**: Manage vendor pricing and inventory at scale.
 - One-click vendor verification and automated QC scoring.
-- Automated platform commission tracking (3% flat rate).
+- **Commission Penalty System**: Automated "Strike" system for overdue payments.
 - **Credit Limit Management**: Assign and monitor customer Pay Later credit.
 - Customer support suite for managing enquiries and contact messages.
 
@@ -57,9 +60,10 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | React 18 + Vite |
+| **Frontend** | React 18 + Vite + PWA |
 | **Backend** | FastAPI (Python 3.12) |
 | **Database** | Neon PostgreSQL (Serverless) |
+| **Push Notifications** | PyWebPush (VAPID) |
 | **Hosting** | Render (Backend + Frontend) |
 | **Email** | Brevo HTTP API (Transactional) |
 | **Auth** | JWT + bcrypt (Session Cookies) |
@@ -75,16 +79,18 @@ ConEco/
 │   ├── routers/                 # API Endpoints (Auth, Vendor, Customer, Admin, Payment)
 │   ├── main.py                  # Core Application & Scheduler
 │   ├── email_service.py         # Brevo Email Infrastructure
+│   ├── push_service.py          # Web Push Notification Engine
 │   ├── database.py              # Neon PostgreSQL Connection
 │   ├── setup_neon.py            # DB Schema Setup Script
-│   └── commission_invoicing.py  # Billing Automation Logic
+│   ├── invoice_generator.py     # Professional PDF Invoice Logic
+│   └── commission_invoicing.py  # Billing & Penalty Automation
 │
 ├── Frontend/
 │   ├── src/
 │   │   ├── pages/               # Functional UI Components
 │   │   ├── components/          # Reusable Layouts & Elements
 │   │   └── App.jsx              # Application Routing
-│   └── dist/                    # Optimized Production Build
+│   └── public/                  # Assets & PWA Manifest
 │
 ├── Documents/
 │   └── Plan/                    # Feature planning documents
@@ -148,6 +154,10 @@ BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxxxxxxxxxx
 FROM_EMAIL=noreply@coneco.com
 FROM_NAME=ConEco
 
+# Web Push (VAPID)
+VAPID_PUBLIC_KEY=your_public_key
+VAPID_PRIVATE_KEY=your_private_key
+
 # Application URL
 APP_URL=http://localhost:8000
 ```
@@ -159,28 +169,37 @@ See `NEON_DATABASE.md` for getting your Neon connection string.
 
 ## 💳 Billing & Commissions
 
-The platform operates on a simplified, legal-compliant billing model:
+The platform operates on a robust, legal-compliant billing model:
 - **Platform Fee**: **3% Flat Commission** on all transactions.
 - **Billing Cycle**: Weekly invoices generated every Monday for outstanding commissions.
-- **COD Orders**: Vendor collects cash directly; commission tracked separately.
-- **Pay Later**: Customer credit system with 7-day and 14-day payment tiers.
+- **Penalty System**: Vendors receive "Strikes" for unpaid invoices. After **3 Strikes**, the account is automatically blocked.
+- **COD Orders**: Vendor collects cash directly; commission tracked and invoiced weekly.
+- **Pay Later**: Customer credit system with 7-day and 14-day payment tiers managed by Admin.
 
 ---
 
-## 📧 Email System
+## 📣 Communication System
 
-All transactional emails are handled by **Brevo HTTP API**:
+ConEco uses a dual-channel communication strategy for maximum reliability:
 
+### 1. Transactional Emails (Brevo)
 | Event | Recipient |
 |---|---|
 | Email verification on signup | Customer / Vendor |
-| Order confirmation | Customer |
+| Order confirmation & Invoices | Customer |
 | New order notification | Vendor |
-| Order status updates | Customer |
-| Password reset | Customer / Vendor |
-| QC verification status | Vendor |
+| Password reset | All Roles |
+| Support ticket replies | User |
 
-> See `BREVO_EMAIL_SETUP.md` for full configuration guide.
+### 2. Web Push Notifications
+| Event | Recipient |
+|---|---|
+| Order status updates | Customer |
+| New order alerts | Vendor |
+| Commission invoice alerts | Vendor |
+| Security / Login alerts | All Roles |
+
+> See `BREVO_EMAIL_SETUP.md` for full email configuration guide.
 
 ---
 
