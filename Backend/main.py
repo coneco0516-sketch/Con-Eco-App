@@ -192,13 +192,13 @@ def db_check():
             "message": "Connected to PostgreSQL successfully!",
             "database": "Neon PostgreSQL",
             "version": version,
-            "cors_allowed_origins": ALLOWED_ORIGINS
+            "cors_allowed_regex": ALLOWED_ORIGIN_REGEX
         }
     except Exception as e:
         return {
             "status": "error",
             "message": f"Connection failed: {str(e)}",
-            "cors_allowed_origins": ALLOWED_ORIGINS
+            "cors_allowed_regex": ALLOWED_ORIGIN_REGEX
         }
 
 @app.get("/api/health")
