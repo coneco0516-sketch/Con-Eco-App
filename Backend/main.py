@@ -82,13 +82,6 @@ app = FastAPI(title="ConEco Backend API", lifespan=lifespan)
 import os
 
 @app.middleware("http")
-async def add_security_headers(request: Request, call_next):
-    # This middleware handles ONLY the COOP header to avoid conflict with official CORS middleware
-    response = await call_next(request)
-    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
-    return response
-
-@app.middleware("http")
 async def log_requests(request: Request, call_next):
     print(f"REQUEST: {request.method} {request.url.path} from {request.headers.get('origin')}")
     response = await call_next(request)

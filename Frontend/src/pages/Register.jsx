@@ -119,8 +119,18 @@ function Register() {
 
     const finalRole = formData.role.charAt(0).toUpperCase() + formData.role.slice(1);
 
+    // Remove any trailing slashes from API URL to prevent //api/... errors
+    const baseApi = API.endsWith('/') ? API.slice(0, -1) : API;
+    
+    // Safety: If API URL matches current host, use relative path to prevent CORS confusion
+    const fetchUrl = (baseApi && baseApi.includes(window.location.hostname)) 
+      ? `/api/auth/google` 
+      : `${baseApi}/api/auth/google`;
+
+    console.log("Attempting Google Registration at:", fetchUrl);
+
     try {
-      const response = await fetch(`${API}/api/auth/google`, {
+      const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -130,22 +140,31 @@ function Register() {
         credentials: 'include'
       });
       
+      // Check if response is actually JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Non-JSON response from server:", text);
+        throw new Error(`Server returned non-JSON response (${response.status})`);
+      }
+
       const data = await response.json();
       if (data.status === 'success') {
         localStorage.setItem('is_logged_in', 'true');
         localStorage.setItem('user_role', data.role);
         
-        // Success redirect
-        if (data.role === 'Admin') navigate('/admin-dashboard');
-        else if (data.role === 'Vendor') navigate('/vendor-dashboard');
-        else navigate('/catalogue');
+        // Success redirect matching App.jsx routes
+        if (data.role === 'Admin') navigate('/admin');
+        else if (data.role === 'Vendor') navigate('/vendor');
+        else navigate('/customer');
         
         window.location.reload(); // Refresh to update navbar state
       } else {
         setError(data.message || "Google registration failed.");
       }
     } catch (err) {
-      setError("A network error occurred during Google registration.");
+      console.error("Google Auth Fetch Error:", err);
+      setError(`Registration error: ${err.message || 'Check your internet connection'}`);
     } finally {
       setLoading(false);
     }
