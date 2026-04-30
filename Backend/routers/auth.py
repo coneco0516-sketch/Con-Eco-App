@@ -78,23 +78,32 @@ def google_auth(request: GoogleAuthRequest, response: Response):
 
     try:
         # 1. Verify the Google ID Token
-        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
-        
+        try:
+            idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
+        except Exception as e:
+            print(f"GOOGLE_AUTH_ERROR: Token verification failed: {e}")
+            raise HTTPException(status_code=401, detail=f"Google token verification failed: {str(e)}")
+            
         # ID token is valid. Get user's Google info.
         email = idinfo['email']
         name = idinfo.get('name', 'Google User')
         
-        conn = get_db_connection()
+        try:
+            conn = get_db_connection()
+        except Exception as e:
+            print(f"GOOGLE_AUTH_ERROR: DB Connection failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Database connection failed: {str(e)}")
+
         try:
             cursor = conn.cursor(dictionary=True)
             
             # 2. Check if user already exists
-            cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
+            cursor.execute("SELECT user_id, role FROM users WHERE email=%s", (email,))
             user = cursor.fetchone()
             
             if not user:
                 # 3. Create new user if they don't exist
-                # phone and password_hash are now nullable thanks to the migration
+                print(f"GOOGLE_AUTH: Creating new user {email} with role {role_requested}")
                 cursor.execute(
                     "INSERT INTO users (name, email, role, email_verified) VALUES (%s, %s, %s, TRUE) RETURNING user_id",
                     (name, email, role_requested)
@@ -122,13 +131,18 @@ def google_auth(request: GoogleAuthRequest, response: Response):
             )
             
             return {"status": "success", "role": user['role']}
-            
+        except Exception as e:
+            print(f"GOOGLE_AUTH_ERROR: DB Query failed: {e}")
+            if conn: conn.rollback()
+            raise HTTPException(status_code=500, detail=f"Database query failed: {str(e)}")
         finally:
-            conn.close()
+            if conn: conn.close()
             
-    except ValueError:
-        # Invalid token
-        raise HTTPException(status_code=401, detail="Invalid Google token")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"GOOGLE_AUTH_ERROR: Unexpected error: {e}")
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 @router.post("/login")
 def login(request: LoginRequest, response: Response, http_request: Request, background_tasks: BackgroundTasks):
