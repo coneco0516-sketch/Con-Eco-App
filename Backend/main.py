@@ -81,35 +81,28 @@ app = FastAPI(title="ConEco Backend API", lifespan=lifespan)
 
 import os
 
-# Production-Ready CORS configuration
-# Using regex to allow any Render subdomain or local development ports
-ALLOWED_ORIGIN_REGEX = r"https://.*\.onrender\.com|http://localhost:\d+|http://127\.0\.0\.1:\d+"
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 @app.middleware("http")
 async def cors_and_security_middleware(request: Request, call_next):
-    # 1. Handle Preflight OPTIONS requests manually as a fallback
+    # This middleware handles both CORS and COOP security headers robustly
+    origin = request.headers.get("origin")
+    
+    # 1. Handle Preflight OPTIONS requests
     if request.method == "OPTIONS":
         response = Response(content="OK", status_code=200)
     else:
         response = await call_next(request)
     
-    # 2. Force add CORS headers for safety (FastAPI CORSMiddleware can sometimes miss error responses)
-    origin = request.headers.get("origin")
-    if origin and ("onrender.com" in origin or "localhost" in origin or "127.0.0.1" in origin):
+    # 2. Add CORS headers to EVERY response (including OPTIONS and Errors)
+    if origin:
+        # We mirror the origin to perfectly satisfy the 'allow_credentials=True' requirement
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With, X-CSRF-Token"
+        response.headers["Access-Control-Max-Age"] = "600"
     
-    # 3. REQUIRED for Google Identity Services popups
+    # 3. REQUIRED for Google Identity Services popups (COOP)
+    # This must be on both the backend responses and the frontend static pages
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
     
     return response
