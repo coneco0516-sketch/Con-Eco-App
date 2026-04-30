@@ -7,6 +7,8 @@ import secrets
 from datetime import datetime, timedelta
 from typing import Optional
 from database import get_db_connection
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 from email_service import (
     send_login_notification,
@@ -20,6 +22,7 @@ from email_service import (
 load_dotenv = lambda: None # Mock
 SECRET_KEY = os.environ.get("JWT_SECRET", "coneco_super_secret_internship_key")
 ALGORITHM = "HS256"
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -54,6 +57,69 @@ def get_current_user_from_cookie(request: Request):
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
+    role: Optional[str] = "Customer"
+
+@router.post("/google")
+def google_auth(request: GoogleAuthRequest, response: Response):
+    token = request.credential
+    role_requested = request.role
+    
+    try:
+        # 1. Verify the Google ID Token
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
+        
+        # ID token is valid. Get user's Google info.
+        email = idinfo['email']
+        name = idinfo.get('name', 'Google User')
+        
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor(dictionary=True)
+            
+            # 2. Check if user already exists
+            cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
+            user = cursor.fetchone()
+            
+            if not user:
+                # 3. Create new user if they don't exist
+                # phone and password_hash are now nullable thanks to the migration
+                cursor.execute(
+                    "INSERT INTO users (name, email, role, email_verified) VALUES (%s, %s, %s, TRUE) RETURNING user_id",
+                    (name, email, role_requested)
+                )
+                res = cursor.fetchone()
+                user_id = res['user_id']
+                
+                # Add to role-specific tables (customers or vendors)
+                if role_requested == 'Vendor':
+                    cursor.execute("INSERT INTO vendors (vendor_id) VALUES (%s)", (user_id,))
+                else:
+                    cursor.execute("INSERT INTO customers (customer_id) VALUES (%s)", (user_id,))
+                
+                conn.commit()
+                user = {"user_id": user_id, "role": role_requested}
+            
+            # 4. Create session token
+            access_token = create_access_token({"user_id": user['user_id'], "role": user['role']})
+            response.set_cookie(
+                key="session_token", 
+                value=access_token, 
+                httponly=True, 
+                samesite="None", 
+                secure=True
+            )
+            
+            return {"status": "success", "role": user['role']}
+            
+        finally:
+            conn.close()
+            
+    except ValueError:
+        # Invalid token
+        raise HTTPException(status_code=401, detail="Invalid Google token")
 
 @router.post("/login")
 def login(request: LoginRequest, response: Response, http_request: Request, background_tasks: BackgroundTasks):

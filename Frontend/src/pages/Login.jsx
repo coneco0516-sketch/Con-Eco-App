@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
+import { GoogleLogin } from '@react-oauth/google';
+
 const API = process.env.REACT_APP_API_URL || '';
 
 function Login() {
@@ -14,6 +16,37 @@ function Login() {
   const handleTogglePassword = () => {
     setShowPassword(true);
     setTimeout(() => setShowPassword(false), 5000);
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const response = await fetch(`${API}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          credential: credentialResponse.credential,
+          role: 'Customer' // Default for new Google users
+        }),
+        credentials: 'include'
+      });
+      
+      const data = await response.json();
+      if (data.status === 'success') {
+        localStorage.setItem('is_logged_in', 'true');
+        localStorage.setItem('user_role', data.role);
+        if (data.role === 'Admin') navigate('/admin');
+        else if (data.role === 'Vendor') navigate('/vendor');
+        else navigate('/customer');
+      } else {
+        setError(data.message || 'Google authentication failed.');
+        setLoading(false);
+      }
+    } catch (err) {
+      setError('Network error during Google login.');
+      setLoading(false);
+    }
   };
 
   const handleLogin = async (e) => {
@@ -95,6 +128,16 @@ function Login() {
           {loading ? 'Authenticating...' : 'Sign In'}
         </button>
       </form>
+
+      <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ margin: '1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>OR</div>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError('Google Login Failed')}
+          theme="filled_blue"
+          shape="pill"
+        />
+      </div>
     </div>
   );
 }

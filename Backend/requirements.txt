@@ -25,3 +25,4 @@ pywebpush
 psycopg2-binary==2.9.10
 mysql-connector-python==9.0.0
 pymysql==1.1.1
+google-auth==2.38.0
