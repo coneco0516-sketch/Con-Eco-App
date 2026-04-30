@@ -82,41 +82,38 @@ app = FastAPI(title="ConEco Backend API", lifespan=lifespan)
 import os
 
 # Production-Ready CORS configuration
-allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "")
-cleaned_origins = allowed_origins_env.replace('"', '').replace("'", "").strip()
-
-if not cleaned_origins:
-    ALLOWED_ORIGINS = [
-        "http://localhost:5173",
-        "http://localhost:8000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:8000",
-        "https://con-eco-app-w78g.onrender.com",
-        "https://con-eco-frontend.onrender.com"
-    ]
-else:
-    ALLOWED_ORIGINS = [o.strip() for o in cleaned_origins.split(",") if o.strip()]
-
-# Brute force check for the specific frontend that is currently failing
-if "https://con-eco-frontend.onrender.com" not in ALLOWED_ORIGINS:
-    ALLOWED_ORIGINS.append("https://con-eco-frontend.onrender.com")
-
-print(f"CORS_DEBUG: Allowing origins: {ALLOWED_ORIGINS}")
+# Using regex to allow any Render subdomain or local development ports
+ALLOWED_ORIGIN_REGEX = r"https://.*\.onrender\.com|http://localhost:\d+|http://127\.0\.0\.1:\d+"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.middleware("http")
-async def add_security_headers(request: Request, call_next):
-    response = await call_next(request)
-    # REQUIRED for Google Identity Services popups
+async def cors_and_security_middleware(request: Request, call_next):
+    # 1. Handle Preflight OPTIONS requests manually as a fallback
+    if request.method == "OPTIONS":
+        response = Response(content="OK", status_code=200)
+    else:
+        response = await call_next(request)
+    
+    # 2. Force add CORS headers for safety (FastAPI CORSMiddleware can sometimes miss error responses)
+    origin = request.headers.get("origin")
+    if origin and ("onrender.com" in origin or "localhost" in origin or "127.0.0.1" in origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    # 3. REQUIRED for Google Identity Services popups
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+    
     return response
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     print(f"REQUEST: {request.method} {request.url.path} from {request.headers.get('origin')}")
