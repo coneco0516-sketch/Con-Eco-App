@@ -120,6 +120,20 @@
             color: var(--primary-accent);
         }
 
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .menu-toggle .bar {
+            width: 25px;
+            height: 3px;
+            background-color: var(--text-main);
+            transition: all 0.3s;
+        }
+
         /* Hero */
         .hero {
             height: 100vh;
@@ -436,19 +450,15 @@
         }
 
         .back-btn-pwa {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
             text-decoration: none;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 50px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -465,6 +475,9 @@
 
         /* Mobile Menu */
         @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
             .section {
                 padding: 60px 0;
             }
@@ -496,12 +509,14 @@
     </style>
 </head>
 <body>
-    <a href="javascript:history.length > 1 ? history.back() : window.location.href='/'" class="back-btn-pwa">← Back</a>
     <div class="cursor-glow"></div>
     
     <nav id="navbar">
         <div class="container">
-            <a href="#home" class="logo"><img src="Logo.svg" alt="Hriday Logo" class="logo-img"></a>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="javascript:history.length > 1 ? history.back() : window.location.href='/'" class="back-btn-pwa">← Back</a>
+                <a href="#home" class="logo"><img src="Logo.svg" alt="Hriday Logo" class="logo-img"></a>
+            </div>
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#about">About</a></li>
