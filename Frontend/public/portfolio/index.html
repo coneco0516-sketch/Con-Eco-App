@@ -435,6 +435,34 @@
             transform: translateY(-2px);
         }
 
+        .back-btn-pwa {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .back-btn-pwa:hover {
+            background: var(--primary-accent);
+            color: white;
+            border-color: var(--primary-accent);
+            transform: translateX(-5px);
+        }
+
         /* Mobile Menu */
         @media (max-width: 768px) {
             .section {
@@ -468,6 +496,7 @@
     </style>
 </head>
 <body>
+    <a href="javascript:history.length > 1 ? history.back() : window.location.href='/'" class="back-btn-pwa">← Back</a>
     <div class="cursor-glow"></div>
     
     <nav id="navbar">

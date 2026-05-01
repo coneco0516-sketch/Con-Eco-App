@@ -18,7 +18,7 @@ function About() {
       <section className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
         <h3 style={{ color: 'var(--primary-color)', marginTop: 0 }}>Meet Our Team</h3>
         <div className="dashboard-row" style={{ marginTop: '1.5rem' }}>
-          <a href="/portfolio/index.html" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', flex: '1', display: 'block', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.2)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
+          <a href="/portfolio/index.html" style={{ textDecoration: 'none', color: 'inherit', flex: '1', display: 'block', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.2)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
             <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', height: '100%' }}>
               <img src="/Project_Head.jpg" alt="Project Head" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
               <h4 style={{ color: 'var(--text-highlight)', margin: 0 }}>Hriday Demashetti - 2AG22CV006 - Civil Engineering Student</h4>
