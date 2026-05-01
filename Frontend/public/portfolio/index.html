@@ -142,7 +142,7 @@
         }
 
         .hero h1 {
-            font-size: 4.5rem;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
             line-height: 1.1;
             margin-bottom: 1.5rem;
         }
@@ -187,8 +187,10 @@
         }
 
         .abstract-shape {
-            width: 400px;
-            height: 400px;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1;
+            margin: 0 auto;
             background: url('Project_Head.jpg') no-repeat center center/cover;
             border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
             animation: morph 10s ease-in-out infinite;
@@ -435,6 +437,12 @@
 
         /* Mobile Menu */
         @media (max-width: 768px) {
+            .section {
+                padding: 60px 0;
+            }
+            .about-grid {
+                padding: 2rem 1.5rem;
+            }
             .nav-links {
                 display: none;
             }
