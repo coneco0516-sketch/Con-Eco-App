@@ -28,7 +28,14 @@ def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return bcrypt.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
+    if not plain or not hashed:
+        return False
+    try:
+        # Ensure both are bytes for bcrypt
+        return bcrypt.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
+    except Exception as e:
+        print(f"Bcrypt verification error: {e}")
+        return False
 
 router = APIRouter()
 
@@ -218,7 +225,7 @@ def register(request: RegisterRequest, background_tasks: BackgroundTasks):
         cursor.execute("INSERT INTO users (name, email, phone, password_hash, role, email_verified, email_verification_token, email_verification_sent_at) VALUES (%s, %s, %s, %s, %s, FALSE, %s, NOW()) RETURNING user_id",
                        (request.full_name, request.email, request.phone_number, hashed_pass, request.role, token))
         res = cursor.fetchone()
-        user_id = res['user_id'] if isinstance(res, dict) else res[0]
+        user_id = res['user_id'] if hasattr(res, '__getitem__') and 'user_id' in res else res[0]
         
         # Dispatch the verification email in background
         background_tasks.add_task(send_email_verification, request.email, request.full_name, token)
