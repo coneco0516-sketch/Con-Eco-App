@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import { GoogleLogin } from '@react-oauth/google';
 
-const API = import.meta.env.VITE_API_URL || '';
+const API = import.meta.env.VITE_API_URL || 'https://con-eco-app-w78g.onrender.com';
 
 function Login() {
   const [email, setEmail] = useState('');
