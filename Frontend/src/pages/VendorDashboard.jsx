@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import VendorSidebar from '../components/VendorSidebar';
 
-const API = process.env.REACT_APP_API_URL || '';
+const API = import.meta.env.VITE_API_URL || '';
 
 function VendorDashboard() {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import { GoogleLogin } from '@react-oauth/google';
 
-const API = process.env.REACT_APP_API_URL || '';
+const API = import.meta.env.VITE_API_URL || '';
 
 function Login() {
   const [email, setEmail] = useState('');

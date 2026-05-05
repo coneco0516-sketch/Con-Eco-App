@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
-const API = process.env.REACT_APP_API_URL || '';
+const API = import.meta.env.VITE_API_URL || '';
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CustomerSidebar from '../components/CustomerSidebar';
 import { useNavigate } from 'react-router-dom';
 
-const API = process.env.REACT_APP_API_URL || '';
+const API = import.meta.env.VITE_API_URL || '';
 
 const PUSH_VAPID_KEY = 'BMWUGlFCX4gbzFvuIVv-C0l6xRNm2ymMTnd3-mQqoCwAC7TOkheENAnxhPqXJk-dLZq4DzSwd6lFVY_7QWcFBOM';
 

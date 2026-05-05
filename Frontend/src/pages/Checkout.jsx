@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CustomerSidebar from '../components/CustomerSidebar';
 import { useNavigate } from 'react-router-dom';
 
-const API = process.env.REACT_APP_API_URL || '';
+const API = import.meta.env.VITE_API_URL || '';
 
 // Dynamically load the Razorpay checkout script
 function loadRazorpayScript() {
