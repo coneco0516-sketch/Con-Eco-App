@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const API = import.meta.env.VITE_API_URL || '';
+const API = import.meta.env.VITE_API_URL || 'https://con-eco-app-w78g.onrender.com';
 
 function Contact() {
   const [formData, setFormData] = useState({
