@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CustomerSidebar from '../components/CustomerSidebar';
 import { useNavigate } from 'react-router-dom';
 
-const API = import.meta.env.VITE_API_URL || '';
+const API = import.meta.env.VITE_API_URL || 'https://con-eco-app-w78g.onrender.com';
 
 // Dynamically load the Razorpay checkout script
 function loadRazorpayScript() {
