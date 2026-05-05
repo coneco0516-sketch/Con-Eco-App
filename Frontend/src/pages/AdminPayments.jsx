@@ -139,9 +139,14 @@ function AdminPayments() {
         {/* SUMMARY CARDS */}
         <section className="dashboard-stats-grid">
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
-            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Sales (Offline)</h3>
-            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#3fb950' }}>₹{stats.total_revenue}</p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Total offline sales</p>
+            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Collected Offline</h3>
+            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#f59e0b' }}>₹{stats.vendor_collected || 0}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>COD / Negotiable / Credit</p>
+          </div>
+          <div className="stat-card glass-panel" style={{ flex: 1 }}>
+            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Total Revenue (All)</h3>
+            <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, color: '#3fb950' }}>₹{stats.total_revenue || 0}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Includes online & offline</p>
           </div>
           <div className="stat-card glass-panel" style={{ flex: 1 }}>
             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>Pending Collection</h3>
