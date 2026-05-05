@@ -17,7 +17,8 @@ function PlatformSettings() {
     email_notifications: true,
     push_notifications: false,
     server_maintenance_mode: false,
-    default_credit_limit: 5000
+    default_credit_limit: 5000,
+    enable_pay_later: true
   });
   
   const [loading, setLoading] = useState(true);
@@ -153,13 +154,17 @@ function PlatformSettings() {
                 <label style={{ color: 'var(--text-secondary)' }}>Enable Order Cancellation</label>
                 <input type="checkbox" name="enable_order_cancellation" checked={settings.enable_order_cancellation} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
               </div>
-              <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--surface-border)', paddingTop: '0.5rem' }}>
-                <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Default Credit Limit (₹)</label>
-                <input type="number" name="default_credit_limit" value={settings.default_credit_limit} onChange={handleChange} className="input-field" placeholder="e.g. 5000" />
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>
-                  Default limit for verified customers. Can be overridden per-customer.
-                </p>
-              </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <label style={{ color: 'var(--text-secondary)' }}>Enable Pay Later (Credit System)</label>
+                  <input type="checkbox" name="enable_pay_later" checked={settings.enable_pay_later} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
+                </div>
+                <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--surface-border)', paddingTop: '0.5rem' }}>
+                  <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Default Credit Limit (₹)</label>
+                  <input type="number" name="default_credit_limit" value={settings.default_credit_limit} onChange={handleChange} className="input-field" placeholder="e.g. 5000" />
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>
+                    Default limit for verified customers. Can be overridden per-customer.
+                  </p>
+                </div>
             </div>
           </section>
 

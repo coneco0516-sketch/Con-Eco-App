@@ -13,13 +13,25 @@ function CustomerProfile() {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
   const [credit, setCredit] = useState(null);
+  const [platformSettings, setPlatformSettings] = useState({});
   const [msg, setMsg] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProfile();
     fetchCredit();
+    fetchPlatformSettings();
   }, []);
+
+  const fetchPlatformSettings = async () => {
+    try {
+      const resp = await fetch(`${API}/api/admin/platform_settings`, { credentials: 'include' });
+      const data = await resp.json();
+      if (data.status === 'success') setPlatformSettings(data.settings);
+    } catch (err) {
+      console.error('Platform settings fetch error:', err);
+    }
+  };
 
   const fetchCredit = async () => {
     try {
@@ -172,7 +184,7 @@ function CustomerProfile() {
                     <button onClick={handleLogout} className="btn danger">Logout</button>
                   </div>
 
-                  {credit && credit.summary && parseFloat(credit.summary.credit_limit) > 0 && (
+                  {platformSettings.enable_pay_later !== false && credit && credit.summary && parseFloat(credit.summary.credit_limit) > 0 && (
                      <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(52, 152, 219, 0.05)', borderRadius: '12px', border: '1px solid rgba(52, 152, 219, 0.2)' }}>
                         <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <span>💳</span> Credit Account 

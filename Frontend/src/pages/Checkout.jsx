@@ -29,6 +29,7 @@ function Checkout() {
   const [address, setAddress] = useState('');
   const [ackDelivery, setAckDelivery] = useState(false);
   const [creditInfo, setCreditInfo] = useState(null);
+  const [platformSettings, setPlatformSettings] = useState({});
 
   const navigate = useNavigate();
 
@@ -52,6 +53,14 @@ function Checkout() {
         if (data.status === 'success') setCreditInfo(data.summary);
       })
       .catch(err => console.error('Error fetching credit info:', err));
+
+    // Fetch platform settings for Pay Later toggle
+    fetch(`${API}/api/admin/platform_settings`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') setPlatformSettings(data.settings);
+      })
+      .catch(err => console.error('Error fetching platform settings:', err));
 
   }, []);
 
@@ -248,7 +257,7 @@ function Checkout() {
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
   ];
 
-  if (creditInfo && parseFloat(creditInfo.credit_limit) > 0) {
+  if (platformSettings.enable_pay_later !== false && creditInfo && parseFloat(creditInfo.credit_limit) > 0) {
     const available = parseFloat(creditInfo.credit_available);
     const isSuspended = creditInfo.credit_status === 'Suspended';
     const insufficient = available < total;
