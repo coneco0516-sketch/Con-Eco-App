@@ -51,12 +51,38 @@ function CustomerVerification() {
                 <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 10px 0' }}>{cust.name}</h3>
                 <p><strong>Email:</strong> <span style={{ color: 'var(--text-primary)' }}>{cust.email}</span></p>
                 <p><strong>Status:</strong> <span style={{ color: isPending ? '#d4a20b' : '#238636' }}>{cust.verification_status}</span></p>
-                <div className="actions" style={{ marginTop: '15px' }}>
-                  {isPending ? (
-                    <button className="btn" style={{ background: '#2ea043' }} onClick={() => updateStatus(cust.customer_id, 'Verified')}>Verify</button>
-                  ) : (
-                    <button className="btn danger" onClick={() => updateStatus(cust.customer_id, 'Blocked')}>Block</button>
-                  )}
+                  <div style={{ marginTop: '15px', borderTop: '1px solid var(--surface-border)', paddingTop: '10px' }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>Credit Limit (₹)</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input 
+                        type="number" 
+                        defaultValue={cust.credit_limit} 
+                        id={`limit-${cust.customer_id}`}
+                        className="input-field" 
+                        style={{ padding: '5px', fontSize: '0.9rem', width: '100px' }} 
+                      />
+                      <button 
+                        className="btn" 
+                        style={{ padding: '5px 10px', fontSize: '0.8rem' }}
+                        onClick={() => {
+                          const limit = document.getElementById(`limit-${cust.customer_id}`).value;
+                          fetch(`${API}/api/admin/customers/${cust.customer_id}/credit`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ credit_limit: parseFloat(limit) }),
+                            credentials: 'include'
+                          })
+                          .then(res => res.json())
+                          .then(data => {
+                            if (data.status === 'success') alert("Credit limit updated!");
+                            else alert("Error: " + data.message);
+                          });
+                        }}
+                      >
+                        Update
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             );

@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
           globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
           runtimeCaching: [
             {
-              urlPattern: /^https:\/\/coneco-backend\.onrender\.com\/api\/.*/,
+              urlPattern: /^https:\/\/con-eco-app-w78g\.onrender\.com\/api\/.*/,
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'api-cache',
