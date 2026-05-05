@@ -153,14 +153,22 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             
             order_status = 'Pending' if payment_method == 'COD' else 'Processing'
 
+            # Credit system due dates if PayLater
+            stage1_due = None
+            stage2_due = None
+            if payment_method == 'PayLater':
+                from datetime import timedelta
+                stage1_due = (datetime.now() + timedelta(days=7)).date()
+                stage2_due = (datetime.now() + timedelta(days=14)).date()
+
             cursor.execute(
                 """INSERT INTO Orders 
-                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, credit_stage1_due, credit_stage2_due) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                    RETURNING order_id""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"],
                  total_amount, base_amount, gst_amount, commission_amount, total_amount,
-                 order_status, delivery_address, payment_method)
+                 order_status, delivery_address, payment_method, stage1_due, stage2_due)
             )
             order_db_id = cursor.fetchone()['order_id']
             
@@ -318,6 +326,123 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer),
         return {"status": "success", "message": message}
     else:
         raise HTTPException(status_code=500, detail=message)
+
+
+# ── 4. Place Order Pay Later ─────────────────────────────────────────────────
+class PayLaterOrderRequest(BaseModel):
+    delivery_address: str
+
+@router.post("/place_order_pay_later")
+def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_customer),
+                         background_tasks: BackgroundTasks = None):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # 1. Fetch customer's credit details
+        cursor.execute("""
+            SELECT credit_limit, credit_used, credit_status, credit_suspended_until 
+            FROM Customers WHERE customer_id=%s
+        """, (user["user_id"],))
+        cust = cursor.fetchone()
+        
+        if not cust:
+            raise HTTPException(status_code=404, detail="Customer record not found.")
+
+        from datetime import date
+        today = date.today()
+        
+        # 2. Check suspension
+        if cust['credit_status'] == 'Suspended':
+            if cust['credit_suspended_until'] and cust['credit_suspended_until'] > today:
+                raise HTTPException(status_code=403, detail=f"Credit suspended until {cust['credit_suspended_until']}")
+            else:
+                # Suspension expired -> auto-lift
+                default_limit = get_platform_setting('default_credit_limit', 5000)
+                cursor.execute("""
+                    UPDATE Customers SET credit_status='None', credit_limit=%s 
+                    WHERE customer_id=%s
+                """, (default_limit, user["user_id"]))
+                cust['credit_status'] = 'None'
+                cust['credit_limit'] = default_limit
+
+        # 3. Check if credit is enabled
+        if float(cust['credit_limit'] or 0) <= 0:
+            raise HTTPException(status_code=403, detail="Pay Later is not enabled for your account.")
+
+        # 4. Calculate cart total
+        cursor.execute("""
+            SELECT c.quantity, c.item_type, COALESCE(p.price, s.price) as price
+            FROM Cart c
+            LEFT JOIN Products p ON c.item_type='Product' AND c.item_id=p.product_id
+            LEFT JOIN Services s ON c.item_type='Service' AND c.item_id=s.service_id
+            WHERE c.customer_id=%s
+        """, (user["user_id"],))
+        items = cursor.fetchall()
+        
+        if not items:
+             raise HTTPException(status_code=400, detail="Cart is empty.")
+
+        total_order_amount = 0
+        for item in items:
+            item_base = float(item['price']) * item['quantity']
+            item_gst = round(item_base * 0.18, 2)
+            comm_key = 'product_commission_pct' if item['item_type'] == 'Product' else 'service_commission_pct'
+            rate = float(get_platform_setting(comm_key, 3.0))
+            item_comm = round(item_base * rate / 100, 2)
+            total_order_amount += (item_base + item_gst + item_comm)
+
+        total_order_amount = round(total_order_amount, 2)
+
+        # 5. Check credit limit
+        if float(cust['credit_used'] or 0) + total_order_amount > float(cust['credit_limit']):
+            available = float(cust['credit_limit']) - float(cust['credit_used'] or 0)
+            raise HTTPException(status_code=403, detail=f"Exceeds credit limit. Available: ₹{max(0, available)}")
+
+        # 6. Finalize order
+        import random, string
+        txn_id = f"CRD-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+
+        success, message = finalize_order(
+            user["user_id"],
+            data.delivery_address,
+            'PayLater',
+            'Pending',
+            txn_id,
+            background_tasks=background_tasks
+        )
+
+        if success:
+            # 7. Update customer credit used
+            cursor.execute("""
+                UPDATE Customers 
+                SET credit_used = credit_used + %s, credit_status = 'Active' 
+                WHERE customer_id = %s
+                RETURNING credit_used, credit_limit
+            """, (total_order_amount, user["user_id"]))
+            after = cursor.fetchone()
+            
+            # 8. Insert transaction record
+            cursor.execute("SELECT order_id FROM Orders WHERE customer_id=%s AND payment_method='PayLater' ORDER BY created_at DESC LIMIT 1", (user["user_id"],))
+            last_order = cursor.fetchone()
+            order_id = last_order['order_id'] if last_order else None
+
+            cursor.execute("""
+                INSERT INTO credit_transactions (customer_id, order_id, txn_type, amount, credit_used_after, credit_limit_after, notes)
+                VALUES (%s, %s, 'Debit', %s, %s, %s, %s)
+            """, (user["user_id"], order_id, total_order_amount, after['credit_used'], after['credit_limit'], f"Order #{order_id} via Pay Later"))
+            
+            conn.commit()
+            return {"status": "success", "message": "Order placed successfully using credit."}
+        else:
+            raise HTTPException(status_code=500, detail=message)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        if 'conn' in locals() and conn: conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if 'conn' in locals() and conn: conn.close()
 
 
 # ── 4. Verify Settlement (Paying for Credit Orders) ──────────────────────────

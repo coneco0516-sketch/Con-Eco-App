@@ -102,7 +102,8 @@ def get_customers(user = Depends(check_admin)):
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
-            "SELECT c.customer_id, u.name, u.email, u.phone, c.verification_status "
+            "SELECT c.customer_id, u.name, u.email, u.phone, c.verification_status, "
+            "       c.credit_limit, c.credit_used, c.credit_status, c.credit_suspended_until "
             "FROM Customers c "
             "JOIN Users u ON c.customer_id = u.user_id"
         )
@@ -132,6 +133,93 @@ def update_customer_status(data: StatusUpdate, user = Depends(check_admin)):
         return {"status": "success"}
     finally:
         conn.close()
+
+# --- CREDIT SYSTEM MANAGEMENT ---
+
+@router.get("/credit_accounts")
+def get_credit_accounts(user = Depends(check_admin)):
+    """Fetch all customers with credit details for the Admin Payments tab."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        sql = """
+            SELECT c.customer_id, u.name, u.email,
+                   c.credit_limit, c.credit_used, c.credit_status,
+                   TO_CHAR(c.credit_suspended_until, 'DD Mon YYYY') as suspended_until,
+                   (c.credit_limit - c.credit_used) as credit_available
+            FROM Customers c
+            JOIN Users u ON c.customer_id = u.user_id
+            WHERE c.credit_limit > 0 OR c.credit_used > 0 OR c.credit_status != 'None'
+            ORDER BY c.credit_status DESC, c.credit_used DESC
+        """
+        cursor.execute(sql)
+        accounts = cursor.fetchall()
+        
+        # Also fetch recent transactions
+        cursor.execute("""
+            SELECT ct.*, u.name as customer_name, TO_CHAR(ct.created_at, 'DD Mon HH24:MI') as date
+            FROM credit_transactions ct
+            JOIN Users u ON ct.customer_id = u.user_id
+            ORDER BY ct.created_at DESC
+            LIMIT 50
+        """)
+        transactions = cursor.fetchall()
+        
+        cursor.close()
+        return {"status": "success", "accounts": accounts, "transactions": transactions}
+    finally:
+        conn.close()
+
+class CreditUpdate(BaseModel):
+    credit_limit: Optional[float] = None
+    credit_status: Optional[str] = None
+    lift_suspension: Optional[bool] = False
+    notes: Optional[str] = None
+
+@router.put("/customers/{customer_id}/credit")
+def update_customer_credit(customer_id: int, data: CreditUpdate, user = Depends(check_admin)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        # 1. Update the record
+        updates = []
+        params = []
+        
+        if data.credit_limit is not None:
+            updates.append("credit_limit = %s")
+            params.append(data.credit_limit)
+        
+        if data.lift_suspension:
+            updates.append("credit_status = 'None'")
+            updates.append("credit_suspended_until = NULL")
+        elif data.credit_status is not None:
+            updates.append("credit_status = %s")
+            params.append(data.credit_status)
+            
+        if not updates:
+            return {"status": "error", "message": "No updates provided"}
+            
+        params.append(customer_id)
+        sql = f"UPDATE Customers SET {', '.join(updates)} WHERE customer_id = %s RETURNING credit_used, credit_limit"
+        cursor.execute(sql, params)
+        res = cursor.fetchone()
+        
+        # 2. Record adjustment transaction
+        cursor.execute("""
+            INSERT INTO credit_transactions (customer_id, txn_type, amount, credit_used_after, credit_limit_after, notes)
+            VALUES (%s, 'Adjustment', 0, %s, %s, %s)
+        """, (customer_id, res['credit_used'], res['credit_limit'], data.notes or "Admin manual adjustment"))
+        
+        conn.commit()
+        cursor.close()
+        return {"status": "success", "message": "Customer credit updated successfully"}
+    except Exception as e:
+        if 'conn' in locals() and conn: conn.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        if 'conn' in locals() and conn: conn.close()
+
 
 @router.get("/vendors")
 def get_vendors(user = Depends(check_admin)):

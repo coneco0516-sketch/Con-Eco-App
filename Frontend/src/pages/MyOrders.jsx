@@ -173,9 +173,9 @@ function MyOrders() {
                     </div>
                   ) : null}
 
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.8rem', color: '#ffd700', border: '1px solid #ffd700', padding: '2px 6px', borderRadius: '4px' }}>
-                      {o.payment_method}
+                      {o.payment_method === 'PayLater' ? 'Credit Account' : o.payment_method}
                     </span>
                     <span style={{ 
                       fontSize: '0.8rem', 
@@ -186,6 +186,30 @@ function MyOrders() {
                     }}>
                       Payment: {o.payment_status}
                     </span>
+                    {o.payment_method === 'PayLater' && o.payment_status !== 'Completed' && (
+                       <span style={{ 
+                         fontSize: '0.8rem', 
+                         background: 'rgba(52, 152, 219, 0.2)', 
+                         color: '#3498db',
+                         padding: '2px 6px', 
+                         borderRadius: '4px',
+                         border: '1px solid #3498db'
+                       }}>
+                         Due: {new Date(o.credit_stage1_due).toLocaleDateString()}
+                       </span>
+                    )}
+                    {o.credit_tier && (
+                       <span style={{ 
+                         fontSize: '0.8rem', 
+                         background: o.credit_tier === 'Stage1' ? 'rgba(35, 134, 54, 0.2)' : 'rgba(231, 76, 60, 0.2)', 
+                         color: o.credit_tier === 'Stage1' ? '#3fb950' : '#e74c3c',
+                         padding: '2px 6px', 
+                         borderRadius: '4px',
+                         fontWeight: 'bold'
+                       }}>
+                         Tier: {o.credit_tier} {o.credit_tier === 'Stage1' && '🚀'}
+                       </span>
+                    )}
                   </div>
 
                 </div>

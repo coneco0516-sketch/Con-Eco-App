@@ -347,7 +347,47 @@ def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
+        conn.close()
+
+# --- CREDIT SYSTEM ---
+
+@router.get("/credit_summary")
+def get_credit_summary(user = Depends(check_customer)):
+    """Fetch customer's credit account details and history."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # 1. Fetch main account details
+        cursor.execute("""
+            SELECT credit_limit, credit_used, credit_status,
+                   TO_CHAR(credit_suspended_until, 'DD Mon YYYY') as suspended_until,
+                   (credit_limit - credit_used) as credit_available
+            FROM Customers WHERE customer_id = %s
+        """, (user["user_id"],))
+        summary = cursor.fetchone()
+        
+        if not summary:
+            return {"status": "error", "message": "Customer not found"}
+
+        # 2. Fetch last 10 transactions
+        cursor.execute("""
+            SELECT txn_type, amount, notes, 
+                   TO_CHAR(created_at, 'DD Mon YYYY') as date,
+                   credit_used_after, credit_limit_after
+            FROM credit_transactions
+            WHERE customer_id = %s
+            ORDER BY created_at DESC
+            LIMIT 10
+        """, (user["user_id"],))
+        history = cursor.fetchall()
+
         cursor.close()
+        return {
+            "status": "success",
+            "summary": summary,
+            "recent_transactions": history
+        }
+    finally:
         conn.close()
 
 class ReviewData(BaseModel):

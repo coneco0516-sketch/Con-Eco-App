@@ -16,7 +16,8 @@ function PlatformSettings() {
     auto_order_confirmation: false,
     email_notifications: true,
     push_notifications: false,
-    server_maintenance_mode: false
+    server_maintenance_mode: false,
+    default_credit_limit: 5000
   });
   
   const [loading, setLoading] = useState(true);
@@ -138,10 +139,10 @@ function PlatformSettings() {
             </div>
           </section>
 
-          {/* Order Settings */}
+          {/* Order & Credit Settings */}
           <section className="glass-panel" style={{ padding: '1.5rem' }}>
             <h3 style={{ color: 'var(--text-highlight)', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>📦</span> Order Settings
+              <span>📦</span> Order & Credit Settings
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -152,9 +153,12 @@ function PlatformSettings() {
                 <label style={{ color: 'var(--text-secondary)' }}>Enable Order Cancellation</label>
                 <input type="checkbox" name="enable_order_cancellation" checked={settings.enable_order_cancellation} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ color: 'var(--text-secondary)' }}>Auto Order Confirmation</label>
-                <input type="checkbox" name="auto_order_confirmation" checked={settings.auto_order_confirmation} onChange={handleChange} style={{ transform: 'scale(1.2)' }} />
+              <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--surface-border)', paddingTop: '0.5rem' }}>
+                <label className="input-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Default Credit Limit (₹)</label>
+                <input type="number" name="default_credit_limit" value={settings.default_credit_limit} onChange={handleChange} className="input-field" placeholder="e.g. 5000" />
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>
+                  Default limit for verified customers. Can be overridden per-customer.
+                </p>
               </div>
             </div>
           </section>

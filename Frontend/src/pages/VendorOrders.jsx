@@ -142,13 +142,25 @@ function VendorOrders() {
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
                     <p style={{ color: 'var(--text-highlight)', fontSize: '0.9rem', margin: 0 }}>
-                      Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method || 'N/A'}</span> 
+                      Payment: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{o.payment_method === 'PayLater' ? 'Credit Account' : (o.payment_method || 'N/A')}</span> 
                       <span style={{ marginLeft: '10px', fontSize: '0.8rem', padding: '2px 8px', borderRadius: '4px', background: o.payment_status === 'Completed' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: o.payment_status === 'Completed' ? '#22c55e' : '#f59e0b' }}>
                         {o.payment_status || 'Pending'}
                       </span>
                     </p>
+                    {o.payment_method === 'PayLater' && o.payment_status !== 'Completed' && (
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                         <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(52, 152, 219, 0.2)', color: '#3498db', border: '1px solid #3498db' }}>
+                            Due: {new Date(o.credit_stage1_due).toLocaleDateString()}
+                         </span>
+                         {new Date() > new Date(o.credit_stage2_due) && (
+                           <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(231, 76, 60, 0.2)', color: '#e74c3c', border: '1px solid #e74c3c' }}>
+                              OVERDUE
+                           </span>
+                         )}
+                      </div>
+                    )}
                   </div>
 
 
@@ -160,9 +172,9 @@ function VendorOrders() {
                       ₹{['COD', 'Negotiable'].includes(o.payment_method) ? o.amount.toFixed(2) : o.base_amount.toFixed(2)}
                     </p>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
-                      {['COD', 'Negotiable'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
+                      {['COD', 'Negotiable', 'PayLater'].includes(o.payment_method) ? 'Gross (Collect Cash)' : 'Net Payout'}
                     </p>
-                    {!['COD', 'Negotiable'].includes(o.payment_method) && (
+                    {!['COD', 'Negotiable', 'PayLater'].includes(o.payment_method) && (
                       <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', margin: '4px 0 0 0' }}>
                         Gross: ₹{o.amount.toFixed(2)}
                       </p>
@@ -234,12 +246,22 @@ function VendorOrders() {
                       <option value="Cancelled">Cancelled</option>
                     </select>
                   )}
-                  {['COD', 'Negotiable'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
+                  {['COD', 'Negotiable', 'PayLater'].includes(o.payment_method) && o.payment_status !== 'Completed' && (
                     <button 
                       onClick={() => handlePaymentStatusChange(o.order_id, 'Completed')}
                       className="btn"
-                      style={{ background: 'transparent', border: '1px solid #22c55e', color: '#22c55e', fontSize: '0.8rem', padding: '8px' }}>
-                      Mark as Paid
+                      style={{ 
+                        background: 'transparent', 
+                        border: '1px solid #22c55e', 
+                        color: '#22c55e', 
+                        fontSize: '0.8rem', 
+                        padding: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '5px'
+                      }}>
+                      {o.payment_method === 'PayLater' ? '✅ Received Credit Payment' : 'Mark as Paid'}
                     </button>
                   )}
                 </div>

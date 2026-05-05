@@ -435,26 +435,95 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
-        cursor.execute("SELECT payment_method FROM Orders WHERE order_id=%s AND vendor_id=%s", (data.order_id, vendor_id))
+        cursor.execute("""
+            SELECT o.payment_method, o.customer_id, o.total_amount, o.amount, 
+                   o.credit_stage1_due, o.credit_stage2_due 
+            FROM Orders o WHERE o.order_id=%s AND o.vendor_id=%s
+        """, (data.order_id, vendor_id))
         order = cursor.fetchone()
         
         if not order:
             return {"status": "error", "message": "Order not found or no permission"}
             
-        if order['payment_method'] not in ['COD', 'Negotiable']:
-            return {"status": "error", "message": "Only Cash/Offline orders can have their payment status updated manually."}
+        if order['payment_method'] not in ['COD', 'Negotiable', 'PayLater']:
+            return {"status": "error", "message": "Only Offline/Credit orders can have their payment status updated manually."}
             
-        cursor.execute("UPDATE Payments SET status=%s WHERE order_id=%s", (data.status, data.order_id))
+        if data.status != 'Completed' and data.status != 'Paid':
+             # Just update if it's some other status (Refunded, etc)
+             cursor.execute("UPDATE Payments SET status=%s WHERE order_id=%s", (data.status, data.order_id))
+             conn.commit()
+             return {"status": "success"}
+
+        # --- LOGIC FOR COMPLETING PAYMENT ---
+        from datetime import date
+        today = date.today()
         
-            
+        # Default tier logic for non-credit orders
+        if order['payment_method'] != 'PayLater':
+            cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
+            cursor.execute("UPDATE commissions SET status='Settled' WHERE order_id=%s", (data.order_id,))
+            conn.commit()
+            return {"status": "success"}
+
+        # --- PAY LATER TIER LOGIC ---
+        tier = 'Stage1' if today <= order['credit_stage1_due'] else ('Stage2' if today <= order['credit_stage2_due'] else 'Overdue')
+        
+        # 1. Mark payment completed
+        cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
+        cursor.execute("UPDATE Orders SET credit_tier = %s WHERE order_id=%s", (tier, data.order_id))
+        cursor.execute("UPDATE commissions SET status='Settled' WHERE order_id=%s", (data.order_id,))
+
+        # 2. Reduce credit_used
+        order_amount = float(order['total_amount'] or order['amount'] or 0)
+        cursor.execute("UPDATE Customers SET credit_used = GREATEST(0, credit_used - %s) WHERE customer_id = %s RETURNING credit_used, credit_limit", (order_amount, order['customer_id']))
+        cust = cursor.fetchone()
+
+        # 3. Apply tier result
+        notes = f"Payment for Order #{data.order_id} ({tier})"
+        txn_type = 'Repayment'
+
+        if tier == 'Stage1':
+            # Double credit limit as reward
+            cursor.execute("UPDATE Customers SET credit_limit = credit_limit * 2 WHERE customer_id = %s RETURNING credit_limit", (order['customer_id'],))
+            new_limit = cursor.fetchone()['credit_limit']
+            cust['credit_limit'] = new_limit
+            txn_type = 'Reward'
+            notes += " - Credit limit doubled!"
+
+        elif tier == 'Overdue':
+            # Suspend for 2 months
+            from datetime import timedelta
+            suspended_until = today + timedelta(days=60)
+            cursor.execute("""
+                UPDATE Customers SET 
+                    credit_status = 'Suspended', 
+                    credit_suspended_until = %s,
+                    credit_used = 0 
+                WHERE customer_id = %s
+                RETURNING credit_used, credit_limit
+            """, (suspended_until, order['customer_id']))
+            cust = cursor.fetchone()
+            txn_type = 'Penalty'
+            notes += f" - Suspended until {suspended_until}"
+
+        # 4. Insert transaction record
+        cursor.execute("""
+            INSERT INTO credit_transactions (customer_id, order_id, txn_type, amount, credit_used_after, credit_limit_after, notes)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (order['customer_id'], data.order_id, txn_type, order_amount, cust['credit_used'], cust['credit_limit'], notes))
+
+        # 5. Reset status to 'None' if fully cleared (non-overdue)
+        if tier != 'Overdue' and float(cust['credit_used']) <= 0:
+            cursor.execute("UPDATE Customers SET credit_status = 'None' WHERE customer_id = %s", (order['customer_id'],))
+
         conn.commit()
-        return {"status": "success"}
+        return {"status": "success", "tier": tier}
     except Exception as e:
-        conn.rollback()
+        if 'conn' in locals() and conn: conn.rollback()
         return {"status": "error", "message": str(e)}
     finally:
-        cursor.close()
-        conn.close()
+        if 'cursor' in locals() and cursor: cursor.close()
+        if 'conn' in locals() and conn: conn.close()
 
 class WithdrawRequest(BaseModel):
     amount: float

@@ -12,12 +12,26 @@ function CustomerProfile() {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [credit, setCredit] = useState(null);
   const [msg, setMsg] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProfile();
+    fetchCredit();
   }, []);
+
+  const fetchCredit = async () => {
+    try {
+      const resp = await fetch(`${API}/api/customer/credit_summary`, { credentials: 'include' });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        setCredit(data);
+      }
+    } catch (err) {
+      console.error('Credit fetch error:', err);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -156,6 +170,63 @@ function CustomerProfile() {
                   <button onClick={() => setEditMode(true)} className="btn">Edit Profile</button>
                   <button onClick={handleLogout} className="btn danger">Logout</button>
                 </div>
+
+                {credit && credit.summary && parseFloat(credit.summary.credit_limit) > 0 && (
+                   <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(52, 152, 219, 0.05)', borderRadius: '12px', border: '1px solid rgba(52, 152, 219, 0.2)' }}>
+                      <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>💳</span> Credit Account 
+                        {credit.summary.credit_status === 'Suspended' && <span style={{ fontSize: '0.7rem', background: '#e74c3c', color: 'white', padding: '2px 8px', borderRadius: '4px' }}>SUSPENDED</span>}
+                      </h3>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                         <span style={{ color: 'var(--text-secondary)' }}>Available Limit</span>
+                         <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>₹{parseFloat(credit.summary.credit_available).toFixed(2)}</span>
+                      </div>
+                      
+                      <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', marginBottom: '1.5rem' }}>
+                         <div style={{ 
+                            height: '100%', 
+                            width: `${Math.min(100, (parseFloat(credit.summary.credit_used) / parseFloat(credit.summary.credit_limit)) * 100)}%`,
+                            background: 'var(--primary-color)'
+                         }}></div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                         <div style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Total Limit</p>
+                            <p style={{ margin: 0, fontSize: '1rem', color: 'white', fontWeight: 'bold' }}>₹{parseFloat(credit.summary.credit_limit).toFixed(0)}</p>
+                         </div>
+                         <div style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Currently Used</p>
+                            <p style={{ margin: 0, fontSize: '1rem', color: 'white', fontWeight: 'bold' }}>₹{parseFloat(credit.summary.credit_used).toFixed(0)}</p>
+                         </div>
+                      </div>
+
+                      {credit.summary.credit_status === 'Suspended' && (
+                         <div style={{ padding: '0.8rem', background: 'rgba(231, 76, 60, 0.1)', borderRadius: '6px', borderLeft: '3px solid #e74c3c', marginBottom: '1.5rem' }}>
+                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#e74c3c' }}>
+                               <strong>Account Suspended:</strong> Your credit account is temporarily blocked due to overdue payments. Suspension ends: {credit.summary.suspended_until}
+                            </p>
+                         </div>
+                      )}
+
+                      <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.8rem 0', fontSize: '1rem' }}>Recent Activity</h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                         {credit.recent_transactions.map((txn, idx) => (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', fontSize: '0.85rem' }}>
+                               <div>
+                                  <span style={{ fontWeight: 'bold', color: txn.txn_type === 'Debit' ? '#e74c3c' : '#3fb950', marginRight: '10px' }}>
+                                     {txn.txn_type === 'Debit' ? '−' : '+'} ₹{txn.amount}
+                                  </span>
+                                  <span style={{ color: 'var(--text-secondary)' }}>{txn.notes}</span>
+                               </div>
+                               <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)' }}>{txn.date}</span>
+                            </div>
+                         ))}
+                         {credit.recent_transactions.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>No recent transactions.</p>}
+                      </div>
+                   </div>
+                )}
 
                 <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
                   <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>🔔 Browser Notifications</h4>

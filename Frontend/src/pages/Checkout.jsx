@@ -28,6 +28,7 @@ function Checkout() {
   const [error, setError] = useState('');
   const [address, setAddress] = useState('');
   const [ackDelivery, setAckDelivery] = useState(false);
+  const [creditInfo, setCreditInfo] = useState(null);
 
   const navigate = useNavigate();
 
@@ -44,6 +45,13 @@ function Checkout() {
       })
       .catch(() => setLoading(false));
 
+    // Fetch credit info
+    fetch(`${API}/api/customer/credit_summary`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') setCreditInfo(data.summary);
+      })
+      .catch(err => console.error('Error fetching credit info:', err));
 
   }, []);
 
@@ -82,6 +90,28 @@ function Checkout() {
           navigate('/customer/order-success');
         } else {
           setError(data.detail || 'Failed to place order.');
+          setPaying(false);
+        }
+      } catch (err) {
+        setError('Connection error. Please try again.');
+        setPaying(false);
+      }
+      return;
+    }
+
+    if (paymentMethod === 'PayLater') {
+      try {
+        const res = await fetch(`${API}/api/payment/place_order_pay_later`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ delivery_address: address })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          navigate('/customer/order-success');
+        } else {
+          setError(data.detail || 'Failed to place credit order.');
           setPaying(false);
         }
       } catch (err) {
@@ -217,6 +247,22 @@ function Checkout() {
   const paymentOptions = [
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
   ];
+
+  if (creditInfo && parseFloat(creditInfo.credit_limit) > 0) {
+    const available = parseFloat(creditInfo.credit_available);
+    const isSuspended = creditInfo.credit_status === 'Suspended';
+    const insufficient = available < total;
+    
+    paymentOptions.push({
+      id: 'PayLater',
+      label: 'Pay Later (Credit)',
+      icon: '⏳',
+      disabled: isSuspended || insufficient,
+      subtitle: isSuspended ? `Suspended until ${creditInfo.suspended_until}` : 
+                insufficient ? `Insufficient Limit (₹${available.toFixed(0)})` :
+                `Available: ₹${available.toFixed(0)}`
+    });
+  }
 
   return (
     <div className="dashboard-layout">
@@ -362,6 +408,11 @@ function Checkout() {
                   >
                     <span style={{ fontSize: '1.5rem' }}>{opt.icon}</span>
                     <span style={{ color: opt.disabled ? '#e74c3c' : paymentMethod === opt.id ? 'white' : 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>{opt.label}</span>
+                    {opt.subtitle && (
+                      <span style={{ fontSize: '0.7rem', color: opt.disabled ? '#e74c3c' : 'var(--primary-color)', opacity: 0.8 }}>
+                        {opt.subtitle}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -377,12 +428,14 @@ function Checkout() {
             >
               {paying ? 'Processing...' : (
                 paymentMethod === 'COD' ? 'Place Order (COD)' :
+                paymentMethod === 'PayLater' ? 'Place Order (Pay Later)' :
                   `Pay ₹${total.toFixed(2)} via Razorpay`
               )}
             </button>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '1rem', textAlign: 'center' }}>
               {paymentMethod === 'COD' ? '💵 You will pay when the items are delivered.' :
+               paymentMethod === 'PayLater' ? '📅 Pay within 7 days for limit doubling reward!' :
                   '🔒 Secured by Razorpay. Supports UPI, Cards, Net Banking & Wallets.'}
             </p>
           </div>
