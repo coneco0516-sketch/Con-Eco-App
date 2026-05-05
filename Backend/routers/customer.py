@@ -310,7 +310,7 @@ def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
         cust_id = cust['customer_id']
 
         cursor.execute("""
-            SELECT status, payment_method, payment_status 
+            SELECT o.status, o.payment_method, p.status as payment_status 
             FROM Orders o
             LEFT JOIN Payments p ON o.order_id = p.order_id
             WHERE o.order_id = %s AND o.customer_id = %s
@@ -318,12 +318,12 @@ def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
         order = cursor.fetchone()
 
         if not order:
-            raise HTTPException(status_code=404, detail="Order not found")
+            return {"status": "error", "message": "Order not found"}
 
         if order['status'] != 'Pending':
             return {
                 "status": "error", 
-                "message": "Order has already been accepted or processed. To cancel, please contact the vendor and request them to change the status back to 'Pending'."
+                "message": "Order has already been accepted or processed. To cancel, please contact the vendor."
             }
 
         # Cancel the order
@@ -341,11 +341,9 @@ def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
         conn.commit()
         return {"status": "success", "message": refund_msg}
 
-    except HTTPException:
-        raise
     except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        if conn: conn.rollback()
+        return {"status": "error", "message": str(e)}
     finally:
         conn.close()
 

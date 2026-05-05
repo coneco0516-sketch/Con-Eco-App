@@ -93,7 +93,7 @@ function MyOrders() {
         alert(data.message);
         fetchOrders();
       } else {
-        alert("Cannot cancel: " + data.message);
+        alert("Cannot cancel: " + (data.message || data.detail || 'Server error'));
       }
     } catch (err) {
       alert("Error cancelling order.");
