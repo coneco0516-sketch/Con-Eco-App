@@ -83,6 +83,7 @@ def get_cart(user = Depends(check_customer)):
         service_rate = get_platform_setting('service_commission_pct', 3.0)
         
         base_total = 0.0
+        gst_total = 0.0
         commission_total = 0.0
         for i in items:
             item_base = float(i['price']) * i['quantity']
@@ -93,7 +94,15 @@ def get_cart(user = Depends(check_customer)):
             i['commission_rate'] = rate
             commission_total += item_base * rate / 100
 
-        gst_total = round(base_total * 0.18, 2)
+            # GST only applies if vendor is GST-registered (has a gst_number)
+            if i.get('gst_number'):
+                item_gst = round(item_base * 0.18, 2)
+                gst_total += item_gst
+                i['gst_applicable'] = True
+            else:
+                i['gst_applicable'] = False
+
+        gst_total = round(gst_total, 2)
         commission_total = round(commission_total, 2)
         total = round(base_total + gst_total + commission_total, 2)
         

@@ -127,10 +127,13 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             """
             SELECT c.*, COALESCE(p.vendor_id, s.vendor_id) as vendor_id,
                          COALESCE(p.price,     s.price)     as price,
-                         COALESCE(p.name,      s.name)      as item_name
+                         COALESCE(p.name,      s.name)      as item_name,
+                         COALESCE(v1.gst_number, v2.gst_number) as gst_number
             FROM Cart c
             LEFT JOIN Products p ON c.item_type='Product' AND c.item_id=p.product_id
             LEFT JOIN Services s ON c.item_type='Service' AND c.item_id=s.service_id
+            LEFT JOIN Vendors v1 ON p.vendor_id = v1.vendor_id
+            LEFT JOIN Vendors v2 ON s.vendor_id = v2.vendor_id
             WHERE c.customer_id=%s
             """,
             (cust_id,)
@@ -142,7 +145,8 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
 
         for item in cart_items:
             base_amount = float(item["price"]) * item["quantity"]
-            gst_amount = round(base_amount * 0.18, 2)
+            # GST only if vendor is GST-registered
+            gst_amount = round(base_amount * 0.18, 2) if item.get("gst_number") else 0.0
             
             # Dynamic commission rate from platform settings
             comm_key = 'product_commission_pct' if item['item_type'] == 'Product' else 'service_commission_pct'

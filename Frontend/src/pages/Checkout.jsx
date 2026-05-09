@@ -349,8 +349,17 @@ function Checkout() {
               <span style={{ color: 'var(--text-secondary)' }}>₹{baseTotal.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '1rem' }}>
-              <span style={{ color: '#3498db' }}>GST (18%)</span>
-              <span style={{ color: '#3498db' }}>₹{gstTotal.toFixed(2)}</span>
+              <span style={{ color: gstTotal > 0 ? '#3498db' : 'var(--text-secondary)' }}>
+                GST (18%)
+                {gstTotal === 0 && (
+                  <span style={{ fontSize: '0.7rem', marginLeft: '6px', color: '#ffd700', fontWeight: 'normal' }}>
+                    — Vendor not GST-registered
+                  </span>
+                )}
+              </span>
+              <span style={{ color: gstTotal > 0 ? '#3498db' : 'var(--text-secondary)' }}>
+                {gstTotal > 0 ? `₹${gstTotal.toFixed(2)}` : 'Not Applicable'}
+              </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1rem' }}>
               <span style={{ color: '#ffd700' }}>Platform Commission</span>
