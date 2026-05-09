@@ -18,6 +18,7 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
 - [Billing & Commissions](#-billing--commissions)
+- [GST Billing System](#-gst-billing-system)
 - [Email System](#-email-system)
 - [Deployment](#-deployment)
 
@@ -36,13 +37,16 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - **Bulk Price Negotiation**: Request custom quotes for large orders.
 - Direct order placement via **COD** (Cash on Delivery).
 - **Pay Later Credit Tab**: Place orders on credit, pay within 7–14 days.
+- **GST & Non-GST Billing**: Select bill type at checkout — GST Tax Invoice for ITC claims or a Simple Bill for retail purchases. GST option is auto-restricted if vendor is not GST-registered.
 - Real-time order tracking with automated status updates.
+- **Download Bill**: Once the vendor uploads the bill post-delivery, customers can download it directly from "My Orders."
 - **PWA Ready**: Installable on mobile and desktop for a native experience.
 
 ### 🏪 Vendors
 - Transparent **Earnings Dashboard** (Gross vs Commission vs Net).
 - **Bulk Price Management**: Rapidly update prices across the entire catalogue.
 - **Vendor Wallet**: Automated earnings tracking with Bank Withdrawal (Payout) requests.
+- **Bill Upload System**: Upload GST Tax Invoices or Simple Bills for each order from the dashboard. Each order card clearly shows the customer's requested bill type.
 - Weekly automated billing system with downloadable compliance receipts.
 - Professional QC verification system for platform-wide quality control.
 
@@ -68,6 +72,7 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 | **Email** | Brevo HTTP API (Transactional) |
 | **Auth** | JWT + bcrypt (Session Cookies) |
 | **Invoicing** | fpdf2 + PDF Generation |
+| **Payments** | Razorpay (UPI, Card, Net Banking) |
 
 ---
 
@@ -76,14 +81,15 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 ```
 ConEco/
 ├── Backend/
-│   ├── routers/                 # API Endpoints (Auth, Vendor, Customer, Admin, Payment)
+│   ├── routers/                 # API Endpoints (Auth, Vendor, Customer, Admin, Payment, Invoice)
 │   ├── main.py                  # Core Application & Scheduler
 │   ├── email_service.py         # Brevo Email Infrastructure
 │   ├── push_service.py          # Web Push Notification Engine
 │   ├── database.py              # Neon PostgreSQL Connection
 │   ├── setup_neon.py            # DB Schema Setup Script
 │   ├── invoice_generator.py     # Professional PDF Invoice Logic
-│   └── commission_invoicing.py  # Billing & Penalty Automation
+│   ├── commission_invoicing.py  # Billing & Penalty Automation
+│   └── migrate_gst_billing.py   # GST billing schema migration
 │
 ├── Frontend/
 │   ├── src/
@@ -95,6 +101,7 @@ ConEco/
 ├── Documents/
 │   └── Plan/                    # Feature planning documents
 │
+├── PLATFORM_OVERVIEW.md         # Platform guide for vendors & customers
 ├── RENDER_DEPLOYMENT.md         # Render cloud deployment guide
 ├── NEON_DATABASE.md             # Neon PostgreSQL setup guide
 └── BREVO_EMAIL_SETUP.md         # Brevo email platform guide
@@ -122,6 +129,9 @@ npm install
 ```bash
 # From the Backend/ directory
 python setup_neon.py
+
+# Run GST billing migration (adds bill_type & bill_file_url to Orders table)
+python migrate_gst_billing.py
 ```
 
 ### 3. Running Locally
@@ -158,6 +168,10 @@ FROM_NAME=ConEco
 VAPID_PUBLIC_KEY=your_public_key
 VAPID_PRIVATE_KEY=your_private_key
 
+# Payments (Razorpay)
+RAZORPAY_KEY_ID=rzp_live_xxxx
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+
 # Application URL
 APP_URL=http://localhost:8000
 ```
@@ -175,6 +189,33 @@ The platform operates on a robust, legal-compliant billing model:
 - **Penalty System**: Vendors receive "Strikes" for unpaid invoices. After **3 Strikes**, the account is automatically blocked.
 - **COD Orders**: Vendor collects cash directly; commission tracked and invoiced weekly.
 - **Pay Later**: Customer credit system with 7-day and 14-day payment tiers managed by Admin.
+
+---
+
+## 🧾 GST Billing System
+
+ConEco supports flexible, legally-compliant billing to serve both retail and commercial buyers.
+
+### Bill Types
+
+| Bill Type | Description | Use Case |
+|---|---|---|
+| **GST Bill** | Formal Tax Invoice with vendor GSTIN — eligible for Input Tax Credit (ITC) | Businesses / commercial purchases |
+| **Non-GST / Simple Bill** | Standard receipt without formal tax invoice details | Individuals / retail purchases |
+
+### How It Works
+1. **At Checkout**: Customer selects their preferred bill type. The "GST Bill" option is only shown if the vendor has a verified GST number.
+2. **After Delivery**: Vendor uploads the bill document (PDF or image) from their Orders dashboard.
+3. **Download**: Customer downloads the bill from "My Orders" or "My Booked Services."
+
+### Important Note
+> The **total payable amount is identical** for both bill types. GST on goods/services is always collected as required by law. The bill type only determines the format of the invoice document provided.
+
+### Database Fields (Orders table)
+| Column | Type | Description |
+|---|---|---|
+| `bill_type` | VARCHAR(10) | `'GST'` or `'Non-GST'` — defaults to `'Non-GST'` |
+| `bill_file_url` | TEXT | Path to the vendor-uploaded bill file |
 
 ---
 
@@ -213,6 +254,7 @@ ConEco is deployed on **Render**:
 | Frontend (React) | Static Site | Render |
 | Database | Serverless PostgreSQL | Neon |
 | Email | HTTP API | Brevo |
+| Payments | API | Razorpay |
 
 > See `RENDER_DEPLOYMENT.md` for full step-by-step deployment guide.
 
@@ -224,4 +266,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 ---
 
 **Developed by ConEco Team** — Internship Project @ Vrishank Soft  
-Built with ❤️ using FastAPI + React 18 + Neon + Render + Brevo
+Built with ❤️ using FastAPI + React 18 + Neon + Render + Brevo + Razorpay
