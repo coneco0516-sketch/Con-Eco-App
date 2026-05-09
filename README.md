@@ -194,28 +194,41 @@ The platform operates on a robust, legal-compliant billing model:
 
 ## 🧾 GST Billing System
 
-ConEco supports flexible, legally-compliant billing to serve both retail and commercial buyers.
+ConEco's GST billing is smart, automatic, and legally compliant.
+
+### Core Logic (Conditional GST)
+
+```
+Vendor has gst_number in their profile?
+│
+├── YES → 18% GST added to order total
+│         "GST Bill" option enabled at checkout
+│         Vendor provides formal Tax Invoice after delivery
+│
+└── NO  → GST = ₹0 (NOT added to total)
+          Only "Simple Bill" option shown
+          Vendor provides simple receipt after delivery
+```
 
 ### Bill Types
 
-| Bill Type | Description | Use Case |
-|---|---|---|
-| **GST Bill** | Formal Tax Invoice with vendor GSTIN — eligible for Input Tax Credit (ITC) | Businesses / commercial purchases |
-| **Non-GST / Simple Bill** | Standard receipt without formal tax invoice details | Individuals / retail purchases |
+| Bill Type | GST Added to Total? | Document | Use Case |
+|---|---|---|---|
+| **GST Bill** | ✅ Yes (18%) | Formal Tax Invoice (GSTIN) | Businesses claiming ITC |
+| **Simple Bill** | ❌ No | Standard receipt | Individuals / retail |
 
 ### How It Works
-1. **At Checkout**: Customer selects their preferred bill type. The "GST Bill" option is only shown if the vendor has a verified GST number.
-2. **After Delivery**: Vendor uploads the bill document (PDF or image) from their Orders dashboard.
+1. **At Checkout**: Cart total automatically includes GST only if the vendor has a `gst_number`. The "GST Bill" option is disabled for unregistered vendors.
+2. **After Delivery**: Vendor uploads the bill document (PDF/image) from the Orders dashboard.
 3. **Download**: Customer downloads the bill from "My Orders" or "My Booked Services."
-
-### Important Note
-> The **total payable amount is identical** for both bill types. GST on goods/services is always collected as required by law. The bill type only determines the format of the invoice document provided.
 
 ### Database Fields (Orders table)
 | Column | Type | Description |
 |---|---|---|
 | `bill_type` | VARCHAR(10) | `'GST'` or `'Non-GST'` — defaults to `'Non-GST'` |
 | `bill_file_url` | TEXT | Path to the vendor-uploaded bill file |
+
+> **Note:** Selecting "GST Bill" vs "Simple Bill" does NOT change the total amount for a GST-registered vendor. The 18% GST is always included for registered vendors. For unregistered vendors, GST is never applied.
 
 ---
 
