@@ -30,6 +30,7 @@ function Checkout() {
   const [ackDelivery, setAckDelivery] = useState(false);
   const [creditInfo, setCreditInfo] = useState(null);
   const [platformSettings, setPlatformSettings] = useState({});
+  const [billType, setBillType] = useState('Non-GST');
 
   const navigate = useNavigate();
 
@@ -91,7 +92,8 @@ function Checkout() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             delivery_address: address,
-            payment_method: paymentMethod
+            payment_method: paymentMethod,
+            bill_type: billType
           })
         });
         const data = await res.json();
@@ -114,7 +116,10 @@ function Checkout() {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ delivery_address: address })
+          body: JSON.stringify({ 
+            delivery_address: address,
+            bill_type: billType
+          })
         });
         const data = await res.json();
         if (data.status === 'success') {
@@ -174,7 +179,8 @@ function Checkout() {
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
             delivery_address: address,
-            payment_method: paymentMethod
+            payment_method: paymentMethod,
+            bill_type: billType
           })
         });
         const verifyData = await verifyRes.json();
@@ -386,6 +392,41 @@ function Checkout() {
                 <label htmlFor="ackDelivery" style={{ color: '#ffd700', fontSize: '0.9rem', lineHeight: '1.4', cursor: 'pointer' }}>
                   <strong>Note:</strong> Delivery charges are not included in the order. Please confirm delivery cost with the vendor after placing the order. ConEco is not responsible for delivery charges.
                 </label>
+              </div>
+            </div>
+
+            {/* Bill Type Selector */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ color: 'var(--text-highlight)', fontWeight: 'bold', display: 'block', marginBottom: '0.75rem' }}>
+                🧾 Bill Type
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {['Non-GST', 'GST'].map(type => {
+                  const isGstDisabled = type === 'GST' && !cart.some(item => item.gst_number);
+                  return (
+                    <div key={type}
+                      onClick={() => !isGstDisabled && setBillType(type)}
+                      style={{
+                        padding: '1rem', borderRadius: '8px',
+                        border: `2px solid ${billType === type ? 'var(--primary-color)' : 'var(--surface-border)'}`,
+                        background: billType === type ? 'rgba(46,160,67,0.1)' : 'rgba(255,255,255,0.05)',
+                        cursor: isGstDisabled ? 'not-allowed' : 'pointer',
+                        textAlign: 'center',
+                        opacity: isGstDisabled ? 0.4 : 1,
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.5rem' }}>{type === 'GST' ? '📋' : '🧾'}</span>
+                      <p style={{ color: 'var(--text-highlight)', margin: '0.5rem 0 0', fontWeight: 'bold' }}>
+                        {type === 'GST' ? 'GST Bill' : 'Simple Bill'}
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                        {type === 'GST' ? 'For ITC claim / business use' : 'For personal / retail purchase'}
+                      </p>
+                      {isGstDisabled && <p style={{ fontSize: '0.65rem', color: 'var(--danger-color)', marginTop: '0.25rem' }}>Vendor not GST-registered</p>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

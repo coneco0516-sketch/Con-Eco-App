@@ -356,7 +356,7 @@ def get_payments(user = Depends(check_admin)):
             FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
             WHERE p.status='Completed' 
-              AND o.payment_method != 'COD' 
+              AND o.payment_method NOT IN ('COD', 'Negotiable', 'PayLater') 
               AND COALESCE(o.vendor_credited, FALSE) = FALSE
         """)
         res = cursor.fetchone()
@@ -369,7 +369,7 @@ def get_payments(user = Depends(check_admin)):
             SELECT SUM(p.amount) as c 
             FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
-            WHERE p.status IN ('Completed', 'Paid') AND o.payment_method = 'COD'
+            WHERE p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable', 'PayLater')
         """)
         res = cursor.fetchone()
         stats['vendor_collected'] = float(res['c']) if res and res['c'] else 0
@@ -379,7 +379,7 @@ def get_payments(user = Depends(check_admin)):
             SELECT COUNT(*) as c 
             FROM Payments p 
             JOIN Orders o ON p.order_id = o.order_id 
-            WHERE p.status='Completed' AND o.payment_method != 'COD'
+            WHERE p.status='Completed' AND o.payment_method NOT IN ('COD', 'Negotiable', 'PayLater')
         """)
         res = cursor.fetchone()
         if res: stats['completed'] = res['c'] or 0

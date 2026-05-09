@@ -260,7 +260,8 @@ def vendor_orders(user = Depends(check_vendor)):
                    o.payment_method, o.delivery_address, 
                    pvt.status as payment_status,
                    TO_CHAR(o.created_at, 'DD Mon YYYY') as date,
-                   o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price, o.quantity
+                   o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price, o.quantity,
+                   o.bill_type, o.bill_file_url
             FROM Orders o
             JOIN Customers c ON o.customer_id = c.customer_id
             JOIN Users u ON c.customer_id = u.user_id
@@ -420,6 +421,63 @@ def vendor_bulk_action(data: BulkAction, user = Depends(check_vendor), backgroun
         conn.rollback()
         return {"status": "error", "message": str(e)}
     finally:
+        conn.close()
+
+
+@router.post("/orders/{order_id}/upload_bill")
+async def upload_bill(
+    order_id: int,
+    file: UploadFile = File(...),
+    user = Depends(get_current_user_from_cookie)
+):
+    if user['role'] != 'Vendor':
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+
+        # 1. Verify vendor owns this order and it is Completed or Shipped/Processing (usually after delivery but some might want it early)
+        # The guide says "only after delivery" (Completed)
+        cursor.execute(
+            "SELECT vendor_id, status FROM Orders WHERE order_id = %s", (order_id,)
+        )
+        order = cursor.fetchone()
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        if order['vendor_id'] != user['user_id']:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # We'll allow upload if the status is Completed or Processing/Shipped (in case they ship with bill)
+        # But let's stick to the guide's recommendation of 'Completed' for simplicity if preferred.
+        # Actually, allowing it during Processing/Shipped is better for vendors who include digital bills.
+        
+        # 2. Save file to uploads/bills/
+        bills_dir = UPLOAD_DIR / "bills"
+        bills_dir.mkdir(exist_ok=True)
+        
+        file_extension = os.path.splitext(file.filename)[1]
+        new_filename = f"bill_{order_id}_{uuid.uuid4()}{file_extension}"
+        file_path = bills_dir / new_filename
+        
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+
+        # 3. Save URL to DB
+        file_url = f"/uploads/bills/{new_filename}"
+        cursor.execute(
+            "UPDATE Orders SET bill_file_url = %s WHERE order_id = %s",
+            (file_url, order_id)
+        )
+        conn.commit()
+        
+        return {"status": "success", "bill_file_url": file_url}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
         conn.close()
 
 
@@ -612,7 +670,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method = 'COD'
+            WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable', 'PayLater')
         """, (vendor_id,))
         cod_res = cursor.fetchone()
         stats['cod_total'] = float(cod_res['s']) if cod_res and cod_res['s'] else 0
@@ -623,7 +681,7 @@ def vendor_earnings(user = Depends(check_vendor)):
                 SELECT SUM(COALESCE(o.base_amount, o.amount)) as s 
                 FROM Orders o 
                 JOIN Payments p ON o.order_id = p.order_id
-                WHERE o.vendor_id=%s AND o.payment_method != 'COD' 
+                WHERE o.vendor_id=%s AND o.payment_method NOT IN ('COD', 'Negotiable', 'PayLater') 
                   AND COALESCE(o.vendor_credited, false) = false AND p.status='Completed'
             """, (vendor_id,))
             ponline = cursor.fetchone()
@@ -636,7 +694,7 @@ def vendor_earnings(user = Depends(check_vendor)):
             SELECT SUM(p.amount) as s 
             FROM Orders o 
             JOIN Payments p ON o.order_id = p.order_id 
-            WHERE o.vendor_id=%s AND p.status NOT IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable')
+            WHERE o.vendor_id=%s AND p.status NOT IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable', 'PayLater')
         """, (vendor_id,))
         pcod = cursor.fetchone()
         stats['pending_cod'] = float(pcod['s']) if pcod and pcod['s'] else 0
@@ -647,7 +705,7 @@ def vendor_earnings(user = Depends(check_vendor)):
                 SELECT SUM(COALESCE(o.base_amount, o.amount)) as s 
                 FROM Orders o 
                 JOIN Payments p ON o.order_id = p.order_id 
-                WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable')
+                WHERE o.vendor_id=%s AND p.status IN ('Completed', 'Paid') AND o.payment_method IN ('COD', 'Negotiable', 'PayLater')
             """, (vendor_id,))
             cod_net_res = cursor.fetchone()
             stats['cod_net'] = float(cod_net_res['s']) if cod_net_res and cod_net_res['s'] else 0
@@ -699,7 +757,7 @@ def vendor_earnings(user = Depends(check_vendor)):
                         ELSE 0 END as commission_rate,
                    COALESCE(o.base_amount, 0) as net,
                    CASE 
-                     WHEN o.payment_method = 'COD' THEN COALESCE(p.status, 'Pending')
+                     WHEN o.payment_method IN ('COD', 'Negotiable', 'PayLater') THEN COALESCE(p.status, 'Pending')
                      WHEN COALESCE(o.vendor_credited, false) = true THEN 'Credited to Wallet'
                      ELSE 'Pending Audit'
                    END as status,

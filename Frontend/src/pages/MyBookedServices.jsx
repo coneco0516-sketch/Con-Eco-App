@@ -189,11 +189,32 @@ function MyBookedServices() {
                         background: 'rgba(35, 134, 54, 0.2)', 
                         color: '#3fb950', 
                         border: '1px solid #3fb950',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        marginBottom: '5px'
                       }}
                     >
                       📋 Download Order Summary
                     </button>
+                  )}
+
+                  {s.bill_file_url && (
+                    <a 
+                      href={`${API}${s.bill_file_url}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="btn"
+                      style={{ 
+                        padding: '6px 15px', 
+                        fontSize: '0.85rem', 
+                        background: 'var(--primary-color)',
+                        color: 'white',
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                        display: 'inline-block'
+                      }}
+                    >
+                      📥 Download {s.bill_type} Bill
+                    </a>
                   )}
 
                   {s.status === 'Pending' ? (

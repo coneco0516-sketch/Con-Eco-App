@@ -252,7 +252,7 @@ def generate_commission_gst_invoice_pdf(invoice_data, output_path):
     pdf.set_font('helvetica', '', 10)
     pdf.cell(95, 5, 'ConEco Platform Pvt. Ltd.', ln=False)
     pdf.cell(95, 5, f"{company}", ln=True)
-    pdf.cell(95, 5, 'GSTIN: [Platform GSTIN]', ln=False)
+    pdf.cell(95, 5, f"GSTIN: {invoice_data.get('platform_gstin', '[Platform GSTIN]')}", ln=False)
     pdf.cell(95, 5, f"GSTIN: {vend_gstin}", ln=True)
     pdf.cell(95, 5, f"Invoice No: {invoice_no}", ln=False)
     pdf.cell(95, 5, f"Vendor: {vend_name}", ln=True)

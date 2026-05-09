@@ -142,20 +142,34 @@ async def get_commission_gst_invoice(invoice_id: int, user=Depends(get_current_u
 
         # --- GST Calculation ---
         # The amount stored in weekly_invoices is the raw 5% commission (no GST embedded).
-        # We need to add 18% GST on top for the GST invoice.
+        # We need to add 18% GST on top only if the platform is GST registered.
+        from database import get_platform_setting
+        platform_gstin = get_platform_setting('platform_gstin', None)
+        
         base_commission = float(inv['amount'])  # pre-tax commission amount
-        gst_amount      = round(base_commission * GST_RATE / 100, 2)
-        total_amount    = round(base_commission + gst_amount, 2)
-        # Intra-state split (CGST + SGST), assuming platform and vendor in same state.
-        # Adjust to IGST if inter-state.
-        cgst = round(gst_amount / 2, 2)
-        sgst = round(gst_amount - cgst, 2)
+        
+        if platform_gstin and platform_gstin.strip() and platform_gstin != 'Not Provided':
+            gst_amount      = round(base_commission * GST_RATE / 100, 2)
+            total_amount    = round(base_commission + gst_amount, 2)
+            # Intra-state split (CGST + SGST), assuming platform and vendor in same state.
+            # Adjust to IGST if inter-state.
+            cgst = round(gst_amount / 2, 2)
+            sgst = round(gst_amount - cgst, 2)
+            igst = 0.0
+        else:
+            gst_amount = 0.0
+            total_amount = base_commission
+            cgst = 0.0
+            sgst = 0.0
+            igst = 0.0
+            platform_gstin = 'Not Provided (Registration Pending)'
 
         invoice_data = {
             'invoice_id':      inv['invoice_id'],
             'vendor_name':     inv['vendor_name'] or '',
             'company_name':    inv['company_name'] or '',
             'vendor_gstin':    inv['vendor_gstin'] or 'Not Provided',
+            'platform_gstin':  platform_gstin,
             'period_start':    inv['period_start'] or '',
             'period_end':      inv['period_end'] or '',
             'due_date':        inv['due_date'] or '',

@@ -115,7 +115,7 @@ def check_customer(user=Depends(get_current_user_from_cookie)):
 
 
 def finalize_order(cust_id, delivery_address, payment_method, payment_status, txn_id,
-                   background_tasks=None):
+                   bill_type="Non-GST", background_tasks=None):
     """
     Common logic to move items from cart to orders and record payments.
     Accepts optional BackgroundTasks for async email sending.
@@ -163,12 +163,12 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
 
             cursor.execute(
                 """INSERT INTO Orders 
-                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, credit_stage1_due, credit_stage2_due) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, credit_stage1_due, credit_stage2_due, bill_type) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                    RETURNING order_id""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"],
                  total_amount, base_amount, gst_amount, commission_amount, total_amount,
-                 order_status, delivery_address, payment_method, stage1_due, stage2_due)
+                 order_status, delivery_address, payment_method, stage1_due, stage2_due, bill_type)
             )
             order_db_id = cursor.fetchone()['order_id']
             
@@ -250,6 +250,7 @@ class VerifyPaymentRequest(BaseModel):
     razorpay_signature:  str
     delivery_address:    str = ""
     payment_method:      str = "Card"
+    bill_type:           str = "Non-GST"
 
 @router.post("/verify")
 def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_customer),
@@ -280,6 +281,7 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
         data.payment_method,
         'Completed',
         data.razorpay_payment_id,
+        bill_type=data.bill_type,
         background_tasks=background_tasks
     )
 
@@ -293,6 +295,7 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
 class OfflineOrderRequest(BaseModel):
     delivery_address: str
     payment_method:   str # 'COD'
+    bill_type:        str = "Non-GST"
 
 @router.post("/place_order_offline")
 def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer),
@@ -319,6 +322,7 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer),
         data.payment_method,
         'Pending',
         txn_id,
+        bill_type=data.bill_type,
         background_tasks=background_tasks
     )
 
@@ -331,6 +335,7 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer),
 # ── 4. Place Order Pay Later ─────────────────────────────────────────────────
 class PayLaterOrderRequest(BaseModel):
     delivery_address: str
+    bill_type:        str = "Non-GST"
 
 @router.post("/place_order_pay_later")
 def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_customer),
@@ -408,6 +413,7 @@ def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_custome
             'PayLater',
             'Pending',
             txn_id,
+            bill_type=data.bill_type,
             background_tasks=background_tasks
         )
 

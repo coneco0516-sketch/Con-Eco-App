@@ -66,7 +66,8 @@ def get_cart(user = Depends(check_customer)):
         SELECT c.cart_id, c.item_type, c.item_id, c.quantity,
                COALESCE(p.name, s.name) as name,
                COALESCE(p.price, s.price) as price,
-               COALESCE(v1.company_name, v2.company_name) as vendor_name
+               COALESCE(v1.company_name, v2.company_name) as vendor_name,
+               COALESCE(v1.gst_number, v2.gst_number) as gst_number
         FROM Cart c
         LEFT JOIN Products p ON c.item_type='Product' AND c.item_id=p.product_id
         LEFT JOIN Services s ON c.item_type='Service' AND c.item_id=s.service_id
@@ -246,7 +247,8 @@ def get_my_orders(user = Depends(check_customer)):
         SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, o.payment_method, pvt.status as payment_status, 
                TO_CHAR(o.created_at, 'DD Mon YYYY') as date, p.name as item_name, v.company_name as vendor_name, 
                u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
-               o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price
+               o.is_bulk_request, o.customer_message, o.vendor_message, o.negotiated_price,
+               o.bill_type, o.bill_file_url
         FROM Orders o
         JOIN Products p ON o.item_id = p.product_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id
@@ -274,6 +276,7 @@ def get_my_services(user = Depends(check_customer)):
         SELECT o.order_id, o.order_type, o.amount, o.status, o.payment_method, pvt.status as payment_status,
                TO_CHAR(o.created_at, 'DD Mon YYYY') as date, s.name as item_name, v.company_name as vendor_name, 
                u.email as vendor_email, u.phone as vendor_phone, o.delivery_address,
+               o.bill_type, o.bill_file_url
         FROM Orders o
         JOIN Services s ON o.item_id = s.service_id
         JOIN Vendors v ON o.vendor_id = v.vendor_id

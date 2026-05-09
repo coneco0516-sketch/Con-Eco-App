@@ -91,6 +91,31 @@ function VendorOrders() {
     }
   };
 
+  const handleBillUpload = async (orderId, file) => {
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const resp = await fetch(`${API}/api/vendor/orders/${orderId}/upload_bill`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert("Bill uploaded successfully!");
+        fetchOrders();
+      } else {
+        alert("Error: " + (data.detail || data.message));
+      }
+    } catch (err) {
+      console.error("Bill upload failed:", err);
+      alert("Network error uploading bill.");
+    }
+  };
+
   const [bulkNegotiation, setBulkNegotiation] = useState({ orderId: null, price: '', message: '' });
 
   return (
@@ -121,6 +146,13 @@ function VendorOrders() {
                         BULK PRICE REQUESTED
                       </span>
                     )}
+                    <span style={{
+                      background: o.bill_type === 'GST' ? 'rgba(52, 152, 219, 0.15)' : 'rgba(46, 160, 67, 0.15)',
+                      color: o.bill_type === 'GST' ? '#3498db' : '#2ea043',
+                      padding: '2px 10px', borderRadius: '20px', fontSize: '0.75rem', border: `1px solid ${o.bill_type === 'GST' ? '#3498db55' : '#2ea04355'}`
+                    }}>
+                      {o.bill_type === 'GST' ? '📋 GST Bill Requested' : '🧾 Simple Bill'}
+                    </span>
                   </div>
                   
                   {o.status !== 'Pending' && o.customer_phone && (
@@ -264,6 +296,47 @@ function VendorOrders() {
                       {o.payment_method === 'PayLater' ? '✅ Received Credit Payment' : 'Mark as Paid'}
                     </button>
                   )}
+
+                  {/* Bill Upload Section */}
+                  <div style={{ marginTop: '10px', borderTop: '1px solid var(--surface-border)', paddingTop: '10px' }}>
+                    {o.bill_file_url ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+                        <span style={{ color: '#3fb950', fontSize: '0.85rem', fontWeight: 'bold' }}>✅ Bill Uploaded</span>
+                        <a 
+                          href={`${API}${o.bill_file_url}`} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          style={{ color: 'var(--primary-color)', fontSize: '0.8rem', textDecoration: 'none', borderBottom: '1px dashed var(--primary-color)' }}
+                        >
+                          View Uploaded Bill
+                        </a>
+                        <button 
+                          onClick={() => document.getElementById(`bill-upload-${o.order_id}`).click()}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
+                        >
+                          (Replace Bill)
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+                        <button 
+                          onClick={() => document.getElementById(`bill-upload-${o.order_id}`).click()}
+                          className="btn"
+                          style={{ padding: '6px 12px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.1)', border: '1px solid var(--surface-border)' }}
+                        >
+                          📤 Upload {o.bill_type} Bill
+                        </button>
+                        <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', margin: 0 }}>Required after delivery</p>
+                      </div>
+                    )}
+                    <input 
+                      type="file" 
+                      id={`bill-upload-${o.order_id}`} 
+                      style={{ display: 'none' }} 
+                      accept=".pdf,image/*"
+                      onChange={(e) => handleBillUpload(o.order_id, e.target.files[0])}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
