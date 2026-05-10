@@ -19,7 +19,7 @@ function AdminBulkPriceUpdater() {
 
   useEffect(() => {
     const role = localStorage.getItem('user_role');
-    if (role !== 'Admin') {
+    if (!['Super Admin', 'Employee'].includes(role)) {
       navigate('/login');
       return;
     }

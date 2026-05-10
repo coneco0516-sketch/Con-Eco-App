@@ -18,7 +18,7 @@ function AdminContactMessages() {
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('is_logged_in');
     const role = localStorage.getItem('user_role');
-    if (!isLoggedIn || role !== 'Admin') {
+    if (!isLoggedIn || !['Super Admin', 'Admin', 'Employee'].includes(role)) {
       navigate('/login');
       return;
     }
