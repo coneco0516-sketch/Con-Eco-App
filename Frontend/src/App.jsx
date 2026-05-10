@@ -263,7 +263,7 @@ function AppContent() {
           <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminProfile /></ProtectedRoute>} />
           <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['Super Admin']}><PlatformSettings /></ProtectedRoute>} />
           <Route path="/admin/contact-messages" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminContactMessages /></ProtectedRoute>} />
-          <Route path="/admin/bulk-pricing" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><AdminBulkPriceUpdater /></ProtectedRoute>} />
+          <Route path="/admin/bulk-pricing" element={<ProtectedRoute allowedRoles={['Super Admin', 'Employee']}><AdminBulkPriceUpdater /></ProtectedRoute>} />
           
           {/* Customer Routes */}
           <Route path="/customer" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerDashboard /></ProtectedRoute>} />

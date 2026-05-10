@@ -30,10 +30,11 @@ function AdminSidebar() {
         )}
         
         {userRole !== 'Employee' && (
-          <>
-            <li><Link to="/admin/commissions" className="nav-item">Commissions</Link></li>
-            <li><Link to="/admin/bulk-pricing" className="nav-item">Bulk Pricing Updater</Link></li>
-          </>
+          <li><Link to="/admin/commissions" className="nav-item">Commissions</Link></li>
+        )}
+
+        {(userRole === 'Super Admin' || userRole === 'Employee') && (
+          <li><Link to="/admin/bulk-pricing" className="nav-item">Bulk Pricing Updater</Link></li>
         )}
         
         <li><Link to="/admin/profile" className="nav-item">My Account</Link></li>

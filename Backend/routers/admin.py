@@ -22,6 +22,11 @@ def require_admin_above(user = Depends(check_admin_base)):
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
 
+def require_super_admin_or_employee(user = Depends(check_admin_base)):
+    if user['role'] not in ['Super Admin', 'Employee']:
+        raise HTTPException(status_code=403, detail="Super Admin or Employee access required")
+    return user
+
 # ===== PLATFORM SETTINGS =====
 
 @router.get("/platform_settings")
@@ -766,7 +771,7 @@ def run_invoice_generation(user = Depends(require_super_admin)):
 # ===== BULK PRICING UPDATER =====
 
 @router.get("/vendors/{vendor_id}/products")
-def get_vendor_products_for_admin(vendor_id: int, user = Depends(require_admin_above)):
+def get_vendor_products_for_admin(vendor_id: int, user = Depends(require_super_admin_or_employee)):
     """Fetch all products for a specific vendor with pricing and updated_at."""
     conn = get_db_connection()
     try:
@@ -790,7 +795,7 @@ class PriceUpdate(BaseModel):
     price: float
 
 @router.put("/products/{product_id}/price")
-def update_product_price_admin(product_id: int, data: PriceUpdate, user = Depends(require_admin_above)):
+def update_product_price_admin(product_id: int, data: PriceUpdate, user = Depends(require_super_admin_or_employee)):
     """Update a single product's price and its updated_at timestamp."""
     conn = get_db_connection()
     try:
