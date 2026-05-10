@@ -28,7 +28,8 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 
 ### 👤 Authentication & Security
 - Secure registration with **email verification** via Brevo.
-- Role-based access: **Customer**, **Vendor**, and **Admin**.
+- Role-based access: **Customer**, **Vendor**, and **Admin Hierarchy** (Super Admin, Admin, Employee).
+- Granular permission system for administrative staff.
 - Login activity monitoring with security alerts.
 - **Web Push Notifications**: Real-time alerts for orders and security events.
 
@@ -50,13 +51,12 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - Weekly automated billing system with downloadable compliance receipts.
 - Professional QC verification system for platform-wide quality control.
 
-### 🛡️ Admin Dashboard
-- Centralized management for all users, orders, and payments.
-- **Bulk Pricing Control**: Manage vendor pricing and inventory at scale.
-- One-click vendor verification and automated QC scoring.
+### 🛡️ Admin Dashboard (Multi-Tier)
+- **Super Admin**: Full access to financial logs, bank payouts, platform settings, and **Staff Management**.
+- **Admin**: Operational management including vendor/customer verification and bulk pricing controls.
+- **Employee**: Support role focused on order tracking and customer contact message replies.
 - **Commission Penalty System**: Automated "Strike" system for overdue payments.
 - **Credit Limit Management**: Assign and monitor customer Pay Later credit.
-- Customer support suite for managing enquiries and contact messages.
 
 ---
 
@@ -132,6 +132,9 @@ python setup_neon.py
 
 # Run GST billing migration (adds bill_type & bill_file_url to Orders table)
 python migrate_gst_billing.py
+
+# Run Multi-Tier Role migration (adds Super Admin, Admin, Employee roles)
+python migrate_multi_tier_roles.py
 ```
 
 ### 3. Running Locally

@@ -25,6 +25,11 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 - **Weekly Billing**: Automated commission invoices generated every Monday.
 - **Bill Upload System**: Upload official bill documents (PDF or image) from the Orders dashboard. Each order shows a badge with the customer's requested bill type.
 
+### 🛡️ For Platform Management (Admin Levels)
+- **Super Admin**: Platform owners with full financial control, bank payouts, staff management, and system settings access.
+- **Admin**: Mid-level managers focused on vendor/customer verification, commission reports, and bulk pricing controls.
+- **Employee**: Operational staff focused on order tracking, customer support, and contact message handling.
+
 ---
 
 ## 🛡️ What Makes ConEco Different?
@@ -53,6 +58,11 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 4. **Upload Bill**: After delivery, upload the official bill. The order card shows the customer's requested bill type.
 5. **Withdraw**: Request payouts from your wallet.
 6. **Maintain**: Pay weekly commission invoices to avoid "Strikes."
+
+### For Admin & Staff
+1. **Super Admin**: Manages the platform's core, handles financial payouts, and manages staff accounts.
+2. **Admin**: Approves new vendors/customers and monitors automated commission invoicing.
+3. **Employee**: Manages customer inquiries and monitors daily order fulfillment status.
 
 ---
 
