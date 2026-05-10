@@ -7,15 +7,25 @@ from email_service import send_qc_status_notification, get_notification_preferen
 
 router = APIRouter()
 
-def check_admin(user = Depends(get_current_user_from_cookie)):
-    if user['role'] != 'Admin':
+def check_admin_base(user = Depends(get_current_user_from_cookie)):
+    if user['role'] not in ['Super Admin', 'Admin', 'Employee']:
         raise HTTPException(status_code=403, detail="Forbidden")
+    return user
+
+def require_super_admin(user = Depends(check_admin_base)):
+    if user['role'] != 'Super Admin':
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    return user
+
+def require_admin_above(user = Depends(check_admin_base)):
+    if user['role'] not in ['Super Admin', 'Admin']:
+        raise HTTPException(status_code=403, detail="Admin access required")
     return user
 
 # ===== PLATFORM SETTINGS =====
 
 @router.get("/platform_settings")
-def get_platform_settings(user = Depends(check_admin)):
+def get_platform_settings(user = Depends(require_super_admin)):
     """Fetches all platform settings."""
     settings = get_all_platform_settings()
     # Ensure default commission values if not present
@@ -25,7 +35,7 @@ def get_platform_settings(user = Depends(check_admin)):
     return {"status": "success", "settings": settings}
 
 @router.post("/platform_settings")
-def update_platform_settings(settings: dict, user = Depends(check_admin)):
+def update_platform_settings(settings: dict, user = Depends(require_super_admin)):
     """Update platform-wide settings."""
     conn = get_db_connection()
     try:
@@ -52,7 +62,7 @@ def update_platform_settings(settings: dict, user = Depends(check_admin)):
 
 
 @router.get("/dashboard_stats")
-def dashboard_stats(user = Depends(check_admin)):
+def dashboard_stats(user = Depends(check_admin_base)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -97,7 +107,7 @@ def dashboard_stats(user = Depends(check_admin)):
         conn.close()
 
 @router.get("/customers")
-def get_customers(user = Depends(check_admin)):
+def get_customers(user = Depends(require_admin_above)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -123,7 +133,7 @@ class VendorQCUpdate(BaseModel):
     qc_score: int
 
 @router.post("/customers/update_status")
-def update_customer_status(data: StatusUpdate, user = Depends(check_admin)):
+def update_customer_status(data: StatusUpdate, user = Depends(require_admin_above)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -137,7 +147,7 @@ def update_customer_status(data: StatusUpdate, user = Depends(check_admin)):
 # --- CREDIT SYSTEM MANAGEMENT ---
 
 @router.get("/credit_accounts")
-def get_credit_accounts(user = Depends(check_admin)):
+def get_credit_accounts(user = Depends(require_super_admin)):
     """Fetch all customers with credit details for the Admin Payments tab."""
     conn = get_db_connection()
     try:
@@ -177,7 +187,7 @@ class CreditUpdate(BaseModel):
     notes: Optional[str] = None
 
 @router.put("/customers/{customer_id}/credit")
-def update_customer_credit(customer_id: int, data: CreditUpdate, user = Depends(check_admin)):
+def update_customer_credit(customer_id: int, data: CreditUpdate, user = Depends(require_super_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -222,7 +232,7 @@ def update_customer_credit(customer_id: int, data: CreditUpdate, user = Depends(
 
 
 @router.get("/vendors")
-def get_vendors(user = Depends(check_admin)):
+def get_vendors(user = Depends(require_admin_above)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -237,7 +247,7 @@ def get_vendors(user = Depends(check_admin)):
         conn.close()
 
 @router.post("/vendors/update_status")
-def update_vendor_status(data: StatusUpdate, user = Depends(check_admin)):
+def update_vendor_status(data: StatusUpdate, user = Depends(require_admin_above)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -249,7 +259,7 @@ def update_vendor_status(data: StatusUpdate, user = Depends(check_admin)):
         conn.close()
 
 @router.post("/vendors/update_qc")
-def update_vendor_qc(data: VendorQCUpdate, user = Depends(check_admin)):
+def update_vendor_qc(data: VendorQCUpdate, user = Depends(check_admin_base)):
     """Update vendor QC verification status and score"""
     conn = get_db_connection()
     try:
@@ -297,7 +307,7 @@ def update_vendor_qc(data: VendorQCUpdate, user = Depends(check_admin)):
         conn.close()
 
 @router.get("/orders")
-def get_orders(user = Depends(check_admin)):
+def get_orders(user = Depends(check_admin_base)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -326,7 +336,7 @@ def get_orders(user = Depends(check_admin)):
         conn.close()
 
 @router.get("/payments")
-def get_payments(user = Depends(check_admin)):
+def get_payments(user = Depends(require_super_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -407,7 +417,7 @@ class CreditVendorUpdate(BaseModel):
     order_id: int
 
 @router.post("/payments/credit_vendor")
-def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(check_admin)):
+def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(require_super_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -449,7 +459,7 @@ def credit_vendor_wallet(data: CreditVendorUpdate, user = Depends(check_admin)):
         conn.close()
 
 @router.get("/payouts")
-def get_payouts(user = Depends(check_admin)):
+def get_payouts(user = Depends(require_super_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -475,7 +485,7 @@ class PayoutAction(BaseModel):
     payout_id: int
 
 @router.post("/payouts/approve")
-def approve_payout(data: PayoutAction, user = Depends(check_admin)):
+def approve_payout(data: PayoutAction, user = Depends(require_super_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -489,7 +499,7 @@ def approve_payout(data: PayoutAction, user = Depends(check_admin)):
         conn.close()
 
 @router.post("/payouts/reject")
-def reject_payout(data: PayoutAction, user = Depends(check_admin)):
+def reject_payout(data: PayoutAction, user = Depends(require_super_admin)):
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -508,7 +518,7 @@ def reject_payout(data: PayoutAction, user = Depends(check_admin)):
         conn.close()
 
 @router.get("/commissions")
-def get_commission_report(user = Depends(check_admin)):
+def get_commission_report(user = Depends(require_admin_above)):
     """
     Get commission earnings report for platform.
     Shows total commissions earned, pending settlements, and breakdown by vendor.
@@ -581,7 +591,7 @@ def get_commission_report(user = Depends(check_admin)):
 # ===== CONTACT MESSAGES =====
 
 @router.get("/contact_messages")
-def get_contact_messages(user = Depends(check_admin)):
+def get_contact_messages(user = Depends(check_admin_base)):
     """Get all contact form messages"""
     conn = get_db_connection()
     try:
@@ -635,7 +645,7 @@ class ContactStatusUpdate(BaseModel):
     status: str
 
 @router.post("/contact_messages/update_status")
-def update_contact_status(data: ContactStatusUpdate, user = Depends(check_admin)):
+def update_contact_status(data: ContactStatusUpdate, user = Depends(check_admin_base)):
     """Update contact message status (Unread, Read, Replied)"""
     conn = get_db_connection()
     try:
@@ -655,7 +665,7 @@ class ContactReply(BaseModel):
     reply: str
 
 @router.post("/contact_messages/reply")
-def reply_to_contact(data: ContactReply, user = Depends(check_admin)):
+def reply_to_contact(data: ContactReply, user = Depends(check_admin_base)):
     """Reply to a contact message - sends branded email to user"""
     conn = get_db_connection()
     try:
@@ -694,7 +704,7 @@ def reply_to_contact(data: ContactReply, user = Depends(check_admin)):
 # ===== WEEKLY COMMISSION INVOICES (Admin) =====
 
 @router.get("/weekly_invoices")
-def get_all_weekly_invoices(user = Depends(check_admin)):
+def get_all_weekly_invoices(user = Depends(require_admin_above)):
     """Admin view: All vendor weekly commission invoices."""
     conn = get_db_connection()
     try:
@@ -734,7 +744,7 @@ def get_all_weekly_invoices(user = Depends(check_admin)):
         conn.close()
 
 @router.post("/enforce_commission_penalties")
-def run_penalty_enforcement(user = Depends(check_admin)):
+def run_penalty_enforcement(user = Depends(require_super_admin)):
     """Manually trigger penalty enforcement for overdue invoices."""
     from commission_invoicing import enforce_penalties
     try:
@@ -744,7 +754,7 @@ def run_penalty_enforcement(user = Depends(check_admin)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/generate_weekly_invoices")
-def run_invoice_generation(user = Depends(check_admin)):
+def run_invoice_generation(user = Depends(require_super_admin)):
     """Manually trigger weekly invoice generation."""
     from commission_invoicing import generate_weekly_invoices
     try:
@@ -756,7 +766,7 @@ def run_invoice_generation(user = Depends(check_admin)):
 # ===== BULK PRICING UPDATER =====
 
 @router.get("/vendors/{vendor_id}/products")
-def get_vendor_products_for_admin(vendor_id: int, user = Depends(check_admin)):
+def get_vendor_products_for_admin(vendor_id: int, user = Depends(require_admin_above)):
     """Fetch all products for a specific vendor with pricing and updated_at."""
     conn = get_db_connection()
     try:
@@ -780,7 +790,7 @@ class PriceUpdate(BaseModel):
     price: float
 
 @router.put("/products/{product_id}/price")
-def update_product_price_admin(product_id: int, data: PriceUpdate, user = Depends(check_admin)):
+def update_product_price_admin(product_id: int, data: PriceUpdate, user = Depends(require_admin_above)):
     """Update a single product's price and its updated_at timestamp."""
     conn = get_db_connection()
     try:
@@ -802,5 +812,68 @@ def update_product_price_admin(product_id: int, data: PriceUpdate, user = Depend
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+# ===== STAFF MANAGEMENT (Super Admin Only) =====
+
+class StaffCreate(BaseModel):
+    name: str
+    email: str
+    phone: str
+    password: str
+    role: str # Admin or Employee
+
+@router.get("/staff")
+def get_staff_list(user = Depends(require_super_admin)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT user_id, name, email, phone, role, TO_CHAR(created_at, 'DD Mon YYYY') as date "
+            "FROM users WHERE role IN ('Super Admin', 'Admin', 'Employee') "
+            "ORDER BY role ASC, name ASC"
+        )
+        staff = cursor.fetchall()
+        return {"status": "success", "staff": staff}
+    finally:
+        conn.close()
+
+@router.post("/staff")
+def create_staff(data: StaffCreate, user = Depends(require_super_admin)):
+    from routers.auth import hash_password
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        # Check if email exists
+        cursor.execute("SELECT user_id FROM users WHERE email=%s", (data.email,))
+        if cursor.fetchone():
+            return {"status": "error", "message": "Email already exists"}
+        
+        hashed_pass = hash_password(data.password)
+        cursor.execute(
+            "INSERT INTO users (name, email, phone, password_hash, role, email_verified) "
+            "VALUES (%s, %s, %s, %s, %s, TRUE) RETURNING user_id",
+            (data.name, data.email, data.phone, hashed_pass, data.role)
+        )
+        conn.commit()
+        return {"status": "success", "message": f"{data.role} created successfully"}
+    finally:
+        conn.close()
+
+@router.delete("/staff/{user_id}")
+def delete_staff(user_id: int, user = Depends(require_super_admin)):
+    if user['user_id'] == user_id:
+        return {"status": "error", "message": "You cannot delete your own account"}
+        
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        # Only allow deleting Admin or Employee, not other Super Admins for safety
+        cursor.execute("DELETE FROM users WHERE user_id=%s AND role IN ('Admin', 'Employee')", (user_id,))
+        conn.commit()
+        if cursor.rowcount == 0:
+            return {"status": "error", "message": "Staff member not found or cannot be deleted"}
+        return {"status": "success", "message": "Staff member deleted"}
     finally:
         conn.close()

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import AdminStaffManagement from './pages/AdminStaffManagement';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import VendorVerification from './pages/VendorVerification';
@@ -57,7 +58,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     console.log(`Protected: Role ${userRole} not in`, allowedRoles);
     // Redirect to correct dashboard based on actual role
-    if (userRole === 'Admin') return <Navigate to="/admin" replace />;
+    if (['Super Admin', 'Admin', 'Employee'].includes(userRole)) return <Navigate to="/admin" replace />;
     if (userRole === 'Vendor') return <Navigate to="/vendor" replace />;
     return <Navigate to="/customer" replace />;
   }
@@ -147,9 +148,9 @@ function AppContent() {
         const isLoggedInStatus = localStorage.getItem('is_logged_in') === 'true';
         console.log("Maintenance Active:", maintenanceActive, "User Role:", userRole, "Logged In:", isLoggedInStatus);
         
-        // If maintenance is on, user IS logged in, and user is NOT an Admin, show popup
+        // If maintenance is on, user IS logged in, and user is NOT an Admin level role, show popup
         // Logged out users will not see the maintenance popup
-        if (maintenanceActive && isLoggedInStatus && userRole !== 'Admin') {
+        if (maintenanceActive && isLoggedInStatus && !['Super Admin', 'Admin', 'Employee'].includes(userRole)) {
           console.log("Showing Maintenance Popup...");
           setShowMaintenancePopup(true);
           // Block scrolling when maintenance is active
@@ -250,18 +251,19 @@ function AppContent() {
           <Route path="/notifications" element={<NotificationSettings />} />
           
           {/* Admin Routes */}
-          <Route path="/admin" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['Admin']}><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/vendors" element={<ProtectedRoute allowedRoles={['Admin']}><VendorVerification /></ProtectedRoute>} />
-          <Route path="/admin/customers" element={<ProtectedRoute allowedRoles={['Admin']}><CustomerVerification /></ProtectedRoute>} />
-          <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={['Admin']}><AdminOrders /></ProtectedRoute>} />
-          <Route path="/admin/payments" element={<ProtectedRoute allowedRoles={['Admin']}><AdminPayments /></ProtectedRoute>} />
-          <Route path="/admin/commissions" element={<ProtectedRoute allowedRoles={['Admin']}><AdminCommissions /></ProtectedRoute>} />
-          <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['Admin']}><AdminAnalytics /></ProtectedRoute>} />
-          <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={['Admin']}><AdminProfile /></ProtectedRoute>} />
-          <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['Admin']}><PlatformSettings /></ProtectedRoute>} />
-          <Route path="/admin/contact-messages" element={<ProtectedRoute allowedRoles={['Admin']}><AdminContactMessages /></ProtectedRoute>} />
-          <Route path="/admin/bulk-pricing" element={<ProtectedRoute allowedRoles={['Admin']}><AdminBulkPriceUpdater /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/staff" element={<ProtectedRoute allowedRoles={['Super Admin']}><AdminStaffManagement /></ProtectedRoute>} />
+          <Route path="/admin/vendors" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><VendorVerification /></ProtectedRoute>} />
+          <Route path="/admin/customers" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><CustomerVerification /></ProtectedRoute>} />
+          <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminOrders /></ProtectedRoute>} />
+          <Route path="/admin/payments" element={<ProtectedRoute allowedRoles={['Super Admin']}><AdminPayments /></ProtectedRoute>} />
+          <Route path="/admin/commissions" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><AdminCommissions /></ProtectedRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><AdminAnalytics /></ProtectedRoute>} />
+          <Route path="/admin/profile" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminProfile /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['Super Admin']}><PlatformSettings /></ProtectedRoute>} />
+          <Route path="/admin/contact-messages" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminContactMessages /></ProtectedRoute>} />
+          <Route path="/admin/bulk-pricing" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><AdminBulkPriceUpdater /></ProtectedRoute>} />
           
           {/* Customer Routes */}
           <Route path="/customer" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerDashboard /></ProtectedRoute>} />

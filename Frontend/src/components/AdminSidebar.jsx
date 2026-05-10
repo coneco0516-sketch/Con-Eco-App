@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const userRole = localStorage.getItem('user_role');
 
   return (
     <aside className="dashboard-sidebar glass-panel">
@@ -12,15 +13,35 @@ function AdminSidebar() {
       </div>
       <ul className={`sidebar-links ${isOpen ? 'show' : ''}`} style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
         <li><Link to="/admin/dashboard" className="nav-item">Dashboard</Link></li>
-        <li><Link to="/admin/vendors" className="nav-item">Vendor Verification</Link></li>
+        
+        {userRole === 'Super Admin' && (
+          <li><Link to="/admin/staff" className="nav-item">Staff Management</Link></li>
+        )}
+        
+        {userRole !== 'Employee' && (
+          <li><Link to="/admin/vendors" className="nav-item">Vendor Verification</Link></li>
+        )}
+        
         <li><Link to="/admin/customers" className="nav-item">Customer Verification</Link></li>
         <li><Link to="/admin/orders" className="nav-item">Orders Details</Link></li>
-        <li><Link to="/admin/payments" className="nav-item">Payments</Link></li>
-        <li><Link to="/admin/commissions" className="nav-item">Commissions</Link></li>
-        <li><Link to="/admin/bulk-pricing" className="nav-item">Bulk Pricing Updater</Link></li>
+        
+        {userRole === 'Super Admin' && (
+          <li><Link to="/admin/payments" className="nav-item">Payments</Link></li>
+        )}
+        
+        {userRole !== 'Employee' && (
+          <>
+            <li><Link to="/admin/commissions" className="nav-item">Commissions</Link></li>
+            <li><Link to="/admin/bulk-pricing" className="nav-item">Bulk Pricing Updater</Link></li>
+          </>
+        )}
+        
         <li><Link to="/admin/profile" className="nav-item">My Account</Link></li>
         <li><Link to="/admin/contact-messages" className="nav-item">Contact Messages</Link></li>
-        <li><Link to="/admin/settings" className="nav-item">Platform Settings</Link></li>
+        
+        {userRole === 'Super Admin' && (
+          <li><Link to="/admin/settings" className="nav-item">Platform Settings</Link></li>
+        )}
       </ul>
     </aside>
   );
