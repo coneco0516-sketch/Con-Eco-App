@@ -265,6 +265,8 @@ async def serve_react_app(catchall: str):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://coneco.store",
+        "https://www.coneco.store",
         "https://con-eco-frontend.onrender.com", 
         "https://con-eco-app-w78g.onrender.com",
         "http://localhost:5173",
