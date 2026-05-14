@@ -12,9 +12,9 @@ def clean_text(text):
     """Encode text to latin-1 to avoid PDF generation errors with special chars."""
     if not text:
         return ""
-    # Replace common problematic characters
+    # Replace common problematic characters and strip non-latin1
     text = str(text).replace('\u2013', '-').replace('\u2014', '-').replace('\u2018', "'").replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"')
-    return text.encode('latin-1', 'replace').decode('latin-1')
+    return text.encode('latin-1', 'ignore').decode('latin-1')
 
 
 # ---------------------------------------------------------------------------
@@ -197,7 +197,7 @@ class CommissionGSTInvoicePDF(FPDF):
         self.cell(0, 10, 'GST TAX INVOICE', ln=True, align='R')
         self.set_font('helvetica', '', 10)
         self.set_text_color(100, 100, 100)
-        self.cell(0, 5, '(For Platform Commission — Input Tax Credit applicable)', ln=True, align='R')
+        self.cell(0, 5, '(For Platform Commission - Input Tax Credit applicable)', ln=True, align='R')
         self.set_text_color(0, 0, 0)
         self.ln(5)
 
