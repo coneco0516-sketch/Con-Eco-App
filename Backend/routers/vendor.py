@@ -301,6 +301,26 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor), b
                 
                 
         if data.status == 'Cancelled':
+            # Check if we need to restore credit
+            cursor.execute("SELECT status, payment_method, customer_id, amount FROM Orders WHERE order_id=%s", (data.order_id,))
+            old_order = cursor.fetchone()
+            
+            if old_order and old_order['status'] != 'Cancelled':
+                if old_order['payment_method'] == 'PayLater':
+                    # Restore Credit
+                    amt = float(old_order['amount'] or 0)
+                    cursor.execute("""
+                        UPDATE Customers SET credit_used = GREATEST(0, credit_used - %s) 
+                        WHERE customer_id = %s RETURNING credit_used, credit_limit
+                    """, (amt, old_order['customer_id']))
+                    after = cursor.fetchone()
+                    
+                    # Log transaction
+                    cursor.execute("""
+                        INSERT INTO credit_transactions (customer_id, order_id, txn_type, amount, credit_used_after, credit_limit_after, notes)
+                        VALUES (%s, %s, 'Refund', %s, %s, %s, %s)
+                    """, (old_order['customer_id'], data.order_id, amt, after['credit_used'], after['credit_limit'], f"Order #{data.order_id} Cancelled by Vendor"))
+
             cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
         elif data.status not in ['Completed', 'Delivered']:
             # If moved back to an active state (Pending, Processing, Shipped), 

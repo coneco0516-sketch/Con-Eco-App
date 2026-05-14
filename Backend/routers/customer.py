@@ -341,8 +341,30 @@ def cancel_order(data: CancelOrderData, user = Depends(check_customer)):
         # Cancel the order
         cursor.execute("UPDATE Orders SET status='Cancelled' WHERE order_id=%s", (data.order_id,))
         
-        # Handle payment status update
-        if order['payment_method'] in ['Card', 'UPI']:
+        # Handle payment status update and Credit Restoration
+        if order['payment_method'] == 'PayLater':
+            # Restore credit
+            cursor.execute("SELECT amount FROM Orders WHERE order_id=%s", (data.order_id,))
+            ord_amt = cursor.fetchone()['amount']
+            
+            cursor.execute("""
+                UPDATE Customers 
+                SET credit_used = GREATEST(0, credit_used - %s) 
+                WHERE customer_id = %s 
+                RETURNING credit_used, credit_limit
+            """, (ord_amt, user["user_id"]))
+            after = cursor.fetchone()
+            
+            # Log transaction
+            cursor.execute("""
+                INSERT INTO credit_transactions (customer_id, order_id, txn_type, amount, credit_used_after, credit_limit_after, notes)
+                VALUES (%s, %s, 'Refund', %s, %s, %s, %s)
+            """, (user["user_id"], data.order_id, ord_amt, after['credit_used'], after['credit_limit'], f"Order #{data.order_id} Cancelled by Customer"))
+            
+            cursor.execute("UPDATE Payments SET status='Failed' WHERE order_id=%s", (data.order_id,))
+            refund_msg = "Order cancelled successfully. Your credit limit has been restored."
+
+        elif order['payment_method'] in ['Card', 'UPI']:
             cursor.execute("UPDATE Payments SET status='Refunded' WHERE order_id=%s", (data.order_id,))
             refund_msg = "Order cancelled successfully. 100% refund initiated."
         else:
