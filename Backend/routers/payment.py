@@ -168,6 +168,7 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             print("[FINALIZE ERROR] Cart is empty")
             return False, "Cart is empty"
 
+        grand_total = 0.0
         for item in cart_items:
             if item["price"] is None:
                 print(f"[FINALIZE ERROR] Item {item['item_id']} ({item['item_type']}) has no price")
@@ -183,6 +184,7 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             
             commission_amount = round(base_amount * float(commission_rate) / 100, 2)
             total_amount = round(base_amount + gst_amount + commission_amount, 2)
+            grand_total += total_amount
             
             order_status = 'Pending' if payment_method == 'COD' else 'Processing'
 
@@ -225,7 +227,7 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
                 if prefs.get('order_alerts', True):
                     order_summary = {
                         "order_id": txn_id,
-                        "total_amount": sum(float(i["price"]) * i["quantity"] for i in cart_items), # Simplified total
+                        "total_amount": round(grand_total, 2),
                         "status": "Confirmed",
                         "customer_name": user_data['name'],
                         "date": datetime.now().strftime("%d %b %Y %H:%M")
