@@ -261,6 +261,8 @@ function Checkout() {
 
   const paymentOptions = [
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
+    { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
+    { id: 'UPI', label: 'UPI / QR Code', icon: '📱' },
   ];
 
   if (platformSettings.enable_pay_later !== false && creditInfo && parseFloat(creditInfo.credit_limit) > 0) {

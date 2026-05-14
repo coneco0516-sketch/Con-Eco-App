@@ -45,13 +45,35 @@ def create_razorpay_order(data: CreateOrderRequest, user=Depends(check_user)):
             detail="Payment gateway not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env"
         )
 
-    client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
-    order = client.order.create({
-        "amount":   data.amount_paise,
-        "currency": data.currency,
-        "payment_capture": 1   # Auto-capture payment
-    })
-    return {"status": "success", "order_id": order["id"], "key_id": RAZORPAY_KEY_ID}
+    if data.amount_paise < 100:
+        raise HTTPException(status_code=400, detail="Minimum amount is 100 paise (₹1).")
+
+    try:
+        client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+        # Add a simple receipt ID
+        receipt_id = f"rcpt_{user['user_id']}_{int(datetime.now().timestamp())}"
+        
+        order = client.order.create({
+            "amount":   data.amount_paise,
+            "currency": data.currency,
+            "receipt":  receipt_id,
+            "payment_capture": 1   # Auto-capture payment
+        })
+        
+        return {
+            "status": "success", 
+            "order_id": order["id"], 
+            "amount": order["amount"],
+            "currency": order["currency"],
+            "key_id": RAZORPAY_KEY_ID
+        }
+    except razorpay.errors.BadRequestError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except razorpay.errors.SignatureVerificationError as e:
+        raise HTTPException(status_code=401, detail="Invalid Razorpay credentials")
+    except Exception as e:
+        print(f"[RAZORPAY ERROR] {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create Razorpay order")
 
 
 # ── 2. Verify Razorpay Payment for Commissions (Vendor) ──────────────────────
