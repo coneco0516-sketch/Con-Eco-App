@@ -4,18 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
-// Dynamically load the Razorpay checkout script
-function loadRazorpayScript() {
-  return new Promise((resolve) => {
-    if (document.getElementById('razorpay-script')) return resolve(true);
-    const script = document.createElement('script');
-    script.id = 'razorpay-script';
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-}
 
 function Checkout() {
   const [cart, setCart] = useState([]);
@@ -134,82 +122,6 @@ function Checkout() {
       }
       return;
     }
-
-    // Razorpay Flow for Card and UPI
-    // 1. Ensure Razorpay JS SDK is loaded
-    const loaded = await loadRazorpayScript();
-    if (!loaded) {
-      setError('Failed to load payment gateway. Check your internet connection.');
-      setPaying(false);
-      return;
-    }
-
-    // 2. Ask our backend to create a Razorpay order
-    const amountPaise = Math.round(total * 100); // Convert ₹ to paise
-    const res = await fetch(`${API}/api/payment/create_order`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount_paise: amountPaise })
-    });
-    const orderData = await res.json();
-
-    if (orderData.status !== 'success') {
-      setError(orderData.detail || 'Could not create payment order.');
-      setPaying(false);
-      return;
-    }
-
-    // 3. Open Razorpay checkout popup
-    const options = {
-      key: orderData.key_id,
-      amount: amountPaise,
-      currency: 'INR',
-      name: 'ConEco Marketplace',
-      description: 'Construction Materials & Services',
-      order_id: orderData.order_id,
-      handler: async function (response) {
-        // 4. Verify payment signature with our backend → place orders in DB
-        const verifyRes = await fetch(`${API}/api/payment/verify`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-            delivery_address: address,
-            payment_method: paymentMethod,
-            bill_type: billType
-          })
-        });
-        const verifyData = await verifyRes.json();
-        if (verifyData.status === 'success') {
-          navigate('/customer/order-success');
-        } else {
-          setError('Payment verification failed. Please contact support.');
-        }
-      },
-      prefill: { name: '', email: '', contact: '' },
-      theme: { color: '#2ea043' },
-      modal: {
-        ondismiss: () => setPaying(false)
-      }
-    };
-
-    // If we want to hint Razorpay to prefer a certain method:
-    if (paymentMethod === 'UPI') {
-      options.config = { display: { blocks: { utp: { name: 'Pay via UPI', methods: ['upi'] } }, sequence: ['block.utp'], preferences: { show_default_blocks: true } } };
-    } else if (paymentMethod === 'Card') {
-      options.config = { display: { blocks: { cards: { name: 'Pay via Card', methods: ['card'] } }, sequence: ['block.cards'], preferences: { show_default_blocks: true } } };
-    }
-
-    const rzp = new window.Razorpay(options);
-    rzp.on('payment.failed', (response) => {
-      setError(`Payment failed: ${response.error.description}`);
-      setPaying(false);
-    });
-    rzp.open();
   };
 
   const updateQuantity = async (cartId, newQuantity) => {
@@ -261,8 +173,6 @@ function Checkout() {
 
   const paymentOptions = [
     { id: 'COD', label: 'Cash on Delivery', icon: '💵' },
-    { id: 'Card', label: 'Credit / Debit Card', icon: '💳' },
-    { id: 'UPI', label: 'UPI / QR Code', icon: '📱' },
   ];
 
   if (platformSettings.enable_pay_later !== false && creditInfo && parseFloat(creditInfo.credit_limit) > 0) {
