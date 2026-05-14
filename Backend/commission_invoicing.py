@@ -27,7 +27,7 @@ def generate_weekly_invoices():
             FROM commissions c
             JOIN Orders o ON c.order_id = o.order_id
             WHERE c.vendor_id = %s 
-              AND o.payment_method IN ('COD', 'Negotiable')
+              AND o.payment_method IN ('COD', 'Negotiable', 'PayLater')
               AND c.status = 'Pending'
               AND c.created_at BETWEEN %s AND %s
         """, (vendor_id, start_date, end_date))

@@ -536,10 +536,11 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
         from datetime import date
         today = date.today()
         
-        # Default tier logic for non-credit orders
+        # Default tier logic for non-credit orders (COD/Negotiable)
         if order['payment_method'] != 'PayLater':
             cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
-            cursor.execute("UPDATE commissions SET status='Settled' WHERE order_id=%s", (data.order_id,))
+            # Commission stays 'Pending' for COD so it can be billed weekly via Platform Commissions
+            cursor.execute("UPDATE commissions SET status='Pending' WHERE order_id=%s", (data.order_id,))
             conn.commit()
             return {"status": "success"}
 
@@ -561,7 +562,8 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
         # 1. Mark payment completed
         cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
         cursor.execute("UPDATE Orders SET credit_tier = %s WHERE order_id=%s", (tier, data.order_id))
-        cursor.execute("UPDATE commissions SET status='Settled' WHERE order_id=%s", (data.order_id,))
+        # Commission stays 'Pending' so it can be billed weekly via Platform Commissions
+        cursor.execute("UPDATE commissions SET status='Pending' WHERE order_id=%s", (data.order_id,))
 
         # 2. Reduce credit_used
         order_amount = float(order['total_amount'] or order['amount'] or 0)
