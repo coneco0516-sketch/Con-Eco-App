@@ -49,16 +49,18 @@ def create_razorpay_order(data: CreateOrderRequest, user=Depends(check_user)):
         raise HTTPException(status_code=400, detail="Minimum amount is 100 paise (₹1).")
 
     try:
+        print(f"[RAZORPAY] Creating order for user {user['user_id']} with amount {data.amount_paise} {data.currency}")
         client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
         # Add a simple receipt ID
         receipt_id = f"rcpt_{user['user_id']}_{int(datetime.now().timestamp())}"
         
         order = client.order.create({
-            "amount":   data.amount_paise,
+            "amount":   int(data.amount_paise),
             "currency": data.currency,
             "receipt":  receipt_id,
             "payment_capture": 1   # Auto-capture payment
         })
+        print(f"[RAZORPAY] Order created: {order['id']}")
         
         return {
             "status": "success", 

@@ -30,7 +30,7 @@ def require_super_admin_or_employee(user = Depends(check_admin_base)):
 # ===== PLATFORM SETTINGS =====
 
 @router.get("/platform_settings")
-def get_platform_settings(user = Depends(require_super_admin)):
+def get_platform_settings(user = Depends(get_current_user_from_cookie)):
     """Fetches all platform settings."""
     settings = get_all_platform_settings()
     # Ensure default commission values if not present
