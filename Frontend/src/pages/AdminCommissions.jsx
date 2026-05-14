@@ -47,7 +47,7 @@ function AdminCommissions() {
     setIsProcessing(true);
     setActionMessage('');
     try {
-      const res = await fetch(endpoint, { method: 'POST', credentials: 'include' });
+      const res = await fetch(`${API}${endpoint}`, { method: 'POST', credentials: 'include' });
       const result = await res.json();
       if (result.status === 'success') {
         setActionMessage(`✅ ${result.message}`);
