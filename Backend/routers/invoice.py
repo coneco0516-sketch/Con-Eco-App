@@ -113,11 +113,11 @@ async def get_commission_gst_invoice(invoice_id: int, user=Depends(get_current_u
                 FROM commissions c
                 JOIN Orders o ON c.order_id = o.order_id
                 WHERE c.vendor_id = wi.vendor_id
-                  AND o.payment_method IN ('COD','Pay Later (Cash)','Negotiable')
-                  AND c.status = 'Pending'
+                  AND o.payment_method IN ('COD', 'PayLater', 'Negotiable')
+                  AND c.status = 'Paid'
                   AND c.created_at BETWEEN wi.billing_period_start AND wi.billing_period_end
                ) as orders_count,
-               (SELECT commission_rate FROM commissions WHERE vendor_id = wi.vendor_id AND created_at BETWEEN wi.billing_period_start AND wi.billing_period_end LIMIT 1) as commission_rate
+               COALESCE((SELECT commission_rate FROM commissions WHERE vendor_id = wi.vendor_id AND created_at BETWEEN wi.billing_period_start AND wi.billing_period_end LIMIT 1), 3.0) as commission_rate
         FROM weekly_invoices wi
         JOIN Vendors v ON wi.vendor_id = v.vendor_id
         JOIN Users u ON v.vendor_id = u.user_id
