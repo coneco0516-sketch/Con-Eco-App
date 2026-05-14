@@ -241,8 +241,8 @@ if (frontend_dir / "assets").exists():
 
 @app.get("/{catchall:path}")
 async def serve_react_app(catchall: str):
-    # CRITICAL: Prevent the frontend catch-all from stealing API requests
-    if catchall.startswith("api/") or catchall.startswith("api"):
+    # CRITICAL: Prevent the frontend catch-all from stealing API or Documentation requests
+    if catchall.startswith("api/") or catchall.startswith("api") or catchall in ["docs", "redoc", "openapi.json"]:
         return JSONResponse(
             status_code=404, 
             content={"status": "error", "message": f"API endpoint '/{catchall}' not found on this server."}
