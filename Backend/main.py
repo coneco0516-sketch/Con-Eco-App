@@ -11,6 +11,8 @@ from fastapi import FastAPI, Request, BackgroundTasks, Response
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
+from fastapi.openapi.utils import get_openapi
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import pytz
@@ -239,10 +241,35 @@ app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 if (frontend_dir / "assets").exists():
     app.mount("/assets", StaticFiles(directory=frontend_dir / "assets"), name="assets")
 
+# EXPLICIT ROUTES FOR DOCUMENTATION (Must be before catch-all)
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title=app.title + " - Swagger UI",
+        oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js",
+        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css",
+    )
+
+@app.get("/redoc", include_in_schema=False)
+async def redoc_html():
+    return get_redoc_html(
+        openapi_url="/openapi.json",
+        title=app.title + " - ReDoc",
+        redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js",
+    )
+
+@app.get("/openapi.json", include_in_schema=False)
+async def get_open_api_endpoint():
+    return JSONResponse(get_openapi(title=app.title, version="1.0.0", routes=app.routes))
+
 @app.get("/{catchall:path}")
 async def serve_react_app(catchall: str):
     # CRITICAL: Prevent the frontend catch-all from stealing API or Documentation requests
-    if catchall.startswith("api/") or catchall.startswith("api") or catchall in ["docs", "redoc", "openapi.json"]:
+    # We check for common doc paths and let them fall through (though explicit routes above should catch them first)
+    normalized_path = catchall.strip("/")
+    if normalized_path.startswith("api") or normalized_path in ["docs", "redoc", "openapi.json"]:
         return JSONResponse(
             status_code=404, 
             content={"status": "error", "message": f"API endpoint '/{catchall}' not found on this server."}
