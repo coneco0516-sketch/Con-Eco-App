@@ -25,13 +25,13 @@ function Login() {
       const response = await fetch(`${API}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           credential: credentialResponse.credential,
           role: 'Customer' // Default for new Google users
         }),
         credentials: 'include'
       });
-      
+
       const data = await response.json();
       if (data.status === 'success') {
         localStorage.setItem('is_logged_in', 'true');
@@ -95,7 +95,7 @@ function Login() {
           <label className="input-label">Email Address</label>
           <input
             type="text"
-            placeholder="admin@coneco.com"
+            placeholder="[EMAIL_ADDRESS]"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -113,9 +113,9 @@ function Login() {
             className="input-field"
             style={{ paddingRight: '2.5rem' }}
           />
-          <button 
-            type="button" 
-            onClick={handleTogglePassword} 
+          <button
+            type="button"
+            onClick={handleTogglePassword}
             style={{ position: 'absolute', right: '10px', top: '38px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}
           >
             {showPassword ? '👁️' : '👁️‍🗨️'}

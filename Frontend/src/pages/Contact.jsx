@@ -58,7 +58,13 @@ function Contact() {
       <h2 style={{ fontSize: '2.5rem', color: 'var(--text-highlight)', marginBottom: '1rem' }}>Contact Us</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.2rem' }}>We're here to help. Reach out to the ConEco support team.</p>
       
-      <div className="glass-panel" style={{ padding: '3rem', textAlign: 'left' }}>
+      <div className="glass-panel" style={{ 
+        padding: 'clamp(1.5rem, 5vw, 3rem)', 
+        textAlign: 'left',
+        margin: '0 auto',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
         {status.message && (
           <div style={{ 
             padding: '1rem', 
@@ -73,32 +79,34 @@ function Contact() {
         )}
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Full Name</label>
-            <input 
-              type="text" 
-              name="name"
-              className="input-field" 
-              placeholder="John Doe" 
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Full Name</label>
+              <input 
+                type="text" 
+                name="name"
+                className="input-field" 
+                placeholder="John Doe" 
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Email Address</label>
+              <input 
+                type="email" 
+                name="email"
+                className="input-field" 
+                placeholder="john@example.com" 
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Email Address</label>
-            <input 
-              type="email" 
-              name="email"
-              className="input-field" 
-              placeholder="john@example.com" 
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Message</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Message</label>
             <textarea 
               name="message"
               className="input-field" 
@@ -107,12 +115,13 @@ function Contact() {
               value={formData.message}
               onChange={handleChange}
               required
+              style={{ resize: 'vertical' }}
             ></textarea>
           </div>
           <button 
             type="submit" 
             className="btn" 
-            style={{ fontSize: '1.1rem', padding: '0.8rem' }}
+            style={{ fontSize: '1.1rem', padding: '1rem', marginTop: '0.5rem' }}
             disabled={loading}
           >
             {loading ? 'Sending...' : 'Send Message'}
@@ -123,61 +132,67 @@ function Contact() {
       <div style={{ 
         marginTop: '3rem', 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
         gap: '1.5rem',
         textAlign: 'left'
       }}>
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.2rem', transition: 'transform 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
           <div style={{ 
             background: 'rgba(46, 160, 67, 0.15)', 
-            padding: '1rem', 
+            minWidth: '50px',
+            height: '50px',
             borderRadius: '12px', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            color: 'var(--primary-color)'
+            color: 'var(--primary-color)',
+            boxShadow: '0 4px 12px rgba(46, 160, 67, 0.2)'
           }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.27-2.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.27-2.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
           </div>
-          <div>
-            <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Phone Number</h4>
-            <p style={{ margin: '0.2rem 0 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-highlight)' }}>+91 9449088128</p>
+          <div style={{ overflow: 'hidden' }}>
+            <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Phone Number</h4>
+            <p style={{ margin: '0.2rem 0 0', fontSize: '1rem', fontWeight: '600', color: 'var(--text-highlight)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>+91 9449088128</p>
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.2rem', transition: 'transform 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
           <div style={{ 
             background: 'rgba(46, 160, 67, 0.15)', 
-            padding: '1rem', 
+            minWidth: '50px',
+            height: '50px',
             borderRadius: '12px', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            color: 'var(--primary-color)'
+            color: 'var(--primary-color)',
+            boxShadow: '0 4px 12px rgba(46, 160, 67, 0.2)'
           }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
           </div>
-          <div>
-            <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email Address</h4>
-            <p style={{ margin: '0.2rem 0 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-highlight)' }}>admin@coneco.store</p>
+          <div style={{ overflow: 'hidden' }}>
+            <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email Address</h4>
+            <p style={{ margin: '0.2rem 0 0', fontSize: '1rem', fontWeight: '600', color: 'var(--text-highlight)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>admin@coneco.store</p>
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.2rem', transition: 'transform 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
           <div style={{ 
             background: 'rgba(46, 160, 67, 0.15)', 
-            padding: '1rem', 
+            minWidth: '50px',
+            height: '50px',
             borderRadius: '12px', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            color: 'var(--primary-color)'
+            color: 'var(--primary-color)',
+            boxShadow: '0 4px 12px rgba(46, 160, 67, 0.2)'
           }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
           </div>
-          <div>
-            <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Location</h4>
-            <p style={{ margin: '0.2rem 0 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-highlight)' }}>Basav Nagar Gokak</p>
+          <div style={{ overflow: 'hidden' }}>
+            <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Location</h4>
+            <p style={{ margin: '0.2rem 0 0', fontSize: '1rem', fontWeight: '600', color: 'var(--text-highlight)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Basav Nagar Gokak</p>
           </div>
         </div>
       </div>
