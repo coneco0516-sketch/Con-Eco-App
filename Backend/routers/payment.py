@@ -185,18 +185,25 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             commission_amount = round(base_amount * float(commission_rate) / 100, 2)
             total_amount = round(base_amount + gst_amount + commission_amount, 2)
             grand_total += total_amount
-            
             order_status = 'Pending' if payment_method == 'COD' else 'Processing'
+            
+            # Credit Tier Dates
+            s1_due = None
+            s2_due = None
+            if payment_method == 'PayLater':
+                from datetime import timedelta, date
+                s1_due = date.today() + timedelta(days=7)
+                s2_due = date.today() + timedelta(days=14)
 
             print(f"[FINALIZE] Inserting order for item {item['item_id']}, total {total_amount}")
             cursor.execute(
                 """INSERT INTO orders 
-                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, bill_type) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, bill_type, credit_stage1_due, credit_stage2_due) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                    RETURNING order_id""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"],
                  total_amount, base_amount, gst_amount, commission_amount, total_amount,
-                 order_status, delivery_address, payment_method, bill_type)
+                 order_status, delivery_address, payment_method, bill_type, s1_due, s2_due)
             )
             order_db_id = cursor.fetchone()['order_id']
             

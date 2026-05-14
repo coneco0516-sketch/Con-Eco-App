@@ -515,7 +515,7 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
         
         cursor.execute("""
             SELECT o.payment_method, o.customer_id, o.total_amount, o.amount, 
-                   o.credit_stage1_due, o.credit_stage2_due 
+                   o.credit_stage1_due, o.credit_stage2_due, o.created_at 
             FROM Orders o WHERE o.order_id=%s AND o.vendor_id=%s
         """, (data.order_id, vendor_id))
         order = cursor.fetchone()
@@ -544,7 +544,19 @@ def vendor_update_payment_status(data: PaymentStatusUpdate, user = Depends(check
             return {"status": "success"}
 
         # --- PAY LATER TIER LOGIC ---
-        tier = 'Stage1' if today <= order['credit_stage1_due'] else ('Stage2' if today <= order['credit_stage2_due'] else 'Overdue')
+        from datetime import timedelta
+        
+        # Safely handle missing due dates for old orders
+        s1_due = order['credit_stage1_due']
+        s2_due = order['credit_stage2_due']
+        
+        if s1_due is None or s2_due is None:
+            # Fallback: calculate based on order creation date
+            base_date = order['created_at'].date() if order['created_at'] else today
+            s1_due = base_date + timedelta(days=7)
+            s2_due = base_date + timedelta(days=14)
+
+        tier = 'Stage1' if today <= s1_due else ('Stage2' if today <= s2_due else 'Overdue')
         
         # 1. Mark payment completed
         cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
