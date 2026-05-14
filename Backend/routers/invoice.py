@@ -108,7 +108,7 @@ async def get_commission_gst_invoice(invoice_id: int, user=Depends(get_current_u
                TO_CHAR(wi.created_at,           'DD Mon YYYY') as created_date,
                u.name as vendor_name,
                v.company_name,
-               v.gstin as vendor_gstin,
+               v.gst_number as vendor_gstin,
                (SELECT COUNT(*) 
                 FROM commissions c
                 JOIN Orders o ON c.order_id = o.order_id
