@@ -63,7 +63,7 @@ function Register() {
     }
 
     if (!acceptedTerms) {
-      setError("You must accept the Privacy Policy and Terms of Services to register.");
+      setError("You must accept the Privacy Policy and Terms and Conditions to register.");
       return;
     }
 
@@ -261,7 +261,7 @@ function Register() {
             style={{ width: 'auto', marginTop: '0.3rem', cursor: 'pointer' }}
           />
           <label htmlFor="acceptTerms" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', cursor: 'pointer', lineHeight: '1.4' }}>
-            I have read <Link to="/privacy" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Privacy Policy</Link> and <Link to="/terms" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Terms of Services</Link> and accept all the policies and Terms
+            I have read <Link to="/privacy" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Privacy Policy</Link> and <Link to="/terms" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Terms and Conditions</Link> and accept all the policies and Terms
           </label>
         </div>
 

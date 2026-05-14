@@ -300,7 +300,7 @@ function AppContent() {
             <Link to="/faq" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>FAQ</Link>
             <Link to="/contact" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Contact</Link>
             <Link to="/privacy" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Privacy Policy</Link>
-            <Link to="/terms" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Terms of Service</Link>
+            <Link to="/terms" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Terms and Conditions</Link>
           </div>
         </footer>
       )}

@@ -3,43 +3,70 @@ import React from 'react';
 function Terms() {
   return (
     <div style={{ maxWidth: '800px', margin: '3rem auto', padding: '0 1rem' }}>
-      <h2 style={{ fontSize: '2.5rem', color: 'var(--text-highlight)', marginBottom: '1rem', textAlign: 'center' }}>Terms of Service</h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem', textAlign: 'center', fontSize: '1.2rem' }}>Please read our terms carefully before using ConEco.</p>
+      <h2 style={{ fontSize: '2.5rem', color: 'var(--text-highlight)', marginBottom: '1rem', textAlign: 'center', fontWeight: '800' }}>Terms and Conditions</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem', textAlign: 'center', fontSize: '1.1rem', letterSpacing: '0.5px' }}>Last Updated: May 2026</p>
       
-      <div className="glass-panel" style={{ padding: '2rem' }}>
-        <h3 style={{ color: 'var(--text-highlight)', marginBottom: '1rem' }}>Acceptance of Terms</h3>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-          By accessing or using the ConEco platform, you confirm your acceptance of these Terms of Service. If you disagree with any part of these terms, you may not access the service.
-        </p>
+      <div className="glass-panel" style={{ padding: '3rem', border: '1px solid var(--surface-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h3 style={{ color: 'var(--primary-color)', marginBottom: '1.2rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <span style={{ opacity: 0.5 }}>01.</span> About the Service
+          </h3>
+          <p style={{ color: 'var(--text-primary)', marginBottom: '1.5rem', lineHeight: '1.8', opacity: 0.9 }}>
+            Con Eco (coneco.store) is an information-aggregator platform. We provide a digital marketplace for users to view daily market rates for construction materials provided by local dealers in Gokak and surrounding areas.
+          </p>
+        </section>
         
-        <h3 style={{ color: 'var(--text-highlight)', marginBottom: '1rem' }}>Vendor Responsibilities</h3>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-          Vendors must provide completely accurate and legal descriptions of the materials and services they are listing. Any deliberate misinformation entails immediate account verification revocation.
-        </p>
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h3 style={{ color: 'var(--primary-color)', marginBottom: '1.2rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <span style={{ opacity: 0.5 }}>02.</span> No Guarantee on Pricing
+          </h3>
+          <p style={{ color: 'var(--text-primary)', marginBottom: '1.5rem', lineHeight: '1.8', opacity: 0.9 }}>
+            Prices listed on Con Eco are provided by third-party dealers and are subject to change without notice due to market volatility. Con Eco does not guarantee the accuracy of any price at the time of purchase. The final price is determined solely between the buyer and the dealer.
+          </p>
+        </section>
         
-        <h3 style={{ color: 'var(--text-highlight)', marginBottom: '1rem' }}>Refund & Cancellation Policy</h3>
-        <div style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-          <p style={{ marginBottom: '1rem' }}><strong>100% Refund (Pre-Acceptance):</strong> Customers are eligible for a 100% refund for online payments if they cancel their order while the status is still "Pending" (i.e., before the vendor has accepted the order).</p>
-          <p style={{ marginBottom: '1rem' }}><strong>Post-Acceptance Cancellations:</strong> Once an order is accepted by the vendor (status changes from "Pending"), direct cancellation is disabled. The customer must contact the vendor directly and request them to revert the order status back to "Pending" in order to process a cancellation and refund.</p>
-          <p><strong>Cash on Delivery (COD):</strong> The same cancellation timeline rules apply to COD orders. While no online payment refund is necessary, the order can only be cancelled while in the "Pending" state.</p>
-        </div>
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h3 style={{ color: 'var(--primary-color)', marginBottom: '1.2rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <span style={{ opacity: 0.5 }}>03.</span> Limitation of Liability
+          </h3>
+          <div style={{ color: 'var(--text-primary)', marginBottom: '1.5rem', lineHeight: '1.8', opacity: 0.9 }}>
+            <p style={{ marginBottom: '1.2rem' }}>Con Eco is not a seller, manufacturer, or distributor of construction materials. We are not responsible for:</p>
+            <ul style={{ paddingLeft: '1.2rem', listStyleType: 'none' }}>
+              <li style={{ marginBottom: '0.8rem', position: 'relative', paddingLeft: '1.5rem' }}>
+                <span style={{ position: 'absolute', left: 0, color: 'var(--primary-color)' }}>•</span> Discrepancies in material quality or quantity.
+              </li>
+              <li style={{ marginBottom: '0.8rem', position: 'relative', paddingLeft: '1.5rem' }}>
+                <span style={{ position: 'absolute', left: 0, color: 'var(--primary-color)' }}>•</span> Delays in delivery or supply-chain issues.
+              </li>
+              <li style={{ marginBottom: '0.8rem', position: 'relative', paddingLeft: '1.5rem' }}>
+                <span style={{ position: 'absolute', left: 0, color: 'var(--primary-color)' }}>•</span> Financial losses resulting from price fluctuations.
+              </li>
+            </ul>
+          </div>
+        </section>
         
-        <h3 style={{ color: 'var(--text-highlight)', marginBottom: '1rem' }}>Delivery Charges Policy</h3>
-        <div style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-          <p style={{ marginBottom: '1rem' }}>Delivery charges are not included in the order total displayed on the ConEco platform.</p>
-          <p style={{ marginBottom: '1rem' }}>As delivery costs vary based on location, distance, and local transportation conditions, ConEco does not fix, control, or standardize delivery charges.</p>
-          <p style={{ marginBottom: '1rem' }}>After placing an order, customers and vendors are required to communicate directly to finalize the delivery arrangements and applicable charges.</p>
-          <p style={{ marginBottom: '1rem' }}>The delivery fee shall be paid separately by the customer, either directly to the delivery personnel or to the vendor, as mutually agreed between the customer and the vendor.</p>
-          <p>ConEco shall not be held responsible or liable for any disputes, differences, or issues arising between the customer and the vendor regarding delivery charges, payment, or related arrangements.</p>
-        </div>
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h3 style={{ color: 'var(--primary-color)', marginBottom: '1.2rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <span style={{ opacity: 0.5 }}>04.</span> User Conduct
+          </h3>
+          <p style={{ color: 'var(--text-primary)', marginBottom: '1.5rem', lineHeight: '1.8', opacity: 0.9 }}>
+            Users agree to use the "Request Quote" feature for legitimate business inquiries only. Misuse of the platform or providing false information may lead to a permanent ban.
+          </p>
+        </section>
         
-        <h3 style={{ color: 'var(--text-highlight)', marginBottom: '1rem' }}>Limitation of Liability</h3>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-          ConEco functions strictly as an intermediary facilitator platform and disclaims liability for any discrepancy regarding service quality or disputes between vendors and customers. We do however moderate conflicts appropriately.
-        </p>
+        <section>
+          <h3 style={{ color: 'var(--primary-color)', marginBottom: '1.2rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <span style={{ opacity: 0.5 }}>05.</span> Governing Law
+          </h3>
+          <p style={{ color: 'var(--text-primary)', lineHeight: '1.8', opacity: 0.9 }}>
+            These terms are governed by the laws of India, and any disputes shall be subject to the exclusive jurisdiction of the courts in Belagavi, Karnataka.
+          </p>
+        </section>
       </div>
     </div>
   );
 }
 
 export default Terms;
+
+
