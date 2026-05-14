@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-const API = import.meta.env.VITE_API_URL || 'https://con-eco-app-w78g.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
 function Navbar() {
   const navigate = useNavigate();

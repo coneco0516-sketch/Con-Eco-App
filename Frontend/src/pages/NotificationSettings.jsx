@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './NotificationSettings.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://con-eco-app-w78g.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
 export default function NotificationSettings() {
   const [preferences, setPreferences] = useState({

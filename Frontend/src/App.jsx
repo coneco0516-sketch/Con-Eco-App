@@ -47,7 +47,7 @@ import VendorProfile from './pages/VendorProfile';
 import VendorBilling from './pages/VendorBilling';
 import './index.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://con-eco-app-w78g.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
 // Role-based route protection component
 function ProtectedRoute({ children, allowedRoles }) {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 
-const API = import.meta.env.VITE_API_URL || 'https://con-eco-app-w78g.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
 function VendorBilling() {
   const [invoices, setInvoices] = useState([]);
