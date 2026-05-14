@@ -48,10 +48,10 @@ Before sending emails, you must verify the sender address:
 2. Click **Add a Sender**
 3. Fill in:
    - **From Name:** `ConEco`
-   - **From Email:** `noreply@coneco.com` (or your domain email)
+   - **From Email:** `admin@coneco.store` (or your domain email)
 4. Brevo sends a verification email — click the link to confirm
 
-> **No custom domain?** Use a Gmail address like `coneco0516@gmail.com` and verify it the same way.
+> **No custom domain?** Use a verified email address like `admin@coneco.store` and verify it the same way.
 
 ---
 
@@ -61,7 +61,7 @@ Add to `Backend/.env` and your Render environment:
 
 ```env
 BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxx
-FROM_EMAIL=noreply@coneco.com
+FROM_EMAIL=admin@coneco.store
 FROM_NAME=ConEco
 ```
 
@@ -97,7 +97,7 @@ headers = {
 }
 
 payload = {
-    "sender": {"name": "ConEco", "email": "noreply@coneco.com"},
+    "sender": {"name": "ConEco", "email": "admin@coneco.store"},
     "to": [{"email": recipient_email, "name": recipient_name}],
     "subject": "Your Subject Here",
     "htmlContent": "<h1>Email Body</h1>"

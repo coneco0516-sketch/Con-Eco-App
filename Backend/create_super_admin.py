@@ -21,7 +21,7 @@ def create_super_admin():
     # User details
     admin_data = {
         "name": "Super Admin",
-        "email": "coneco0516@gmail.com",
+        "email": "admin@coneco.store",
         "password": "Admin@0516",
         "phone": "9449088128",
         "role": "Admin"

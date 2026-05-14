@@ -159,7 +159,7 @@ function Contact() {
           </div>
           <div>
             <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email Address</h4>
-            <p style={{ margin: '0.2rem 0 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-highlight)' }}>coneco0516@gmail.com</p>
+            <p style={{ margin: '0.2rem 0 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-highlight)' }}>admin@coneco.store</p>
           </div>
         </div>
 

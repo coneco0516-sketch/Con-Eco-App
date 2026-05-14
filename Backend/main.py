@@ -220,7 +220,7 @@ def test_email_endpoint():
 
     try:
         success = send_email(
-            "coneco0516@gmail.com",
+            "admin@coneco.store",
             "ConEco Gmail SMTP Test",
             "<h1>Gmail SMTP is working!</h1><p>If you see this, check your Gmail inbox AND spam folder.</p>"
         )
