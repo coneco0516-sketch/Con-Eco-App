@@ -405,12 +405,16 @@ def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_custome
         if float(cust['credit_limit'] or 0) <= 0:
             raise HTTPException(status_code=403, detail="Pay Later is not enabled for your account.")
 
-        # 4. Calculate cart total
+        # 4. Calculate cart total accurately (matching finalize_order logic)
         cursor.execute("""
-            SELECT c.quantity, c.item_type, COALESCE(p.price, s.price) as price
-            FROM Cart c
-            LEFT JOIN Products p ON c.item_type='Product' AND c.item_id=p.product_id
-            LEFT JOIN Services s ON c.item_type='Service' AND c.item_id=s.service_id
+            SELECT c.quantity, c.item_type, 
+                   COALESCE(p.price, s.price) as price,
+                   COALESCE(v1.gst_number, v2.gst_number) as gst_number
+            FROM cart c
+            LEFT JOIN products p ON c.item_type='Product' AND c.item_id=p.product_id
+            LEFT JOIN services s ON c.item_type='Service' AND c.item_id=s.service_id
+            LEFT JOIN vendors v1 ON p.vendor_id = v1.vendor_id
+            LEFT JOIN vendors v2 ON s.vendor_id = v2.vendor_id
             WHERE c.customer_id=%s
         """, (user["user_id"],))
         items = cursor.fetchall()
@@ -420,11 +424,16 @@ def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_custome
 
         total_order_amount = 0
         for item in items:
+            if item['price'] is None: continue
             item_base = float(item['price']) * item['quantity']
-            item_gst = round(item_base * 0.18, 2)
+            
+            # GST only if vendor is GST-registered
+            item_gst = round(item_base * 0.18, 2) if item.get('gst_number') else 0.0
+            
             comm_key = 'product_commission_pct' if item['item_type'] == 'Product' else 'service_commission_pct'
             rate = float(get_platform_setting(comm_key, 3.0))
             item_comm = round(item_base * rate / 100, 2)
+            
             total_order_amount += (item_base + item_gst + item_comm)
 
         total_order_amount = round(total_order_amount, 2)
