@@ -12,7 +12,9 @@ def clean_text(text):
     """Encode text to latin-1 to avoid PDF generation errors with special chars."""
     if not text:
         return ""
-    return str(text).encode('latin-1', 'replace').decode('latin-1')
+    # Replace common problematic characters
+    text = str(text).replace('\u2013', '-').replace('\u2014', '-').replace('\u2018', "'").replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"')
+    return text.encode('latin-1', 'replace').decode('latin-1')
 
 
 # ---------------------------------------------------------------------------
@@ -244,6 +246,8 @@ def generate_commission_gst_invoice_pdf(invoice_data, output_path):
 
     invoice_no   = f"CNE-COMM-{inv_id:04d}" if isinstance(inv_id, int) else f"CNE-COMM-{inv_id}"
 
+    platform_gstin = clean_text(invoice_data.get('platform_gstin', '[Platform GSTIN]'))
+    
     # ---- Invoice header info ----
     pdf.set_font('helvetica', 'B', 11)
     pdf.cell(95, 7, 'Invoice From (Supplier):', ln=False)
@@ -252,9 +256,9 @@ def generate_commission_gst_invoice_pdf(invoice_data, output_path):
     pdf.set_font('helvetica', '', 10)
     pdf.cell(95, 5, 'ConEco Platform Pvt. Ltd.', ln=False)
     pdf.cell(95, 5, f"{company}", ln=True)
-    pdf.cell(95, 5, f"GSTIN: {invoice_data.get('platform_gstin', '[Platform GSTIN]')}", ln=False)
+    pdf.cell(95, 5, f"GSTIN: {platform_gstin}", ln=False)
     pdf.cell(95, 5, f"GSTIN: {vend_gstin}", ln=True)
-    pdf.cell(95, 5, f"Invoice No: {invoice_no}", ln=False)
+    pdf.cell(95, 5, f"Invoice No: {clean_text(invoice_no)}", ln=False)
     pdf.cell(95, 5, f"Vendor: {vend_name}", ln=True)
     pdf.cell(95, 5, f"Invoice Date: {paid_date}", ln=True)
     pdf.ln(8)
@@ -262,7 +266,8 @@ def generate_commission_gst_invoice_pdf(invoice_data, output_path):
     # ---- Billing Period ----
     pdf.set_font('helvetica', 'B', 10)
     pdf.set_fill_color(240, 248, 255)
-    pdf.cell(0, 8, f"  Billing Period:  {period_start}  to  {period_end}   |   Orders Covered: {orders_count}", border=1, fill=True, ln=True)
+    period_text = f"  Billing Period:  {period_start}  to  {period_end}   |   Orders Covered: {orders_count}"
+    pdf.cell(0, 8, clean_text(period_text), border=1, fill=True, ln=True)
     pdf.ln(5)
 
     # ---- Service Table ----
