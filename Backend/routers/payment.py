@@ -15,11 +15,10 @@ load_dotenv()
 
 
 
-RAZORPAY_KEY_ID     = os.environ.get("RAZORPAY_KEY_ID", "")
-RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
+RAZORPAY_KEY_ID     = os.environ.get("RAZORPAY_KEY_ID", "").strip('"')
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "").strip('"')
 
 router = APIRouter()
-
 
 def check_user(user=Depends(get_current_user_from_cookie)):
     if not user:
@@ -111,7 +110,7 @@ def verify_invoice_payment(data: VerifyInvoiceRequest, user=Depends(get_current_
         )
         
         # 2. Reset strikes and verify account if it was unverified due to strikes
-        cursor.execute("UPDATE Vendors SET commission_strikes = 0, verification_status='Verified' WHERE vendor_id=%s", (user["user_id"],))
+        cursor.execute("UPDATE vendors SET commission_strikes = 0, verification_status='Verified' WHERE vendor_id=%s", (user["user_id"],))
         
         # 3. Mark all commissions in that period as 'Paid'
         # First get the period
@@ -137,13 +136,13 @@ def check_customer(user=Depends(get_current_user_from_cookie)):
         raise HTTPException(status_code=403, detail="Forbidden")
     return user
 
-
 def finalize_order(cust_id, delivery_address, payment_method, payment_status, txn_id,
                    bill_type="Non-GST", background_tasks=None):
     """
     Common logic to move items from cart to orders and record payments.
     Accepts optional BackgroundTasks for async email sending.
     """
+    print(f"[FINALIZE] Starting order finalization for customer {cust_id}, txn {txn_id}")
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -153,21 +152,27 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
                          COALESCE(p.price,     s.price)     as price,
                          COALESCE(p.name,      s.name)      as item_name,
                          COALESCE(v1.gst_number, v2.gst_number) as gst_number
-            FROM Cart c
-            LEFT JOIN Products p ON c.item_type='Product' AND c.item_id=p.product_id
-            LEFT JOIN Services s ON c.item_type='Service' AND c.item_id=s.service_id
-            LEFT JOIN Vendors v1 ON p.vendor_id = v1.vendor_id
-            LEFT JOIN Vendors v2 ON s.vendor_id = v2.vendor_id
+            FROM cart c
+            LEFT JOIN products p ON c.item_type='Product' AND c.item_id=p.product_id
+            LEFT JOIN services s ON c.item_type='Service' AND c.item_id=s.service_id
+            LEFT JOIN vendors v1 ON p.vendor_id = v1.vendor_id
+            LEFT JOIN vendors v2 ON s.vendor_id = v2.vendor_id
             WHERE c.customer_id=%s
             """,
             (cust_id,)
         )
         cart_items = cursor.fetchall()
+        print(f"[FINALIZE] Found {len(cart_items)} items in cart")
 
         if not cart_items:
+            print("[FINALIZE ERROR] Cart is empty")
             return False, "Cart is empty"
 
         for item in cart_items:
+            if item["price"] is None:
+                print(f"[FINALIZE ERROR] Item {item['item_id']} ({item['item_type']}) has no price")
+                return False, f"Item '{item.get('item_name', 'Unknown')}' is no longer available or has no price."
+
             base_amount = float(item["price"]) * item["quantity"]
             # GST only if vendor is GST-registered
             gst_amount = round(base_amount * 0.18, 2) if item.get("gst_number") else 0.0
@@ -181,27 +186,21 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             
             order_status = 'Pending' if payment_method == 'COD' else 'Processing'
 
-            # Credit system due dates if PayLater
-            stage1_due = None
-            stage2_due = None
-            if payment_method == 'PayLater':
-                from datetime import timedelta
-                stage1_due = (datetime.now() + timedelta(days=7)).date()
-                stage2_due = (datetime.now() + timedelta(days=14)).date()
-
+            print(f"[FINALIZE] Inserting order for item {item['item_id']}, total {total_amount}")
             cursor.execute(
-                """INSERT INTO Orders 
-                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, credit_stage1_due, credit_stage2_due, bill_type) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                """INSERT INTO orders 
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, bill_type) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                    RETURNING order_id""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"],
                  total_amount, base_amount, gst_amount, commission_amount, total_amount,
-                 order_status, delivery_address, payment_method, stage1_due, stage2_due, bill_type)
+                 order_status, delivery_address, payment_method, bill_type)
             )
             order_db_id = cursor.fetchone()['order_id']
             
+            print(f"[FINALIZE] Order {order_db_id} created, inserting payment/commission")
             cursor.execute(
-                "INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,%s)",
+                "INSERT INTO payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,%s)",
                 (txn_id, order_db_id, total_amount, payment_status)
             )
             comm_status = 'Settled' if payment_status == 'Completed' else 'Pending'
@@ -211,8 +210,10 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
                 (order_db_id, item["vendor_id"], commission_amount, commission_rate, comm_status)
             )
 
-        cursor.execute("DELETE FROM Cart WHERE customer_id=%s", (cust_id,))
+        print("[FINALIZE] All orders created. Clearing cart.")
+        cursor.execute("DELETE FROM cart WHERE customer_id=%s", (cust_id,))
         conn.commit()
+        print("[FINALIZE SUCCESS] Cart cleared, transaction committed.")
 
         # ── SEND EMAILS (non-blocking via BackgroundTasks if available) ──
         try:
