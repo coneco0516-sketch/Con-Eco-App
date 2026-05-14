@@ -166,69 +166,146 @@ function VendorBilling() {
           ) : invoices.length === 0 ? (
             <p style={{ color: 'var(--text-secondary)' }}>No commission billings found. They are generated every Monday.</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--text-secondary)' }}>
-              <thead>
-                <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--surface-border)' }}>
-                  <th style={{ padding: '1rem' }}>ID</th>
-                  <th style={{ padding: '1rem' }}>Period</th>
-                  <th style={{ padding: '1rem' }}>Commission Amount</th>
-                  <th style={{ padding: '1rem' }}>Due Date</th>
-                  <th style={{ padding: '1rem' }}>Status</th>
-                  <th style={{ padding: '1rem' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
+            <>
+              {/* Desktop Table View */}
+              <div className="table-responsive desktop-only">
+                <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--text-secondary)' }}>
+                  <thead>
+                    <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--surface-border)' }}>
+                      <th style={{ padding: '1rem' }}>ID</th>
+                      <th style={{ padding: '1rem' }}>Period</th>
+                      <th style={{ padding: '1rem' }}>Commission Amount</th>
+                      <th style={{ padding: '1rem' }}>Due Date</th>
+                      <th style={{ padding: '1rem' }}>Status</th>
+                      <th style={{ padding: '1rem' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoices.map(inv => (
+                      <tr key={inv.invoice_id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
+                        <td style={{ padding: '1rem', color: 'var(--text-highlight)', fontWeight: 'bold' }}>#{inv.invoice_id}</td>
+                        <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{inv.start} – {inv.end}</td>
+                        <td style={{ padding: '1rem', color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                          ₹{parseFloat(inv.amount).toFixed(2)}
+                        </td>
+                        <td style={{ padding: '1rem' }}>{inv.due}</td>
+                        <td style={{ padding: '1rem' }}>
+                          <span style={{
+                            padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem',
+                            background: inv.status === 'Paid' ? 'rgba(46, 160, 67, 0.2)' : 'rgba(231, 76, 60, 0.2)',
+                            color: inv.status === 'Paid' ? '#3fb950' : '#f85149'
+                          }}>
+                            {inv.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '1rem' }}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            {inv.status === 'Unpaid' && (
+                              <button
+                                onClick={() => handlePay(inv)}
+                                disabled={!!paying}
+                                className="btn"
+                                style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
+                              >
+                                {paying === inv.invoice_id ? '⏳ Wait...' : '💳 Pay Now'}
+                              </button>
+                            )}
+                            {inv.status === 'Paid' && (
+                              <button
+                                onClick={() => handleDownloadReceipt(inv.invoice_id)}
+                                disabled={downloading === inv.invoice_id}
+                                className="btn"
+                                style={{
+                                  padding: '0.4rem 1rem',
+                                  fontSize: '0.85rem',
+                                  background: 'rgba(52, 152, 219, 0.2)',
+                                  color: '#3498db',
+                                  border: '1px solid #3498db'
+                                }}
+                              >
+                                {downloading === inv.invoice_id ? '⏳ generating...' : '🧾 Download Receipt'}
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="mobile-only">
                 {invoices.map(inv => (
-                  <tr key={inv.invoice_id} style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                    <td style={{ padding: '1rem', color: 'var(--text-highlight)', fontWeight: 'bold' }}>#{inv.invoice_id}</td>
-                    <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{inv.start} – {inv.end}</td>
-                    <td style={{ padding: '1rem', color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                      ₹{parseFloat(inv.amount).toFixed(2)}
-                    </td>
-                    <td style={{ padding: '1rem' }}>{inv.due}</td>
-                    <td style={{ padding: '1rem' }}>
+                  <div key={inv.invoice_id} className="glass-panel" style={{ padding: '1.25rem', marginBottom: '1rem', border: '1px solid var(--surface-border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                      <div>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Invoice ID</span>
+                        <h4 style={{ color: 'var(--text-highlight)', margin: 0 }}>#{inv.invoice_id}</h4>
+                      </div>
                       <span style={{
-                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem',
+                        padding: '4px 10px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold',
                         background: inv.status === 'Paid' ? 'rgba(46, 160, 67, 0.2)' : 'rgba(231, 76, 60, 0.2)',
                         color: inv.status === 'Paid' ? '#3fb950' : '#f85149'
                       }}>
-                        {inv.status}
+                        {inv.status.toUpperCase()}
                       </span>
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        {inv.status === 'Unpaid' && (
+                    </div>
+
+                    <div style={{ marginBottom: '1rem' }}>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 5px 0' }}>Billing Period</p>
+                      <p style={{ color: 'var(--text-primary)', fontSize: '0.9rem', margin: 0 }}>{inv.start} – {inv.end}</p>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
+                      <div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0 0 2px 0' }}>Commission Due</p>
+                        <p style={{ color: 'var(--primary-color)', fontSize: '1.4rem', fontWeight: '700', margin: 0 }}>₹{parseFloat(inv.amount).toFixed(2)}</p>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0 0 8px 0' }}>Due By: {inv.due}</p>
+                        {inv.status === 'Unpaid' ? (
                           <button
                             onClick={() => handlePay(inv)}
                             disabled={!!paying}
                             className="btn"
-                            style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
+                            style={{ width: '100%', padding: '0.5rem 1.2rem' }}
                           >
-                            {paying === inv.invoice_id ? '⏳ Wait...' : '💳 Pay Now'}
+                            {paying === inv.invoice_id ? 'Wait...' : '💳 Pay Now'}
                           </button>
-                        )}
-                        {inv.status === 'Paid' && (
+                        ) : (
                           <button
                             onClick={() => handleDownloadReceipt(inv.invoice_id)}
                             disabled={downloading === inv.invoice_id}
                             className="btn"
                             style={{
-                              padding: '0.4rem 1rem',
-                              fontSize: '0.85rem',
+                              width: '100%',
+                              padding: '0.5rem 1.2rem',
                               background: 'rgba(52, 152, 219, 0.2)',
                               color: '#3498db',
                               border: '1px solid #3498db'
                             }}
                           >
-                            {downloading === inv.invoice_id ? '⏳ generating...' : '🧾 Download Receipt'}
+                            Receipt 🧾
                           </button>
                         )}
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              {/* Responsive Styles */}
+              <style>{`
+                .desktop-only { display: block; }
+                .mobile-only { display: none; }
+
+                @media (max-width: 768px) {
+                  .desktop-only { display: none; }
+                  .mobile-only { display: block; }
+                }
+              `}</style>
+            </>
           )}
         </div>
 
