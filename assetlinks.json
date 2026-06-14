@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.coneco.app",
+      "sha256_cert_fingerprints": [
+        "49:36:0D:92:A6:95:80:4C:7B:77:20:C3:CC:20:3B:66:26:83:B2:8B:61:31:2E:70:D1:27:7D:2E:8E:CB:C8:32"
+      ]
+    }
+  }
+]
