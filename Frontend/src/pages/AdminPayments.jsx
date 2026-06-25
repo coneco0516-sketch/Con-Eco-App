@@ -94,6 +94,25 @@ function AdminPayments() {
     .filter(t => ['completed', 'paid'].includes((t.status || '').toLowerCase()))
     .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
 
+  const getTxnStyle = (t) => {
+    const amt = parseFloat(t.amount || 0);
+    const type = t.txn_type;
+    if (type === 'Debit' || type === 'Penalty') {
+      return { color: '#e74c3c', prefix: '-' };
+    }
+    if (type === 'Repayment' || type === 'Reward') {
+      return { color: '#3fb950', prefix: '+' };
+    }
+    // Adjustment type
+    if (amt > 0) {
+      return { color: '#3fb950', prefix: '+' };
+    } else if (amt < 0) {
+      return { color: '#e74c3c', prefix: '-' };
+    } else {
+      return { color: 'var(--text-secondary)', prefix: '' };
+    }
+  };
+
   return (
     <div className="dashboard-layout">
       <AdminSidebar />
@@ -356,17 +375,23 @@ function AdminPayments() {
                          </tr>
                       </thead>
                       <tbody>
-                         {creditTransactions.map((t, idx) => (
-                            <tr key={idx} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.85rem' }}>
-                               <td style={{ padding: '10px 15px', color: 'var(--text-secondary)' }}>{t.date}</td>
-                               <td style={{ padding: '10px 15px', color: 'var(--text-highlight)' }}>{t.customer_name}</td>
-                               <td style={{ padding: '10px 15px' }}>
-                                  <span style={{ color: t.txn_type === 'Debit' || t.txn_type === 'Penalty' ? '#e74c3c' : '#3fb950', fontWeight: 'bold' }}>{t.txn_type}</span>
-                               </td>
-                               <td style={{ padding: '10px 15px', fontWeight: 'bold' }}>₹{t.amount}</td>
-                               <td style={{ padding: '10px 15px', color: 'var(--text-secondary)' }}>{t.notes}</td>
-                            </tr>
-                         ))}
+                         {creditTransactions.map((t, idx) => {
+                            const style = getTxnStyle(t);
+                            const absAmount = Math.abs(parseFloat(t.amount || 0)).toFixed(2);
+                            return (
+                               <tr key={idx} style={{ borderBottom: '1px solid var(--surface-border)', fontSize: '0.85rem' }}>
+                                  <td style={{ padding: '10px 15px', color: 'var(--text-secondary)' }}>{t.date}</td>
+                                  <td style={{ padding: '10px 15px', color: 'var(--text-highlight)' }}>{t.customer_name}</td>
+                                  <td style={{ padding: '10px 15px' }}>
+                                     <span style={{ color: style.color, fontWeight: 'bold' }}>{t.txn_type}</span>
+                                  </td>
+                                  <td style={{ padding: '10px 15px', fontWeight: 'bold', color: style.color }}>
+                                     {style.prefix}₹{absAmount}
+                                  </td>
+                                  <td style={{ padding: '10px 15px', color: 'var(--text-secondary)' }}>{t.notes}</td>
+                               </tr>
+                            );
+                         })}
                       </tbody>
                    </table>
                 </div>

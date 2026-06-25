@@ -170,9 +170,10 @@ def get_credit_accounts(user = Depends(require_super_admin)):
         cursor.execute(sql)
         accounts = cursor.fetchall()
         
-        # Also fetch recent transactions
+        # Also fetch recent transactions (formatted in IST 12-hour AM/PM)
         cursor.execute("""
-            SELECT ct.*, u.name as customer_name, TO_CHAR(ct.created_at, 'DD Mon HH24:MI') as date
+            SELECT ct.*, u.name as customer_name, 
+                   TO_CHAR(ct.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata', 'DD Mon HH12:MI AM') as date
             FROM credit_transactions ct
             JOIN Users u ON ct.customer_id = u.user_id
             ORDER BY ct.created_at DESC
@@ -197,6 +198,11 @@ def update_customer_credit(customer_id: int, data: CreditUpdate, user = Depends(
     try:
         cursor = conn.cursor(dictionary=True)
         
+        # Fetch previous credit limit to calculate change
+        cursor.execute("SELECT credit_limit FROM Customers WHERE customer_id = %s", (customer_id,))
+        old_cust = cursor.fetchone()
+        old_limit = float(old_cust['credit_limit']) if old_cust and old_cust['credit_limit'] is not None else 0.0
+
         # 1. Update the record
         updates = []
         params = []
@@ -220,11 +226,15 @@ def update_customer_credit(customer_id: int, data: CreditUpdate, user = Depends(
         cursor.execute(sql, params)
         res = cursor.fetchone()
         
+        # Calculate limit change
+        new_limit = float(res['credit_limit']) if res and res['credit_limit'] is not None else 0.0
+        limit_change = new_limit - old_limit
+
         # 2. Record adjustment transaction
         cursor.execute("""
             INSERT INTO credit_transactions (customer_id, txn_type, amount, credit_used_after, credit_limit_after, notes)
-            VALUES (%s, 'Adjustment', 0, %s, %s, %s)
-        """, (customer_id, res['credit_used'], res['credit_limit'], data.notes or "Admin manual adjustment"))
+            VALUES (%s, 'Adjustment', %s, %s, %s, %s)
+        """, (customer_id, limit_change, res['credit_used'], res['credit_limit'], data.notes or "Admin manual adjustment"))
         
         conn.commit()
         cursor.close()
