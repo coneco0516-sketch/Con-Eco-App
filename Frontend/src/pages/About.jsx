@@ -19,14 +19,12 @@ function About() {
       <section className="glass-panel" style={{ padding: 'clamp(1.5rem, 5vw, 2.5rem)', marginTop: '2rem' }}>
         <h3 style={{ color: 'var(--primary-color)', marginTop: 0, textAlign: 'center', fontSize: '1.5rem' }}>Meet Our Team</h3>
         <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-          gap: '2rem', 
-          marginTop: '2rem',
-          alignItems: 'stretch'
+          display: 'flex', 
+          justifyContent: 'center', 
+          marginTop: '2rem'
         }}>
           {/* Card 1: Hriday Demashetti */}
-          <a href="/portfolio/index.html" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column' }}>
+          <a href="/portfolio/index.html" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '380px' }}>
             <div className="glass-panel" style={{ 
               textAlign: 'center', 
               padding: '2.5rem 2rem', 
@@ -57,41 +55,6 @@ function About() {
               <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem', lineHeight: '1.5' }}>2AG22CV006<br/>Civil Engineering Student</p>
             </div>
           </a>
-          
-          {/* Card 2: Tulasi M Marennavar */}
-          <div className="glass-panel" style={{ 
-            textAlign: 'center', 
-            padding: '2.5rem 2rem', 
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.03)',
-            transition: 'all 0.3s ease'
-          }}>
-            <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-              <div style={{ 
-                width: '130px', 
-                height: '130px', 
-                borderRadius: '50%', 
-                background: 'linear-gradient(135deg, var(--primary-color), #7ee787)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '2.5rem',
-                fontWeight: '700',
-                border: '3px solid var(--primary-color)',
-                padding: '4px',
-                boxShadow: '0 4px 15px rgba(46, 160, 67, 0.3)'
-              }}>
-                TM
-              </div>
-            </div>
-            <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem', fontSize: '1.2rem', fontWeight: '700' }}>Tulasi M Marennavar</h4>
-            <p style={{ color: 'var(--primary-color)', fontWeight: '700', margin: '0 0 1rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Team Member 01</p>
-            <div style={{ width: '40px', height: '2px', background: 'var(--surface-border)', marginBottom: '1rem' }}></div>
-            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem', lineHeight: '1.5' }}>2AG22CS145<br/>Computer Science Engineering Student</p>
-          </div>
         </div>
       </section>
 
