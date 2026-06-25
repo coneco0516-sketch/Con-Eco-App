@@ -207,10 +207,13 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             )
             order_db_id = cursor.fetchone()['order_id']
             
-            print(f"[FINALIZE] Order {order_db_id} created, inserting payment/commission")
+            # If there are multiple items in the cart, using the same txn_id would violate the unique primary key constraint of the payments table.
+            # Thus, we append a suffix of -{order_db_id} to make it unique per order.
+            order_txn_id = f"{txn_id}-{order_db_id}"
+            print(f"[FINALIZE] Order {order_db_id} created, inserting payment/commission with txn_id {order_txn_id}")
             cursor.execute(
                 "INSERT INTO payments (txn_id, order_id, amount, status) VALUES (%s,%s,%s,%s)",
-                (txn_id, order_db_id, total_amount, payment_status)
+                (order_txn_id, order_db_id, total_amount, payment_status)
             )
             comm_status = 'Settled' if payment_status == 'Completed' else 'Pending'
             cursor.execute(
@@ -529,10 +532,11 @@ def verify_settlement(data: VerifySettlementRequest, user=Depends(check_customer
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
 
-        # Update Payments table
+        # Update Payments table with unique txn_id containing order_id to prevent duplicates
+        settlement_txn_id = f"{data.razorpay_payment_id}-{data.order_id}"
         cursor.execute(
             "UPDATE Payments SET status='Completed', txn_id=%s WHERE order_id=%s",
-            (data.razorpay_payment_id, data.order_id)
+            (settlement_txn_id, data.order_id)
         )
         # Also update commissions to match
         cursor.execute("UPDATE commissions SET status='Paid' WHERE order_id=%s", (data.order_id,))
