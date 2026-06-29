@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
 import { useNavigate } from 'react-router-dom';
+import AddressBook from '../components/AddressBook';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
@@ -207,6 +208,8 @@ function VendorProfile() {
                    <button onClick={() => setEditMode(true)} className="btn">Edit Business Info</button>
                    <button onClick={handleLogout} className="btn danger">Logout</button>
                  </div>
+
+                 <AddressBook role="Vendor" />
 
                  <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
                    <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>🔔 Browser Notifications</h4>

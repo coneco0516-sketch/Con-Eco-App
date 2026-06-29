@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 import { useNavigate } from 'react-router-dom';
+import AddressBook from '../components/AddressBook';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
@@ -107,6 +108,9 @@ function AdminProfile() {
             )}
           </div>
         )}
+
+        <AddressBook role="Admin" />
+
       </main>
     </div>
   );

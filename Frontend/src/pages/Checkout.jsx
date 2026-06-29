@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CustomerSidebar from '../components/CustomerSidebar';
+import AddressSelector from '../components/AddressSelector';
 import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
@@ -15,6 +16,7 @@ function Checkout() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState('');
   const [address, setAddress] = useState('');
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [ackDelivery, setAckDelivery] = useState(false);
   const [creditInfo, setCreditInfo] = useState(null);
   const [platformSettings, setPlatformSettings] = useState({});
@@ -284,23 +286,11 @@ function Checkout() {
 
             <div style={{ marginBottom: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
               <label style={{ color: 'var(--text-highlight)', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Delivery Address (Site Location) <span style={{ color: 'var(--danger-color)' }}>*</span></label>
-              <textarea
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Enter complete delivery address, pin code, and contact person..."
-                rows="3"
-                style={{
-                  width: '95%',
-                  padding: '0.75rem',
-                  borderRadius: '6px',
-                  border: '1px solid var(--surface-border)',
-                  background: 'rgba(0, 0, 0, 0.2)',
-                  color: 'var(--text-highlight)',
-                  fontFamily: 'inherit',
-                  resize: 'vertical',
-                  marginBottom: '1rem'
-                }}
-              ></textarea>
+              <AddressSelector 
+                selectedAddressId={selectedAddressId}
+                onSelect={setSelectedAddressId}
+                onAddressStringChange={setAddress}
+              />
 
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginTop: '0.5rem', background: 'rgba(255,215,0,0.1)', padding: '1rem', borderRadius: '6px', border: '1px solid rgba(255,215,0,0.3)' }}>
                 <input
