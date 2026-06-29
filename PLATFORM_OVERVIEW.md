@@ -12,6 +12,8 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 ## ✨ Features
 
 ### 🛍️ For Customers (Buyers)
+- **Smart Address Book**: Manage delivery addresses with automatic India Post Pincode lookups.
+- **Service & Product Tracking**: Distinct visual lifecycles for bulk goods vs. scheduled services.
 - **Bulk Price Negotiation**: Request custom quotes for large orders directly from the vendor.
 - **Pay Later (Credit System)**: 7-day or 14-day credit limits assigned by the Admin.
 - **Real-time Order Tracking**: Web Push and Email notifications from "Order Placed" to "Delivered."
@@ -20,6 +22,7 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 
 ### 🏪 For Vendors (Sellers)
 - **Comprehensive Dashboard**: Track Gross Sales, Platform Commissions, and Net Earnings in real-time.
+- **Business Addresses**: Save warehouse and registered office logistics data.
 - **Vendor Wallet**: Automated earnings tracking with "Withdrawal Request" system for bank payouts.
 - **QC Reliability Score**: High-performing vendors get better platform visibility.
 - **Weekly Billing**: Automated commission invoices generated every Monday.

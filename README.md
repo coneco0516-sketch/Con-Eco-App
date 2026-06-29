@@ -20,6 +20,7 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - [Billing & Commissions](#-billing--commissions)
 - [GST Billing System](#-gst-billing-system)
 - [Email System](#-email-system)
+- [Future Features Roadmap](#-future-features-roadmap)
 - [Deployment](#-deployment)
 
 ---
@@ -35,6 +36,8 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 
 ### 🛍️ Customers
 - Unified product & service catalogue with detailed overview pages.
+- **Smart Address Book**: Manage multiple delivery addresses (Home, Office, Project Site) with intelligent **Pincode Auto-fill** powered by the India Post API.
+- **Service & Product Lifecycles**: Distinct, visually tracked lifecycles (Products: Processing -> Delivered; Services: Scheduled -> Completed).
 - **Bulk Price Negotiation**: Request custom quotes for large orders.
 - Direct order placement via **COD** (Cash on Delivery).
 - **Pay Later Credit Tab**: Place orders on credit, pay within 7–14 days.
@@ -45,7 +48,9 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 
 ### 🏪 Vendors
 - Transparent **Earnings Dashboard** (Gross vs Commission vs Net).
+- **Business Address Book**: Store multi-location logistics data (Warehouse, Registered Office, Pickup Point).
 - **Bulk Price Management**: Rapidly update prices across the entire catalogue.
+- **Dynamic Order Acceptance**: Accept custom bulk negotiations and directly alter unit pricing from the dashboard.
 - **Vendor Wallet**: Automated earnings tracking with Bank Withdrawal (Payout) requests.
 - **Bill Upload System**: Upload GST Tax Invoices or Simple Bills for each order from the dashboard. Each order card clearly shows the customer's requested bill type.
 - Weekly automated billing system with downloadable compliance receipts.
@@ -257,6 +262,19 @@ ConEco uses a dual-channel communication strategy for maximum reliability:
 | Security / Login alerts | All Roles |
 
 > See `BREVO_EMAIL_SETUP.md` for full email configuration guide.
+
+---
+
+## 🚀 Future Features Roadmap
+
+We are actively developing the platform before moving to mobile apps. Planned features include:
+1. **Project-Based Procurement**
+2. **Reverse Auction / RFQ Engine**
+3. **Material Comparison Tool**
+4. **Live Negotiation Chat**
+5. **Logistics & Freight Calculator**
+
+> See `Documents/Plan/Future_Features_Roadmap.md` for the complete 3-month implementation timeline.
 
 ---
 
