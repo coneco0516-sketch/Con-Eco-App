@@ -289,8 +289,20 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor), b
         cursor = conn.cursor(dictionary=True)
         vendor_id = user['user_id']
         
-        cursor.execute("SELECT payment_method, customer_id, delivered_at FROM Orders WHERE order_id=%s", (data.order_id,))
+        cursor.execute("SELECT payment_method, customer_id, delivered_at, order_type FROM Orders WHERE order_id=%s", (data.order_id,))
         order = cursor.fetchone()
+        
+        if not order:
+            return {"status": "error", "message": "Order not found"}
+            
+        order_type = order.get('order_type', 'Product')
+        if order_type == 'Service':
+            valid_statuses = ['Pending', 'Confirmed', 'Scheduled', 'In Progress', 'Completed', 'Cancelled']
+        else:
+            valid_statuses = ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Completed', 'Cancelled']
+            
+        if data.status not in valid_statuses:
+            return {"status": "error", "message": f"Invalid status '{data.status}' for order type '{order_type}'"}
 
         cursor.execute("UPDATE Orders SET status=%s WHERE order_id=%s AND vendor_id=%s", (data.status, data.order_id, vendor_id))
         
