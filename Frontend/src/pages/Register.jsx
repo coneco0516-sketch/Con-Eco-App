@@ -31,6 +31,10 @@ function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleRoleSelect = (role) => {
+    setFormData({ ...formData, role });
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setError(null);
@@ -58,6 +62,11 @@ function Register() {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     if (!passwordRegex.test(formData.password)) {
       setError("Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.");
+      return;
+    }
+
+    if (!formData.role) {
+      setError("Please select an Account Role (Customer or Vendor) to continue.");
       return;
     }
 
@@ -213,12 +222,54 @@ function Register() {
         </div>
 
         <div>
-          <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Account Role</label>
-          <select name="role" onChange={handleChange} required style={{ ...inputStyle, cursor: 'pointer' }}>
-            <option value="">Select account type</option>
-            <option value="customer">Customer (Buy materials & hire contractors)</option>
-            <option value="vendor">Vendor (Sell materials & list services)</option>
-          </select>
+          <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.6rem' }}>Account Role</label>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div
+              onClick={() => handleRoleSelect('customer')}
+              className="glass-panel"
+              style={{
+                flex: '1 1 220px',
+                padding: '1rem 1.2rem',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                border: formData.role === 'customer' ? '2px solid var(--primary-color)' : '1px solid var(--surface-border)',
+                background: formData.role === 'customer' ? 'rgba(46, 160, 67, 0.08)' : 'rgba(0,0,0,0.15)',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.8rem'
+              }}
+            >
+              <div style={{ fontSize: '1.8rem', background: 'rgba(56, 112, 224, 0.1)', padding: '0.4rem 0.6rem', borderRadius: '8px' }}>🛒</div>
+              <div>
+                <h4 style={{ margin: 0, color: 'var(--text-highlight)', fontWeight: '700', fontSize: '0.95rem' }}>Customer</h4>
+                <p style={{ margin: '0.2rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: '1.3' }}>Buy materials & book services</p>
+              </div>
+            </div>
+
+            <div
+              onClick={() => handleRoleSelect('vendor')}
+              className="glass-panel"
+              style={{
+                flex: '1 1 220px',
+                padding: '1rem 1.2rem',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                border: formData.role === 'vendor' ? '2px solid var(--primary-color)' : '1px solid var(--surface-border)',
+                background: formData.role === 'vendor' ? 'rgba(46, 160, 67, 0.08)' : 'rgba(0,0,0,0.15)',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.8rem'
+              }}
+            >
+              <div style={{ fontSize: '1.8rem', background: 'rgba(46, 160, 67, 0.1)', padding: '0.4rem 0.6rem', borderRadius: '8px' }}>🏢</div>
+              <div>
+                <h4 style={{ margin: 0, color: 'var(--text-highlight)', fontWeight: '700', fontSize: '0.95rem' }}>Vendor</h4>
+                <p style={{ margin: '0.2rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: '1.3' }}>Sell products & contract services</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* VENDOR SECTION */}
