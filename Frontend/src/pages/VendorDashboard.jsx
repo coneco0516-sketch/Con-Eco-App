@@ -156,14 +156,14 @@ function VendorDashboard() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Row 1: Catalog & Orders */}
           <div className="dashboard-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
-            <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <div className="stat-card glass-panel interactive-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
               <span style={{ fontSize: '2.5rem' }}>📋</span>
               <h3>Catalogue Size</h3>
               <p className="stat-value">{loading ? '...' : (stats ? stats.catalogue_size : 0)}</p>
               <Link to="/vendor/catalogue" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Manage Products →</Link>
             </div>
 
-            <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <div className="stat-card glass-panel interactive-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
               <span style={{ fontSize: '2.5rem' }}>📥</span>
               <h3>Pending Orders</h3>
               <p className="stat-value" style={{ color: stats && stats.pending_orders > 0 ? '#f85149' : 'var(--text-highlight)' }}>
@@ -172,14 +172,14 @@ function VendorDashboard() {
               <Link to="/vendor/orders" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Process Orders →</Link>
             </div>
 
-            <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <div className="stat-card glass-panel interactive-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
               <span style={{ fontSize: '2.5rem' }}>💰</span>
               <h3>Net Earnings</h3>
               <p className="stat-value" style={{ color: '#3fb950' }}>₹{loading ? '...' : (stats ? stats.total_earnings : '0')}</p>
               <Link to="/vendor/earnings" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Breakdown →</Link>
             </div>
 
-            <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <div className="stat-card glass-panel interactive-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
               <span style={{ fontSize: '2.5rem' }}>🧾</span>
               <h3>Outstanding Commission</h3>
               <p className="stat-value" style={{ color: stats && stats.outstanding_commission > 0 ? '#f85149' : 'var(--primary-color)' }}>
@@ -212,19 +212,19 @@ function VendorDashboard() {
             <div className="glass-panel" style={{ padding: '2rem' }}>
               <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 1.5rem 0' }}>🛠️ Quick Actions</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <Link to="/vendor/catalogue" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card">
+                <Link to="/vendor/catalogue" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card interactive-card">
                   <span style={{ fontSize: '2rem' }}>🏗️</span>
                   <h4 style={{ margin: '10px 0 0 0', fontSize: '0.95rem', color: 'var(--text-highlight)' }}>Catalog</h4>
                 </Link>
-                <Link to="/vendor/rfq" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card">
+                <Link to="/vendor/rfq" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card interactive-card">
                   <span style={{ fontSize: '2rem' }}>🔄</span>
                   <h4 style={{ margin: '10px 0 0 0', fontSize: '0.95rem', color: 'var(--text-highlight)' }}>RFQ Bids</h4>
                 </Link>
-                <Link to="/vendor/orders" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card">
+                <Link to="/vendor/orders" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card interactive-card">
                   <span style={{ fontSize: '2rem' }}>🚚</span>
                   <h4 style={{ margin: '10px 0 0 0', fontSize: '0.95rem', color: 'var(--text-highlight)' }}>Orders</h4>
                 </Link>
-                <Link to="/vendor/analytics" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card">
+                <Link to="/vendor/analytics" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card interactive-card">
                   <span style={{ fontSize: '2rem' }}>📈</span>
                   <h4 style={{ margin: '10px 0 0 0', fontSize: '0.95rem', color: 'var(--text-highlight)' }}>Analytics</h4>
                 </Link>

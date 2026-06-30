@@ -759,4 +759,17 @@ body.light-mode .interactive-card:hover {
   height: 360px;
   border-radius: 12px;
 }
+
+/* Skeleton shimmer rows (for orders/cart) */
+.skeleton-row {
+  height: 90px;
+  border-radius: 10px;
+}
+
+/* Mobile main padding override for dashboard pages */
+@media (max-width: 768px) {
+  .dashboard-layout main {
+    padding: 1.2rem !important;
+  }
+}
 

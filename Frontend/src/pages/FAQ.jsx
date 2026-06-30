@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const faqData = [
     {
@@ -40,92 +41,152 @@ function FAQ() {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  const filteredFaq = faqData.filter(item => 
+    item.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    item.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div style={{ maxWidth: '800px', margin: '4rem auto', padding: '0 1.5rem 6rem' }}>
-      <h2 style={{ fontSize: '3rem', color: 'var(--text-highlight)', marginBottom: '1rem', textAlign: 'center', fontWeight: '800' }}>
-        Frequently Asked Questions
-      </h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '3.5rem', textAlign: 'center', fontSize: '1.2rem' }}>
-        Learn how ConEco simplifies bulk B2B procurement and local supply chain logistics.
-      </p>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {faqData.map((item, idx) => {
-          const isOpen = openIndex === idx;
-          return (
-            <div 
-              key={idx} 
-              className="glass-panel" 
-              style={{ 
-                borderRadius: '12px', 
-                overflow: 'hidden', 
-                border: isOpen ? '1px solid var(--primary-color)' : '1px solid var(--surface-border)',
-                transition: 'all 0.3s ease' 
-              }}
-            >
+      {/* Title */}
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '3rem', color: 'var(--text-highlight)', marginBottom: '1rem', fontWeight: '800' }}>
+          Frequently Asked Questions
+        </h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', margin: 0 }}>
+          Learn how ConEco simplifies bulk B2B procurement and local supply chain logistics.
+        </p>
+      </div>
+
+      {/* Search Input */}
+      <div style={{ marginBottom: '2.5rem', position: 'relative' }}>
+        <input 
+          type="text" 
+          placeholder="🔍 Search FAQ topics..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="input-field"
+          style={{
+            width: '100%',
+            padding: '1rem 1.5rem',
+            borderRadius: '12px',
+            background: 'var(--input-bg)',
+            border: '1px solid var(--surface-border)',
+            color: 'var(--text-highlight)',
+            fontSize: '1.05rem',
+            boxSizing: 'border-box'
+          }}
+        />
+        {searchQuery && (
+          <button 
+            onClick={() => setSearchQuery('')}
+            style={{
+              position: 'absolute',
+              right: '15px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            Clear
+          </button>
+        )}
+      </div>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+        {filteredFaq.length > 0 ? (
+          filteredFaq.map((item, idx) => {
+            const isOpen = openIndex === idx;
+            return (
               <div 
-                onClick={() => toggleFAQ(idx)}
+                key={idx} 
+                className="glass-panel" 
                 style={{ 
-                  padding: '1.5rem', 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  cursor: 'pointer',
-                  background: isOpen ? 'rgba(46, 160, 67, 0.03)' : 'transparent'
+                  borderRadius: '16px', 
+                  overflow: 'hidden', 
+                  border: isOpen ? '1px solid var(--primary-color)' : '1px solid var(--surface-border)',
+                  boxShadow: isOpen ? '0 12px 30px rgba(46, 160, 67, 0.15)' : 'none',
+                  transition: 'all 0.3s ease' 
                 }}
               >
-                <div>
+                <div 
+                  onClick={() => toggleFAQ(idx)}
+                  style={{ 
+                    padding: '1.5rem', 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    cursor: 'pointer',
+                    background: isOpen ? 'rgba(46, 160, 67, 0.04)' : 'transparent',
+                    userSelect: 'none'
+                  }}
+                >
+                  <div style={{ paddingRight: '1rem' }}>
+                    <span style={{ 
+                      fontSize: '0.7rem', 
+                      background: 'rgba(255,255,255,0.05)', 
+                      color: 'var(--text-secondary)', 
+                      padding: '3px 8px', 
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                      fontWeight: '800',
+                      letterSpacing: '0.8px',
+                      border: '1px solid var(--surface-border)'
+                    }}>
+                      {item.category}
+                    </span>
+                    <h3 style={{ 
+                      color: isOpen ? 'var(--text-highlight)' : 'var(--text-primary)', 
+                      margin: '10px 0 0 0', 
+                      fontSize: '1.15rem',
+                      fontWeight: '700'
+                    }}>
+                      {item.question}
+                    </h3>
+                  </div>
                   <span style={{ 
-                    fontSize: '0.75rem', 
-                    background: 'rgba(255,255,255,0.05)', 
-                    color: 'var(--text-secondary)', 
-                    padding: '2px 8px', 
-                    borderRadius: '4px',
-                    marginRight: '10px',
-                    textTransform: 'uppercase',
-                    fontWeight: 'bold',
-                    letterSpacing: '0.5px'
+                    fontSize: '1rem', 
+                    color: isOpen ? 'var(--primary-color)' : 'var(--text-secondary)',
+                    transition: 'transform 0.3s ease',
+                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0)'
                   }}>
-                    {item.category}
+                    ▼
                   </span>
-                  <h3 style={{ 
-                    color: isOpen ? 'var(--text-highlight)' : 'var(--text-primary)', 
-                    margin: '8px 0 0 0', 
-                    fontSize: '1.15rem',
-                    fontWeight: '600'
-                  }}>
-                    {item.question}
-                  </h3>
                 </div>
-                <span style={{ 
-                  fontSize: '1.2rem', 
-                  color: isOpen ? 'var(--primary-color)' : 'var(--text-secondary)',
-                  transition: 'transform 0.3s ease',
-                  transform: isOpen ? 'rotate(180deg)' : 'rotate(0)'
-                }}>
-                  ▼
-                </span>
-              </div>
-              
-              <div style={{ 
-                maxHeight: isOpen ? '500px' : '0', 
-                overflow: 'hidden',
-                transition: 'all 0.3s cubic-bezier(0,1,0.5,1)'
-              }}>
+                
                 <div style={{ 
-                  padding: '0 1.5rem 1.5rem 1.5rem', 
-                  color: 'var(--text-secondary)', 
-                  lineHeight: '1.6',
-                  fontSize: '0.95rem',
-                  borderTop: '1px solid var(--surface-border)',
-                  paddingTop: '1rem'
+                  maxHeight: isOpen ? '400px' : '0', 
+                  opacity: isOpen ? 1 : 0,
+                  overflow: 'hidden',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}>
-                  {item.answer}
+                  <div style={{ 
+                    padding: '0 1.5rem 1.5rem 1.5rem', 
+                    color: 'var(--text-secondary)', 
+                    lineHeight: '1.7',
+                    fontSize: '0.95rem',
+                    borderTop: '1px solid var(--surface-border)',
+                    paddingTop: '1.2rem'
+                  }}>
+                    {item.answer}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <div className="glass-panel" style={{ padding: '4rem 2rem', textAlign: 'center', borderRadius: '16px' }}>
+            <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>🔍</span>
+            <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>No Match Found</h3>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Try looking for keywords like 'QC', 'GST', 'COD', or 'RFQ'.</p>
+          </div>
+        )}
       </div>
     </div>
   );

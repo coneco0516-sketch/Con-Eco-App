@@ -118,25 +118,25 @@ function CustomerDashboard() {
 
         {/* Live Stat KPI Tiles */}
         <div className="dashboard-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-          <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <div className="stat-card glass-panel interactive-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '2.5rem' }}>📦</span>
             <h3>Total Orders</h3>
             <p className="stat-value">{loading ? '...' : (stats ? stats.orders_count : 0)}</p>
             <Link to="/customer/orders" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>View Orders →</Link>
           </div>
-          <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <div className="stat-card glass-panel interactive-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '2.5rem' }}>🛠️</span>
             <h3>Booked Services</h3>
             <p className="stat-value">{loading ? '...' : (stats ? stats.services_count : 0)}</p>
             <Link to="/customer/booked-services" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Manage Bookings →</Link>
           </div>
-          <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <div className="stat-card glass-panel interactive-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '2.5rem' }}>🏗️</span>
             <h3>Active Sites</h3>
             <p className="stat-value">{loading ? '...' : (stats ? stats.sites_count : 0)}</p>
             <Link to="/customer/projects" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Manage Projects →</Link>
           </div>
-          <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <div className="stat-card glass-panel interactive-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '2.5rem' }}>🔄</span>
             <h3>Open RFQs</h3>
             <p className="stat-value">{loading ? '...' : (stats ? stats.rfq_count : 0)}</p>
@@ -152,7 +152,7 @@ function CustomerDashboard() {
               ⚡ Quick Procurement Actions
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <Link to="/customer/products" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: '10px', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s' }} className="quick-action-link">
+              <Link to="/customer/products" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: '10px', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s' }} className="quick-action-link interactive-card">
                 <span style={{ fontSize: '2rem', padding: '8px', background: 'rgba(46, 160, 67, 0.1)', borderRadius: '8px' }}>🧱</span>
                 <div>
                   <h4 style={{ margin: 0, color: 'var(--text-highlight)' }}>Request Raw Materials</h4>
@@ -160,7 +160,7 @@ function CustomerDashboard() {
                 </div>
               </Link>
 
-              <Link to="/customer/services" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: '10px', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s' }} className="quick-action-link">
+              <Link to="/customer/services" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: '10px', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s' }} className="quick-action-link interactive-card">
                 <span style={{ fontSize: '2rem', padding: '8px', background: 'rgba(56, 112, 224, 0.1)', borderRadius: '8px' }}>👷</span>
                 <div>
                   <h4 style={{ margin: 0, color: 'var(--text-highlight)' }}>Book Construction Experts</h4>
@@ -168,7 +168,7 @@ function CustomerDashboard() {
                 </div>
               </Link>
 
-              <Link to="/customer/projects" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: '10px', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s' }} className="quick-action-link">
+              <Link to="/customer/projects" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: '10px', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s' }} className="quick-action-link interactive-card">
                 <span style={{ fontSize: '2rem', padding: '8px', background: 'rgba(241, 196, 15, 0.1)', borderRadius: '8px' }}>📍</span>
                 <div>
                   <h4 style={{ margin: 0, color: 'var(--text-highlight)' }}>Add/Track Project Site</h4>
@@ -184,7 +184,10 @@ function CustomerDashboard() {
               ⏱️ Recent Orders
             </h3>
             {loading ? (
-              <p style={{ color: 'var(--text-secondary)' }}>Loading history...</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <div className="glass-panel skeleton-pulse skeleton-row" style={{ height: '70px' }}></div>
+                <div className="glass-panel skeleton-pulse skeleton-row" style={{ height: '70px' }}></div>
+              </div>
             ) : recentOrders.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-secondary)' }}>
                 <span style={{ fontSize: '2rem' }}>📭</span>
