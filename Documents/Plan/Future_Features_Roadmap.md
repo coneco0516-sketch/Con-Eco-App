@@ -180,49 +180,58 @@ ALTER TABLE Services
 
 ---
 
-# 🚚 FEATURE 4 — Logistics & Freight Calculator
+# ~~🚚 FEATURE 4 — Logistics & Freight Calculator~~
 
-## What It Does
-Automatically adds a calculated freight/transport charge to the order total based on the distance between the vendor's warehouse and the customer's delivery address.
+## ~~What It Does~~
+~~Automatically estimates the freight/transport charge for orders based on the distance between the vendor's warehouse and the customer's delivery address, using vendor-defined freight rules (base charge, per-KM rate, free delivery threshold, vehicle type). It also allows vendors to manually override or quote a freight charge for an order, which the customer then approves or negotiates (Model B + Model C hybrid).~~
 
-## Database Changes
+## ~~Database Changes~~
 
 ```sql
--- Add vendor warehouse location
-ALTER TABLE Vendors
-    ADD COLUMN warehouse_lat DECIMAL(10,8),
-    ADD COLUMN warehouse_lng DECIMAL(11,8),
-    ADD COLUMN warehouse_address TEXT;
+-- Add vendor warehouse location & freight rules
+-- ALTER TABLE Vendors
+--     ADD COLUMN warehouse_lat DECIMAL(10,8),
+--     ADD COLUMN warehouse_lng DECIMAL(11,8),
+--     ADD COLUMN warehouse_address TEXT,
+--     ADD COLUMN freight_base_charge DECIMAL(10,2) DEFAULT 0,
+--     ADD COLUMN freight_rate_per_km DECIMAL(10,2) DEFAULT 0,
+--     ADD COLUMN freight_free_above DECIMAL(10,2) DEFAULT NULL,
+--     ADD COLUMN freight_max_radius_km DECIMAL(8,2) DEFAULT NULL,
+--     ADD COLUMN freight_vehicle_type VARCHAR(50) DEFAULT 'Mini Truck';
 
--- Extend Orders with logistics info
-ALTER TABLE Orders
-    ADD COLUMN freight_charge DECIMAL(10,2) DEFAULT 0,
-    ADD COLUMN vehicle_type VARCHAR(50),
-    ADD COLUMN distance_km DECIMAL(8,2),
-    ADD COLUMN eway_bill_url TEXT,
-    ADD COLUMN gate_pass_url TEXT;
+-- Extend Orders with logistics & quote info
+-- ALTER TABLE Orders
+--     ADD COLUMN freight_charge DECIMAL(10,2) DEFAULT 0,
+--     ADD COLUMN vehicle_type VARCHAR(50),
+--     ADD COLUMN distance_km DECIMAL(8,2),
+--     ADD COLUMN eway_bill_url TEXT,
+--     ADD COLUMN gate_pass_url TEXT,
+--     ADD COLUMN freight_status VARCHAR(30) DEFAULT 'Estimated';
 ```
 
-## Backend API
+## ~~Backend API~~
 
-| Method | Endpoint | Purpose |
+| ~~Method~~ | ~~Endpoint~~ | ~~Purpose~~ |
 |---|---|---|
-| `POST` | `/api/customer/freight/estimate` | Accepts vendor ID + delivery coordinates, returns distance and freight estimate |
-| `POST` | `/api/vendor/orders/{id}/upload_eway` | Upload E-Way bill for an order |
-| `PUT` | `/api/vendor/profile/warehouse` | Update warehouse lat/lng and address |
+| ~~`POST`~~ | ~~`/api/customer/orders/estimate-freight`~~ | ~~Accepts address ID or custom address text, estimates distance/freight for each vendor/item in cart (Model B fallback of ₹500 if warehouse coordinates are missing)~~ |
+| ~~`PUT`~~ | ~~`/api/vendor/profile/warehouse-freight`~~ | ~~Update vendor's warehouse address, coordinates, and freight policy details~~ |
+| ~~`PUT`~~ | ~~`/api/vendor/orders/{id}/freight`~~ | ~~Vendor manually quotes or overrides freight charge for a specific order (status becomes 'Quoted') (Model C)~~ |
+| ~~`PUT`~~ | ~~`/api/customer/orders/{id}/freight/approve`~~ | ~~Customer approves the quoted freight charge (status becomes 'Approved') (Model C)~~ |
+| ~~`PUT`~~ | ~~`/api/customer/orders/{id}/freight/reject`~~ | ~~Customer rejects the quoted freight charge (status becomes 'Rejected') (Model C)~~ |
+| ~~`POST`~~ | ~~`/api/vendor/orders/{id}/upload-logistics`~~ | ~~Upload E-Way bill or Gate pass documents~~ |
 
-## External Integration
-- Use **OpenRouteService** (free) or **Google Maps Distance Matrix API** to calculate road distance.
-- Base freight formula: `₹ = Base Rate + (Rate Per KM × Distance)`
+## ~~External Integration~~
+~~- Use **OpenRouteService** (free) or a coordinate-based estimation to calculate road distance.~~
+~~- Base freight formula: `₹ = Base Rate + (Rate Per KM × Distance)`, overridden to 0 if total order price >= `freight_free_above`.~~
 
-## Frontend Changes
+## ~~Frontend Changes~~
 
-| Component | What to Build |
+| ~~Component~~ | ~~What to Build / Modify~~ |
 |---|---|
-| `CartSummary.jsx` (modify) | Add "Freight Estimate" section with a delivery pincode input that triggers the API call |
-| `VendorProfile.jsx` (modify) | Add a warehouse location picker (map pin or address input with geocoding) |
-| `VendorOrderCard.jsx` (modify) | Add "Upload E-Way Bill" and "Upload Gate Pass" buttons alongside the existing bill upload |
-| `MyBookedServices.jsx` (modify) | Show freight amount and vehicle type in the order breakdown panel |
+| ~~`Checkout.jsx` / `Cart.jsx`~~ | ~~Show estimated freight during checkout, clearly noted as "Subject to vendor final quote if required".~~ |
+| ~~`VendorProfile.jsx`~~ | ~~Add fields for warehouse address, lat/lng (optional geocoding/input), base rate, rate/km, free delivery threshold, and default vehicle.~~ |
+| ~~`VendorOrderCard.jsx` / Details~~ | ~~Form to update/quote the freight charge for active orders. Also upload E-Way Bill/Gate Pass.~~ |
+| ~~`CustomerOrders.jsx` / Details~~ | ~~View showing freight charges and button to approve the custom freight quote if status is 'Quoted'.~~ |
 
 ---
 

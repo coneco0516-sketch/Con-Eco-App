@@ -137,11 +137,12 @@ def check_customer(user=Depends(get_current_user_from_cookie)):
     return user
 
 def finalize_order(cust_id, delivery_address, payment_method, payment_status, txn_id,
-                   bill_type="Non-GST", background_tasks=None):
+                   bill_type="Non-GST", background_tasks=None, site_id=None, address_id=None):
     """
     Common logic to move items from cart to orders and record payments.
     Accepts optional BackgroundTasks for async email sending.
     """
+    from routers.customer import estimate_distance_sync, calculate_freight_charge
     print(f"[FINALIZE] Starting order finalization for customer {cust_id}, txn {txn_id}")
     conn = get_db_connection()
     try:
@@ -151,7 +152,9 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             SELECT c.*, COALESCE(p.vendor_id, s.vendor_id) as vendor_id,
                          COALESCE(p.price,     s.price)     as price,
                          COALESCE(p.name,      s.name)      as item_name,
-                         COALESCE(v1.gst_number, v2.gst_number) as gst_number
+                         COALESCE(v1.gst_number, v2.gst_number) as gst_number,
+                         COALESCE(v1.warehouse_lat, v2.warehouse_lat) as warehouse_lat,
+                         COALESCE(v1.warehouse_lng, v2.warehouse_lng) as warehouse_lng
             FROM cart c
             LEFT JOIN products p ON c.item_type='Product' AND c.item_id=p.product_id
             LEFT JOIN services s ON c.item_type='Service' AND c.item_id=s.service_id
@@ -168,6 +171,30 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             print("[FINALIZE ERROR] Cart is empty")
             return False, "Cart is empty"
 
+        # Determine customer city/state/pincode
+        c_city = ""
+        c_state = ""
+        c_pincode = ""
+        
+        if address_id:
+            cursor.execute("SELECT * FROM SavedAddresses WHERE address_id=%s", (address_id,))
+            addr = cursor.fetchone()
+            if addr:
+                c_city = addr['city']
+                c_state = addr['state']
+                c_pincode = addr['pincode']
+        else:
+            parts = [p.strip() for p in delivery_address.split(',')]
+            if len(parts) >= 3:
+                c_city = parts[-3]
+                c_state = parts[-2]
+                c_pincode = parts[-1]
+            elif len(parts) == 2:
+                c_city = parts[-2]
+                c_state = parts[-1]
+            else:
+                c_city = parts[0]
+
         grand_total = 0.0
         for item in cart_items:
             if item["price"] is None:
@@ -183,7 +210,21 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             commission_rate = get_platform_setting(comm_key, 3.0)
             
             commission_amount = round(base_amount * float(commission_rate) / 100, 2)
-            total_amount = round(base_amount + gst_amount + commission_amount, 2)
+            
+            # Logistics & Freight Calculation
+            dist, base_charge, rate_per_km, free_above, max_radius, vehicle = estimate_distance_sync(
+                item['vendor_id'], c_city, c_state, c_pincode
+            )
+            freight_charge, is_free, out_of_range = calculate_freight_charge(
+                dist, base_charge, rate_per_km, free_above, max_radius, base_amount
+            )
+            
+            is_fallback = (item.get('warehouse_lat') is None or item.get('warehouse_lng') is None)
+            if is_fallback:
+                if base_charge == 0:
+                    freight_charge = 500.00
+            
+            total_amount = round(base_amount + gst_amount + commission_amount + freight_charge, 2)
             grand_total += total_amount
             order_status = 'Pending' if payment_method == 'COD' else 'Processing'
             
@@ -198,12 +239,13 @@ def finalize_order(cust_id, delivery_address, payment_method, payment_status, tx
             print(f"[FINALIZE] Inserting order for item {item['item_id']}, total {total_amount}")
             cursor.execute(
                 """INSERT INTO orders 
-                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, bill_type, credit_stage1_due, credit_stage2_due) 
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                   (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, bill_type, credit_stage1_due, credit_stage2_due, site_id, freight_charge, vehicle_type, distance_km, freight_status) 
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                    RETURNING order_id""",
                 (cust_id, item["vendor_id"], item["item_type"], item["item_id"], item["quantity"],
                  total_amount, base_amount, gst_amount, commission_amount, total_amount,
-                 order_status, delivery_address, payment_method, bill_type, s1_due, s2_due)
+                 order_status, delivery_address, payment_method, bill_type, s1_due, s2_due, site_id,
+                 freight_charge, vehicle, dist, 'Estimated')
             )
             order_db_id = cursor.fetchone()['order_id']
             
@@ -292,6 +334,8 @@ class VerifyPaymentRequest(BaseModel):
     delivery_address:    str = ""
     payment_method:      str = "Card"
     bill_type:           str = "Non-GST"
+    site_id:             Optional[int] = None
+    address_id:          Optional[int] = None
 
 @router.post("/verify")
 def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_customer),
@@ -323,7 +367,9 @@ def verify_razorpay_payment(data: VerifyPaymentRequest, user=Depends(check_custo
         'Completed',
         data.razorpay_payment_id,
         bill_type=data.bill_type,
-        background_tasks=background_tasks
+        background_tasks=background_tasks,
+        site_id=data.site_id,
+        address_id=data.address_id
     )
 
     if success:
@@ -337,6 +383,8 @@ class OfflineOrderRequest(BaseModel):
     delivery_address: str
     payment_method:   str # 'COD'
     bill_type:        str = "Non-GST"
+    site_id:          Optional[int] = None
+    address_id:       Optional[int] = None
 
 @router.post("/place_order_offline")
 def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer),
@@ -364,7 +412,9 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer),
         'Pending',
         txn_id,
         bill_type=data.bill_type,
-        background_tasks=background_tasks
+        background_tasks=background_tasks,
+        site_id=data.site_id,
+        address_id=data.address_id
     )
 
     if success:
@@ -377,10 +427,13 @@ def place_order_offline(data: OfflineOrderRequest, user=Depends(check_customer),
 class PayLaterOrderRequest(BaseModel):
     delivery_address: str
     bill_type:        str = "Non-GST"
+    site_id:          Optional[int] = None
+    address_id:       Optional[int] = None
 
 @router.post("/place_order_pay_later")
 def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_customer),
                          background_tasks: BackgroundTasks = None):
+    from routers.customer import estimate_distance_sync, calculate_freight_charge
     conn = get_db_connection()
     try:
         cursor = conn.cursor(dictionary=True)
@@ -417,9 +470,12 @@ def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_custome
 
         # 4. Calculate cart total accurately (matching finalize_order logic)
         cursor.execute("""
-            SELECT c.quantity, c.item_type, 
+            SELECT c.quantity, c.item_type, c.item_id,
+                   COALESCE(p.vendor_id, s.vendor_id) as vendor_id,
                    COALESCE(p.price, s.price) as price,
-                   COALESCE(v1.gst_number, v2.gst_number) as gst_number
+                   COALESCE(v1.gst_number, v2.gst_number) as gst_number,
+                   COALESCE(v1.warehouse_lat, v2.warehouse_lat) as warehouse_lat,
+                   COALESCE(v1.warehouse_lng, v2.warehouse_lng) as warehouse_lng
             FROM cart c
             LEFT JOIN products p ON c.item_type='Product' AND c.item_id=p.product_id
             LEFT JOIN services s ON c.item_type='Service' AND c.item_id=s.service_id
@@ -431,6 +487,29 @@ def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_custome
         
         if not items:
              raise HTTPException(status_code=400, detail="Cart is empty.")
+
+        c_city = ""
+        c_state = ""
+        c_pincode = ""
+        
+        if data.address_id:
+            cursor.execute("SELECT * FROM SavedAddresses WHERE address_id=%s", (data.address_id,))
+            addr = cursor.fetchone()
+            if addr:
+                c_city = addr['city']
+                c_state = addr['state']
+                c_pincode = addr['pincode']
+        else:
+            parts = [p.strip() for p in data.delivery_address.split(',')]
+            if len(parts) >= 3:
+                c_city = parts[-3]
+                c_state = parts[-2]
+                c_pincode = parts[-1]
+            elif len(parts) == 2:
+                c_city = parts[-2]
+                c_state = parts[-1]
+            else:
+                c_city = parts[0]
 
         total_order_amount = 0
         for item in items:
@@ -444,7 +523,20 @@ def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_custome
             rate = float(get_platform_setting(comm_key, 3.0))
             item_comm = round(item_base * rate / 100, 2)
             
-            total_order_amount += (item_base + item_gst + item_comm)
+            # Freight charge calculation
+            dist, base_charge, rate_per_km, free_above, max_radius, vehicle = estimate_distance_sync(
+                item['vendor_id'], c_city, c_state, c_pincode
+            )
+            freight_charge, is_free, out_of_range = calculate_freight_charge(
+                dist, base_charge, rate_per_km, free_above, max_radius, item_base
+            )
+            
+            is_fallback = (item.get('warehouse_lat') is None or item.get('warehouse_lng') is None)
+            if is_fallback:
+                if base_charge == 0:
+                    freight_charge = 500.00
+            
+            total_order_amount += (item_base + item_gst + item_comm + freight_charge)
 
         total_order_amount = round(total_order_amount, 2)
 
@@ -464,7 +556,9 @@ def place_order_pay_later(data: PayLaterOrderRequest, user=Depends(check_custome
             'Pending',
             txn_id,
             bill_type=data.bill_type,
-            background_tasks=background_tasks
+            background_tasks=background_tasks,
+            site_id=data.site_id,
+            address_id=data.address_id
         )
 
         if success:

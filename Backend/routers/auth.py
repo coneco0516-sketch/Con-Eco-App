@@ -348,7 +348,12 @@ def get_profile(request: Request):
             cursor.execute("SELECT city, state FROM customers WHERE customer_id=%s", (user['user_id'],))
             user.update(cursor.fetchone() or {})
         elif user['role'] == 'Vendor':
-            cursor.execute("SELECT company_name, gst_number, address, city, state, verification_status, qc_score FROM vendors WHERE vendor_id=%s", (user['user_id'],))
+            cursor.execute("""
+                SELECT company_name, gst_number, address, city, state, verification_status, qc_score,
+                       warehouse_lat, warehouse_lng, warehouse_address,
+                       freight_base_charge, freight_rate_per_km, freight_free_above, freight_max_radius_km, freight_vehicle_type
+                FROM vendors WHERE vendor_id=%s
+            """, (user['user_id'],))
             user.update(cursor.fetchone() or {})
             
         return {"status": "success", "profile": user}
@@ -370,8 +375,18 @@ def update_profile(request: Request, data: dict):
             cursor.execute("UPDATE customers SET city=%s, state=%s WHERE customer_id=%s",
                            (data.get('city'), data.get('state'), user_info['user_id']))
         elif user_info['role'] == 'Vendor':
-            cursor.execute("UPDATE vendors SET company_name=%s, gst_number=%s, address=%s, city=%s, state=%s WHERE vendor_id=%s",
-                           (data.get('company_name'), data.get('gst_number'), data.get('address'), data.get('city'), data.get('state'), user_info['user_id']))
+            cursor.execute("""
+                UPDATE vendors SET 
+                    company_name=%s, gst_number=%s, address=%s, city=%s, state=%s,
+                    warehouse_lat=%s, warehouse_lng=%s, warehouse_address=%s,
+                    freight_base_charge=%s, freight_rate_per_km=%s, freight_free_above=%s, freight_max_radius_km=%s, freight_vehicle_type=%s
+                WHERE vendor_id=%s
+            """, (
+                data.get('company_name'), data.get('gst_number'), data.get('address'), data.get('city'), data.get('state'),
+                data.get('warehouse_lat'), data.get('warehouse_lng'), data.get('warehouse_address'),
+                data.get('freight_base_charge'), data.get('freight_rate_per_km'), data.get('freight_free_above'), data.get('freight_max_radius_km'), data.get('freight_vehicle_type'),
+                user_info['user_id']
+            ))
         
         conn.commit()
         return {"status": "success", "message": "Profile updated successfully"}
