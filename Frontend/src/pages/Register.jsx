@@ -237,7 +237,8 @@ function Register() {
                 transition: 'all 0.2s ease',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.8rem'
+                gap: '0.8rem',
+                boxSizing: 'border-box'
               }}
             >
               <div style={{ fontSize: '1.8rem', background: 'rgba(56, 112, 224, 0.1)', padding: '0.4rem 0.6rem', borderRadius: '8px' }}>🛒</div>
@@ -260,7 +261,8 @@ function Register() {
                 transition: 'all 0.2s ease',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.8rem'
+                gap: '0.8rem',
+                boxSizing: 'border-box'
               }}
             >
               <div style={{ fontSize: '1.8rem', background: 'rgba(46, 160, 67, 0.1)', padding: '0.4rem 0.6rem', borderRadius: '8px' }}>🏢</div>
@@ -274,7 +276,7 @@ function Register() {
 
         {/* VENDOR SECTION */}
         {formData.role === 'vendor' && (
-          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--surface-border)', animation: 'fadeIn var(--transition-speed) ease-out' }}>
+          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '12px', border: '1px solid var(--surface-border)', boxSizing: 'border-box', width: '100%', animation: 'fadeIn var(--transition-speed) ease-out' }}>
             <h3 style={{ marginTop: 0, marginBottom: '1.2rem', color: 'var(--primary-color)', fontSize: '1.05rem', fontWeight: '700' }}>🏢 Vendor Details</h3>
             
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -308,7 +310,7 @@ function Register() {
 
         {/* CUSTOMER SECTION */}
         {formData.role === 'customer' && (
-          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--surface-border)', animation: 'fadeIn var(--transition-speed) ease-out' }}>
+          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '12px', border: '1px solid var(--surface-border)', boxSizing: 'border-box', width: '100%', animation: 'fadeIn var(--transition-speed) ease-out' }}>
             <h3 style={{ marginTop: 0, marginBottom: '1.2rem', color: 'var(--primary-color)', fontSize: '1.05rem', fontWeight: '700' }}>📍 Customer Location</h3>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               <div style={{ flex: '1 1 200px' }}>
