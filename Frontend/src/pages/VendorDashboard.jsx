@@ -9,6 +9,7 @@ function VendorDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAnnouncement, setShowAnnouncement] = useState(false);
+  const companyName = localStorage.getItem('user_name') || 'Vendor';
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('is_logged_in');
@@ -94,82 +95,140 @@ function VendorDashboard() {
 
       <VendorSidebar />
 
-      <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Vendor Dashboard</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Manage your materials, orders, and sales performance.</p>
-        <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
+      <main style={{ flex: 1, padding: '2rem' }}>
+        {/* Welcome Banner */}
+        <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h2 style={{ fontSize: '2.2rem', color: 'var(--text-highlight)', margin: 0 }}>Welcome, {companyName}! 🏭</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', marginBottom: 0 }}>Manage your B2B products, services, incoming orders, and commission settlements.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Link to="/vendor/catalogue" className="btn" style={{ background: 'var(--primary-color)' }}>➕ Add Catalog Item</Link>
+            <Link to="/vendor/rfq" className="btn" style={{ background: 'var(--surface-border)', color: 'var(--text-highlight)' }}>Browse RFQ Board</Link>
+          </div>
+        </div>
 
         {/* Verification Status Banner */}
         {stats && stats.verification_status !== 'Verified' && (
           <div style={{
             padding: '1.5rem',
-            marginBottom: '1.5rem',
+            marginBottom: '2rem',
             background: stats.verification_status === 'Pending'
-              ? 'rgba(212, 162, 11, 0.2)'
-              : 'rgba(248, 81, 73, 0.2)',
-            border: `2px solid ${stats.verification_status === 'Pending' ? '#d4a20b' : '#f85149'}`,
-            borderRadius: '8px'
+              ? 'rgba(212, 162, 11, 0.1)'
+              : 'rgba(248, 81, 73, 0.1)',
+            border: `1px solid ${stats.verification_status === 'Pending' ? '#d4a20b' : '#f85149'}`,
+            borderRadius: '8px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem'
           }}>
-            <h3 style={{
-              color: stats.verification_status === 'Pending' ? '#d4a20b' : '#f85149',
-              margin: '0 0 0.5rem 0'
+            <div>
+              <h3 style={{
+                color: stats.verification_status === 'Pending' ? '#d4a20b' : '#f85149',
+                margin: '0 0 0.5rem 0'
+              }}>
+                {stats.verification_status === 'Pending'
+                  ? '⏳ Pending QC Verification'
+                  : '✗ Verification Rejected'
+                }
+              </h3>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                {stats.verification_status === 'Pending'
+                  ? 'Your business details are under review. Your items will be visible to buyers as soon as the admin verifies your profile.'
+                  : 'Your verification failed QC standards. Please review your company profile details or upload valid documents.'
+                }
+              </p>
+            </div>
+            <Link to="/vendor/profile" className="btn" style={{
+              background: 'rgba(56, 112, 224, 0.2)',
+              border: '1px solid #3870e0',
+              color: '#3870e0',
+              fontSize: '0.85rem'
             }}>
-              {stats.verification_status === 'Pending'
-                ? '⏳ Pending QC Verification'
-                : '✗ Verification Rejected'
-              }
-            </h3>
-            <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>
-              {stats.verification_status === 'Pending'
-                ? 'Your business is under review. Your products and services will be visible to customers once verified by our admin team. Please visit your profile for more details.'
-                : 'Your business verification was rejected. Please contact admin support for further information.'
-              }
-            </p>
-            <Link to="/vendor/profile" style={{
-              display: 'inline-block',
-              marginTop: '1rem',
-              padding: '0.5rem 1rem',
-              background: 'rgba(9, 105, 218, 0.3)',
-              border: '1px solid #0969da',
-              color: '#58a6ff',
-              textDecoration: 'none',
-              borderRadius: '4px'
-            }}>
-              View Profile Details →
+              Update Profile Details →
             </Link>
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Row 1 */}
-          <div className="dashboard-row">
-            <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Catalogue {stats && stats.catalogue_size !== undefined ? <span style={{ color: 'var(--primary-color)' }}>({stats.catalogue_size})</span> : ''}</h3>
-              <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Add or edit your product listings and services.</p>
-              <Link to="/vendor/catalogue" className="btn" style={{ background: '#238636' }}>Manage Catalogue</Link>
+        {/* Main Performance stats */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* Row 1: Catalog & Orders */}
+          <div className="dashboard-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+            <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+              <span style={{ fontSize: '2.5rem' }}>📋</span>
+              <h3>Catalogue Size</h3>
+              <p className="stat-value">{loading ? '...' : (stats ? stats.catalogue_size : 0)}</p>
+              <Link to="/vendor/catalogue" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Manage Products →</Link>
             </div>
 
-            <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h3 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Orders {stats && stats.pending_orders > 0 ? <span style={{ color: '#f85149' }}>({stats.pending_orders} New)</span> : ''}</h3>
-              <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>Check requested materials and services.</p>
-              <Link to="/vendor/orders" className="btn" style={{ background: '#1a7f37' }}>View Orders</Link>
+            <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+              <span style={{ fontSize: '2.5rem' }}>📥</span>
+              <h3>Pending Orders</h3>
+              <p className="stat-value" style={{ color: stats && stats.pending_orders > 0 ? '#f85149' : 'var(--text-highlight)' }}>
+                {loading ? '...' : (stats ? stats.pending_orders : 0)}
+              </p>
+              <Link to="/vendor/orders" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Process Orders →</Link>
+            </div>
+
+            <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+              <span style={{ fontSize: '2.5rem' }}>💰</span>
+              <h3>Net Earnings</h3>
+              <p className="stat-value" style={{ color: '#3fb950' }}>₹{loading ? '...' : (stats ? stats.total_earnings : '0')}</p>
+              <Link to="/vendor/earnings" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Breakdown →</Link>
+            </div>
+
+            <div className="stat-card glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
+              <span style={{ fontSize: '2.5rem' }}>🧾</span>
+              <h3>Outstanding Commission</h3>
+              <p className="stat-value" style={{ color: stats && stats.outstanding_commission > 0 ? '#f85149' : 'var(--primary-color)' }}>
+                ₹{loading ? '...' : (stats ? stats.outstanding_commission : '0')}
+              </p>
+              <Link to="/vendor/billing" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Pay Invoice →</Link>
             </div>
           </div>
 
-          {/* Row 2 */}
-          <div className="dashboard-row">
-            <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Total Earnings (Net)</h4>
-              <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#3fb950' }}>₹{stats ? stats.total_earnings : '...'}</p>
-              <Link to="/vendor/earnings" className="btn" style={{ background: '#d26d0e' }}>View Detailed Breakdown</Link>
+          {/* Row 2: Guide Card & Action Hub */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+            <div className="glass-panel" style={{ padding: '2rem' }}>
+              <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 1.5rem 0' }}>💡 Pro tips for B2B procurement success</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                <div>
+                  <strong style={{ color: 'var(--text-highlight)' }}>⚡ Respond quickly to RFQ requests:</strong>
+                  <p style={{ margin: '4px 0 0 0' }}>Buyers posting to the Reverse Auction Board are looking for bulk orders and value quick replies. Submit bids early to stand out.</p>
+                </div>
+                <div>
+                  <strong style={{ color: 'var(--text-highlight)' }}>📦 Keep your stock updated:</strong>
+                  <p style={{ margin: '4px 0 0 0' }}>Ensure unit prices, brand names, and bulk sizes in your catalog are accurate to prevent cancellation rates.</p>
+                </div>
+                <div>
+                  <strong style={{ color: 'var(--text-highlight)' }}>🧾 Pay commissions weekly:</strong>
+                  <p style={{ margin: '4px 0 0 0' }}>Paying your outstanding invoices on time maintains your high search rank and catalog visibility on the buyer's feeds.</p>
+                </div>
+              </div>
             </div>
 
-            <div className="stat-card glass-panel" style={{ flex: 1 }}>
-              <h4 style={{ color: 'var(--text-highlight)', marginBottom: '10px' }}>Commission Bills</h4>
-              <p style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: '0 0 10px 0', color: stats && stats.outstanding_commission > 0 ? '#f85149' : 'var(--primary-color)' }}>
-                ₹{stats ? stats.outstanding_commission : '0'}
-              </p>
-              <Link to="/vendor/Billing" className="btn" style={{ background: '#c1396a' }}>Pay Invoices</Link>
+            <div className="glass-panel" style={{ padding: '2rem' }}>
+              <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 1.5rem 0' }}>🛠️ Quick Actions</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <Link to="/vendor/catalogue" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card">
+                  <span style={{ fontSize: '2rem' }}>🏗️</span>
+                  <h4 style={{ margin: '10px 0 0 0', fontSize: '0.95rem', color: 'var(--text-highlight)' }}>Catalog</h4>
+                </Link>
+                <Link to="/vendor/rfq" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card">
+                  <span style={{ fontSize: '2rem' }}>🔄</span>
+                  <h4 style={{ margin: '10px 0 0 0', fontSize: '0.95rem', color: 'var(--text-highlight)' }}>RFQ Bids</h4>
+                </Link>
+                <Link to="/vendor/orders" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card">
+                  <span style={{ fontSize: '2rem' }}>🚚</span>
+                  <h4 style={{ margin: '10px 0 0 0', fontSize: '0.95rem', color: 'var(--text-highlight)' }}>Orders</h4>
+                </Link>
+                <Link to="/vendor/analytics" style={{ padding: '1.5rem 1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)', borderRadius: '8px', textDecoration: 'none', color: 'inherit', textAlign: 'center', transition: 'transform 0.2s' }} className="stat-card">
+                  <span style={{ fontSize: '2rem' }}>📈</span>
+                  <h4 style={{ margin: '10px 0 0 0', fontSize: '0.95rem', color: 'var(--text-highlight)' }}>Analytics</h4>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

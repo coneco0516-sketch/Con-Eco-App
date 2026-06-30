@@ -881,3 +881,54 @@ def accept_rfq_bid(data: AcceptBidData, user = Depends(check_customer)):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
+
+@router.get("/dashboard")
+def get_customer_dashboard_stats(user = Depends(check_customer)):
+    cust_id = user['user_id']
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # 1. Total Orders
+        cursor.execute("SELECT COUNT(*) as count FROM Orders WHERE customer_id = %s", (cust_id,))
+        orders_count = cursor.fetchone()['count']
+        
+        # 2. Booked Services
+        cursor.execute("SELECT COUNT(*) as count FROM bookedservices WHERE customer_id = %s", (cust_id,))
+        services_count = cursor.fetchone()['count']
+        
+        # 3. Project Sites
+        cursor.execute("SELECT COUNT(*) as count FROM ProjectSites WHERE customer_id = %s", (cust_id,))
+        sites_count = cursor.fetchone()['count']
+        
+        # 4. Open RFQs
+        cursor.execute("SELECT COUNT(*) as count FROM RFQRequests WHERE customer_id = %s AND status = 'Open'", (cust_id,))
+        rfq_count = cursor.fetchone()['count']
+        
+        # 5. Recent Orders (limit 3)
+        cursor.execute("""
+            SELECT o.order_id, o.amount, o.status, 
+                   TO_CHAR(o.created_at, 'DD Mon YYYY') as date,
+                   COALESCE(p.name, o.customer_message) as item_name
+            FROM Orders o
+            LEFT JOIN Products p ON o.item_id = p.product_id
+            WHERE o.customer_id = %s
+            ORDER BY o.created_at DESC
+            LIMIT 3
+        """, (cust_id,))
+        recent_orders = cursor.fetchall()
+        
+        return {
+            "status": "success",
+            "stats": {
+                "orders_count": orders_count,
+                "services_count": services_count,
+                "sites_count": sites_count,
+                "rfq_count": rfq_count
+            },
+            "recent_orders": recent_orders
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+

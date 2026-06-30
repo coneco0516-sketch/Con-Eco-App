@@ -464,7 +464,6 @@ footer {
   align-items: center;
 }
 
-@media (max-width: 768px) {
   /* Class-based strict layout reflows */
   .dashboard-stats-grid {
      grid-template-columns: 1fr !important;
@@ -495,7 +494,7 @@ footer {
     width: 95vw !important;
     padding: 1.5rem !important;
   }
-}
+
   .dashboard-layout {
     flex-direction: column !important;
     gap: 1.5rem !important;
@@ -626,5 +625,55 @@ footer {
   .stat-card {
     padding: 1.2rem !important;
   }
+}
+
+/* --- UI POLISHING & UTILITIES --- */
+.skeleton-pulse {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 37%, rgba(255, 255, 255, 0.05) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: var(--surface-color);
+  border: 1px dashed var(--surface-border);
+  border-radius: 12px;
+  color: var(--text-secondary);
+}
+
+.portal-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--primary-color);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 0.5rem;
+}
+
+/* Sidebar active highlight improvements */
+.nav-item.active {
+  color: var(--text-highlight) !important;
+  background: rgba(46, 160, 67, 0.15);
+  border-left: 3px solid var(--primary-color);
+  border-radius: 0 6px 6px 0;
+  padding-left: 0.5rem;
 }
 

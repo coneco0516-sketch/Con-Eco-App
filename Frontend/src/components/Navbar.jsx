@@ -7,10 +7,12 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('is_logged_in'));
+  const [userRole, setUserRole] = useState(localStorage.getItem('user_role') || '');
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
 
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('is_logged_in'));
+    setUserRole(localStorage.getItem('user_role') || '');
   }, [location]);
 
   useEffect(() => {
@@ -22,11 +24,10 @@ function Navbar() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  console.log("Navbar: isLoggedIn =", isLoggedIn);
-
   const handleLogout = () => {
     localStorage.removeItem('is_logged_in');
     localStorage.removeItem('user_role');
+    localStorage.removeItem('token');
 
     fetch(`${API}/api/auth/logout`, {
       method: 'POST',
@@ -50,9 +51,10 @@ function Navbar() {
           </Link>
         )}
         {isLoggedIn && (
-          <div className="nav-brand">
+          <div className="nav-brand" style={{ display: 'flex', alignItems: 'center' }}>
             <img src="/Logo.svg" alt="ConEco Logo" className="nav-logo" />
             <span>ConEco</span>
+            {userRole && <span className="portal-badge">{userRole} Portal</span>}
           </div>
         )}
         <button 
