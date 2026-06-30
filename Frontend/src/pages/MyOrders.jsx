@@ -1,8 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CustomerSidebar from '../components/CustomerSidebar';
+import NegotiationChat from './NegotiationChat';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
+
+function CustomerNegotiationPanel({ orderId }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginTop: '0.75rem', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--surface-border)' }}>
+      <button
+        onClick={() => setOpen(p => !p)}
+        style={{
+          width: '100%', padding: '0.6rem 1rem', background: 'rgba(245,158,11,0.06)',
+          border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+          color: 'var(--text-secondary)', fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 600,
+          textAlign: 'left',
+        }}
+      >
+        <span>💬</span>
+        <span style={{ color: '#f59e0b' }}>Negotiation Chat</span>
+        <span style={{ marginLeft: 'auto', fontSize: '0.72rem' }}>{open ? '▲ Hide' : '▼ Show'}</span>
+      </button>
+      {open && (
+        <NegotiationChat
+          orderId={orderId}
+          role="Customer"
+          canAccept={false}
+        />
+      )}
+    </div>
+  );
+}
 
 function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -242,6 +271,7 @@ function MyOrders() {
                             {o.negotiated_price && <p style={{ color: '#ffd700', fontSize: '0.85rem', fontWeight: '700', marginTop: '4px', margin: 0 }}>New Bulk Price: ₹{o.negotiated_price} / unit</p>}
                           </div>
                         )}
+                        <CustomerNegotiationPanel orderId={o.order_id} />
                       </div>
                     ) : null}
 

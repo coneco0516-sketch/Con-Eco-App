@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import VendorSidebar from '../components/VendorSidebar';
+import NegotiationChat from './NegotiationChat';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
@@ -479,6 +480,36 @@ function MilestonesSection({ orderId, orderAmount, orderStatus, onRefresh }) {
   );
 }
 
+function VendorNegotiationPanel({ orderId, onRefresh }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ borderTop: '1px solid var(--surface-border)' }}>
+      <button
+        onClick={() => setOpen(p => !p)}
+        style={{
+          width: '100%', padding: '0.6rem 1.25rem', background: 'rgba(245,158,11,0.05)',
+          border: 'none', borderBottom: open ? '1px solid var(--surface-border)' : 'none',
+          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+          color: 'var(--text-secondary)', fontFamily: 'inherit', fontSize: '0.85rem', fontWeight: 600,
+          textAlign: 'left',
+        }}
+      >
+        <span>💬</span>
+        <span style={{ color: '#f59e0b' }}>Negotiation Chat</span>
+        <span style={{ marginLeft: 'auto', fontSize: '0.75rem' }}>{open ? '▲ Hide' : '▼ Show'}</span>
+      </button>
+      {open && (
+        <NegotiationChat
+          orderId={orderId}
+          role="Vendor"
+          canAccept={true}
+          onAccepted={onRefresh}
+        />
+      )}
+    </div>
+  );
+}
+
 function OrderCard({ o, onStatusChange, onPaymentStatus, onBulkAction, onBillUpload, bulkNegotiation, setBulkNegotiation, onRefresh }) {
   const st = getStatusConfig(o.status, o.order_type);
   const pst = PAY_STATUS[o.payment_status] || PAY_STATUS['Pending'];
@@ -636,6 +667,10 @@ function OrderCard({ o, onStatusChange, onPaymentStatus, onBulkAction, onBillUpl
           orderStatus={o.status}
           onRefresh={onRefresh}
         />
+      )}
+
+      {o.is_bulk_request && (
+        <VendorNegotiationPanel orderId={o.order_id} onRefresh={onRefresh} />
       )}
     </div>
   );

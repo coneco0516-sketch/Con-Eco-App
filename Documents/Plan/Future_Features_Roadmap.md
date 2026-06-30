@@ -237,47 +237,59 @@ ALTER TABLE Services
 
 ---
 
-# 💬 FEATURE 5 — Live Negotiation Chat
+# 💬 FEATURE 5 — Live Negotiation Chat ✅ IMPLEMENTED
 
 ## What It Does
-Replaces the current static bulk negotiation input with a real-time conversation thread between buyer and vendor, tied to each order card with a full counter-offer audit trail.
+**Hybrid approach**: The existing one-click Accept/Reject bulk negotiation buttons are **kept** for quick vendor actions. In addition, an expandable **💬 Negotiation Chat panel** is added below each Bulk Request order card — allowing a full real-time conversation thread with counter-offers, text messages, and a price audit trail.
+
+This means:
+- **Quick workflow**: Vendor can still Accept/Reject in one click.
+- **Detailed workflow**: Both parties can open the chat to negotiate back and forth with multiple counter-offers.
+
+## Implementation Notes
+- **`is_accepted`** field added to `NegotiationMessages` to mark which offer was finally accepted.
+- Vendor's "Accept This Price" button in the chat updates `Orders.amount` and sets status to `Processing`.
+- Chat polls every **5 seconds** automatically — no WebSocket needed for MVP.
+- `VendorNegotiationPanel` (collapsible, amber-accented) lives below the MilestonesSection.
+- `CustomerNegotiationPanel` (collapsible) sits inside the Bulk Request info block in `MyOrders.jsx`.
 
 ## Database Changes
 
 ```sql
--- Negotiation messages per order
 CREATE TABLE NegotiationMessages (
     msg_id SERIAL PRIMARY KEY,
-    order_id INT REFERENCES Orders(order_id),
-    sender_role VARCHAR(20),   -- 'Customer' or 'Vendor'
-    sender_id INT,
+    order_id INT REFERENCES Orders(order_id) ON DELETE CASCADE,
+    sender_role VARCHAR(20) NOT NULL,   -- 'Customer' or 'Vendor'
+    sender_id INT NOT NULL,
     message TEXT,
-    offer_price DECIMAL(10,2), -- NULL if just a message, populated if it's a price offer
+    offer_price DECIMAL(10,2),          -- NULL if plain message; price if offer
+    is_accepted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
 ## Backend API
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| `GET` | `/api/negotiations/{order_id}` | Fetch all messages for an order |
-| `POST` | `/api/negotiations/{order_id}/message` | Send a message or counter-offer |
-| `POST` | `/api/negotiations/{order_id}/accept` | Accept the latest price offer — updates order amount |
+| Method | Endpoint | Who | Purpose |
+|---|---|---|---|
+| `GET` | `/api/negotiations/{order_id}` | Both | Fetch all messages for an order |
+| `POST` | `/api/negotiations/{order_id}/message` | Both | Send a message or price counter-offer |
+| `POST` | `/api/negotiations/{order_id}/accept` | Vendor only | Accept a price offer — updates order amount |
 
-## Frontend Changes
+## Frontend Files
 
-| Component | What to Build |
+| File | Role |
 |---|---|
-| `NegotiationChat.jsx` | WhatsApp-style chat bubble UI within the order card. Messages from vendor on right, customer on left. |
-| `PriceOfferBubble.jsx` | Special bubble style for price offers: shows ₹ amount with Accept / Counter buttons |
-| `VendorOrders.jsx` (modify) | Replace the static bulk negotiation form with the `NegotiationChat` component |
-| `MyBookedServices.jsx` (modify) | Show the negotiation thread (read + reply) from the customer's side |
+| `NegotiationChat.jsx` (new) | Reusable WhatsApp-style chat component with polling, offer bubbles, audit trail, input bar |
+| `VendorOrders.jsx` (modified) | Added `VendorNegotiationPanel` wrapper — collapsible, shows chat for all Bulk Request orders |
+| `MyOrders.jsx` (modified) | Added `CustomerNegotiationPanel` wrapper — collapsible, shows chat inside bulk-request info block |
 
-## UI Design Hints
-- Messages load in real-time using **polling every 5 seconds** (simple) or **WebSocket** (advanced).
-- Price offer bubbles have a distinct amber background to stand out from text messages.
-- An audit trail section at the bottom of the thread shows a final timeline: "Original ₹500 → Counter ₹450 → Agreed ₹470."
+## UI Design
+- Vendor messages aligned **right** (primary-color tint), customer messages **left** (gray).
+- Price offer bubbles: **amber** background with ✅ Accept button (vendor-only).
+- Accepted offer: turns **green** and locked — cannot be re-accepted.
+- Price audit trail at bottom: "₹500 → ₹450 → ₹470 ✅" summarizes the negotiation history.
+- Keyboard shortcut: Press `₹` button in input bar to attach a counter-offer price to the message.
 
 ---
 
