@@ -38,6 +38,8 @@ import OrderSuccess from './pages/OrderSuccess';
 import MyOrders from './pages/MyOrders';
 import MyBookedServices from './pages/MyBookedServices';
 import CustomerProfile from './pages/CustomerProfile';
+import ProjectSites from './pages/ProjectSites';
+import ProjectSiteDetail from './pages/ProjectSiteDetail';
 import VendorDashboard from './pages/VendorDashboard';
 import Catalogue from './pages/Catalogue';
 import VendorOrders from './pages/VendorOrders';
@@ -277,6 +279,8 @@ function AppContent() {
           <Route path="/customer/order-success" element={<ProtectedRoute allowedRoles={['Customer']}><OrderSuccess /></ProtectedRoute>} />
           <Route path="/customer/orders" element={<ProtectedRoute allowedRoles={['Customer']}><MyOrders /></ProtectedRoute>} />
           <Route path="/customer/booked-services" element={<ProtectedRoute allowedRoles={['Customer']}><MyBookedServices /></ProtectedRoute>} />
+          <Route path="/customer/projects" element={<ProtectedRoute allowedRoles={['Customer']}><ProjectSites /></ProtectedRoute>} />
+          <Route path="/customer/projects/:id" element={<ProtectedRoute allowedRoles={['Customer']}><ProjectSiteDetail /></ProtectedRoute>} />
           <Route path="/customer/profile" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerProfile /></ProtectedRoute>} />
 
           {/* Vendor Routes */}

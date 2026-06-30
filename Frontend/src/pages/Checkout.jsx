@@ -21,6 +21,8 @@ function Checkout() {
   const [creditInfo, setCreditInfo] = useState(null);
   const [platformSettings, setPlatformSettings] = useState({});
   const [billType, setBillType] = useState('Non-GST');
+  const [sites, setSites] = useState([]);
+  const [selectedSiteId, setSelectedSiteId] = useState('');
 
   const navigate = useNavigate();
 
@@ -53,6 +55,14 @@ function Checkout() {
       })
       .catch(err => console.error('Error fetching platform settings:', err));
 
+    // Fetch project sites
+    fetch(`${API}/api/customer/sites`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') setSites(data.sites);
+      })
+      .catch(err => console.error('Error fetching sites:', err));
+
   }, []);
 
   const [paymentMethod, setPaymentMethod] = useState('COD');
@@ -83,7 +93,8 @@ function Checkout() {
           body: JSON.stringify({
             delivery_address: address,
             payment_method: paymentMethod,
-            bill_type: billType
+            bill_type: billType,
+            site_id: selectedSiteId ? parseInt(selectedSiteId) : null
           })
         });
         const data = await res.json();
@@ -108,7 +119,8 @@ function Checkout() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             delivery_address: address,
-            bill_type: billType
+            bill_type: billType,
+            site_id: selectedSiteId ? parseInt(selectedSiteId) : null
           })
         });
         const data = await res.json();
@@ -304,6 +316,22 @@ function Checkout() {
                   <strong>Note:</strong> Delivery charges are not included in the order. Please confirm delivery cost with the vendor after placing the order. ConEco is not responsible for delivery charges.
                 </label>
               </div>
+            </div>
+
+            {/* Project Site Selector */}
+            <div style={{ marginBottom: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
+              <label style={{ color: 'var(--text-highlight)', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Tag to Project Site (Optional)</label>
+              <select 
+                className="input-field" 
+                value={selectedSiteId} 
+                onChange={(e) => setSelectedSiteId(e.target.value)}
+                style={{ width: '100%', marginBottom: '1rem' }}
+              >
+                <option value="">-- No Project Site --</option>
+                {sites.map(site => (
+                  <option key={site.site_id} value={site.site_id}>{site.site_name}</option>
+                ))}
+              </select>
             </div>
 
             {/* Bill Type Selector */}

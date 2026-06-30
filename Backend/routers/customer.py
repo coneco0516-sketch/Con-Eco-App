@@ -182,6 +182,7 @@ class CheckoutData(BaseModel):
     city: str
     state: str
     payment_method: str
+    site_id: Optional[int] = None
 
 @router.post("/checkout")
 def checkout(data: CheckoutData, user = Depends(check_customer)):
@@ -217,10 +218,10 @@ def checkout(data: CheckoutData, user = Depends(check_customer)):
             total_amount = round(base_amount + gst_amount + commission_amount, 2)
             
             cursor.execute("""
-                INSERT INTO Orders (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending', %s, %s)
+                INSERT INTO Orders (customer_id, vendor_id, order_type, item_id, quantity, amount, base_amount, gst_amount, commission_amount, total_amount, status, delivery_address, payment_method, site_id) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending', %s, %s, %s)
                 RETURNING order_id
-            """, (cust_id, item['vendor_id'], item['item_type'], item['item_id'], item['quantity'], total_amount, base_amount, gst_amount, commission_amount, total_amount, f"{data.address}, {data.city}, {data.state}", data.payment_method))
+            """, (cust_id, item['vendor_id'], item['item_type'], item['item_id'], item['quantity'], total_amount, base_amount, gst_amount, commission_amount, total_amount, f"{data.address}, {data.city}, {data.state}", data.payment_method, data.site_id))
             order_id = cursor.fetchone()['order_id'] if isinstance(cursor.fetchone, dict) or cursor.description else cursor.fetchone()[0]
             # Since I'm using RealDictCursor for dictionary=True, I should handle it correctly.
             # However, cursor.fetchone() might return a dict or tuple depending on internal wrapper.
@@ -576,4 +577,131 @@ def request_bulk_price(data: BulkRequestData, user = Depends(check_customer)):
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
         cursor.close()
+        conn.close()
+
+# --- PROJECT SITES ---
+
+class ProjectSiteData(BaseModel):
+    site_name: str
+    site_address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    budget: Optional[float] = None
+
+@router.get("/sites")
+def get_project_sites(user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+             raise HTTPException(status_code=404, detail="Customer not found")
+        cust_id = cust['customer_id']
+        
+        # Calculate total orders and total spent
+        cursor.execute("""
+            SELECT ps.*, 
+                   COUNT(o.order_id) as total_orders, 
+                   COALESCE(SUM(o.amount), 0) as total_spent
+            FROM ProjectSites ps
+            LEFT JOIN Orders o ON ps.site_id = o.site_id
+            WHERE ps.customer_id = %s
+            GROUP BY ps.site_id
+            ORDER BY ps.created_at DESC
+        """, (cust_id,))
+        sites = cursor.fetchall()
+        
+        # Convert Decimals to float
+        for site in sites:
+            site['budget'] = float(site['budget']) if site['budget'] else 0.0
+            site['total_spent'] = float(site['total_spent']) if site['total_spent'] else 0.0
+            
+        return {"status": "success", "sites": sites}
+    finally:
+        conn.close()
+
+@router.post("/sites")
+def create_project_site(data: ProjectSiteData, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+             raise HTTPException(status_code=404, detail="Customer not found")
+        cust_id = cust['customer_id']
+        
+        cursor.execute("""
+            INSERT INTO ProjectSites (customer_id, site_name, site_address, city, state, budget)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING site_id
+        """, (cust_id, data.site_name, data.site_address, data.city, data.state, data.budget))
+        result = cursor.fetchone()
+        # Handle dict or tuple return
+        site_id = result['site_id'] if isinstance(result, dict) else result[0]
+        conn.commit()
+        return {"status": "success", "site_id": site_id, "message": "Project site created"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@router.get("/sites/{site_id}/orders")
+def get_site_orders(site_id: int, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+             raise HTTPException(status_code=404, detail="Customer not found")
+        cust_id = cust['customer_id']
+        
+        cursor.execute("SELECT * FROM ProjectSites WHERE site_id=%s AND customer_id=%s", (site_id, cust_id))
+        site = cursor.fetchone()
+        if not site:
+            raise HTTPException(status_code=404, detail="Site not found or access denied")
+            
+        cursor.execute("""
+            SELECT o.order_id, o.order_type, o.quantity, o.amount, o.status, 
+                   TO_CHAR(o.created_at, 'DD Mon YYYY') as date, 
+                   COALESCE(p.name, s.name) as item_name, 
+                   v.company_name as vendor_name
+            FROM Orders o
+            LEFT JOIN Products p ON o.item_type='Product' AND o.item_id=p.product_id
+            LEFT JOIN Services s ON o.item_type='Service' AND o.item_id=s.service_id
+            LEFT JOIN Vendors v ON o.vendor_id = v.vendor_id
+            WHERE o.site_id=%s ORDER BY o.created_at DESC
+        """, (site_id,))
+        orders = cursor.fetchall()
+        
+        return {"status": "success", "site": site, "orders": orders}
+    finally:
+        conn.close()
+
+@router.delete("/sites/{site_id}")
+def delete_project_site(site_id: int, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+             raise HTTPException(status_code=404, detail="Customer not found")
+        cust_id = cust['customer_id']
+        
+        cursor.execute("SELECT * FROM ProjectSites WHERE site_id=%s AND customer_id=%s", (site_id, cust_id))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Site not found or access denied")
+            
+        # Optional: Set site_id to NULL for existing orders
+        cursor.execute("UPDATE Orders SET site_id = NULL WHERE site_id=%s", (site_id,))
+        cursor.execute("DELETE FROM ProjectSites WHERE site_id=%s", (site_id,))
+        conn.commit()
+        return {"status": "success", "message": "Project site deleted"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
         conn.close()
