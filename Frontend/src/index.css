@@ -772,4 +772,40 @@ body.light-mode .interactive-card:hover {
     padding: 1.2rem !important;
   }
 }
+
+/* Profile info row grid layout */
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+.profile-info-cell {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.profile-info-cell:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(46, 160, 67, 0.25);
+}
+
+.profile-info-cell .label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.profile-info-cell .value {
+  font-size: 1rem;
+  color: var(--text-highlight);
+  font-weight: 600;
+  word-break: break-all;
+}
 

@@ -288,7 +288,7 @@ function MyBookedServices() {
             { label: 'Completed', value: stats.completed, color: '#22c55e', icon: '✅' },
             { label: 'Cancelled', value: stats.cancelled, color: '#f85149', icon: '❌' },
           ].map(s => (
-            <div key={s.label} className="glass-panel" style={{ padding: '1.25rem', textAlign: 'center' }}>
+            <div key={s.label} className="glass-panel interactive-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
               <div style={{ fontSize: '1.5rem', marginBottom: '0.3rem' }}>{s.icon}</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>{s.label}</div>

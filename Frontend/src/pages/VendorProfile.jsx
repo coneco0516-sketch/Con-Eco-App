@@ -4,9 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import AddressBook from '../components/AddressBook';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
-
 const PUSH_VAPID_KEY = 'BMWUGlFCX4gbzFvuIVv-C0l6xRNm2ymMTnd3-mQqoCwAC7TOkheENAnxhPqXJk-dLZq4DzSwd6lFVY_7QWcFBOM';
-
 
 function VendorProfile() {
   const [profile, setProfile] = useState(null);
@@ -14,6 +12,7 @@ function VendorProfile() {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
+  const [msgType, setMsgType] = useState('success');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,9 +40,16 @@ function VendorProfile() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const showStatusMsg = (text, type = 'success') => {
+    setMsg(text);
+    setMsgType(type);
+    setTimeout(() => setMsg(''), 4000);
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     setMsg('Updating...');
+    setMsgType('info');
     try {
       const resp = await fetch(`${API}/api/auth/profile`, {
         method: 'PUT',
@@ -53,14 +59,14 @@ function VendorProfile() {
       });
       const data = await resp.json();
       if (data.status === 'success') {
-        setMsg('Profile updated successfully!');
+        showStatusMsg('Profile updated successfully!', 'success');
         setEditMode(false);
         fetchProfile();
       } else {
-        setMsg('Update failed: ' + data.message);
+        showStatusMsg('Update failed: ' + data.message, 'error');
       }
     } catch (err) {
-      setMsg('Network error occurred.');
+      showStatusMsg('Network error occurred.', 'error');
     }
   };
 
@@ -100,7 +106,7 @@ function VendorProfile() {
     try {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-          throw new Error('Permission denied');
+        throw new Error('Permission denied');
       }
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.subscribe({
@@ -116,58 +122,93 @@ function VendorProfile() {
       const data = await resp.json();
       if (data.status === 'success') {
         setPushStatus('Subscribed');
-        setMsg('Push notifications enabled!');
+        showStatusMsg('Push notifications enabled!', 'success');
       } else {
         setPushStatus('Error');
-        setMsg('Server error: ' + data.message);
+        showStatusMsg('Server error: ' + data.message, 'error');
       }
     } catch (err) {
       console.error("Push Error details:", err);
       setPushStatus('Denied/Error');
       if (err.message === 'Permission denied') {
-        setMsg('Please allow notifications in your browser settings (Click the padlock icon near URL).');
+        showStatusMsg('Please allow notifications in your browser settings.', 'error');
       } else {
-        setMsg('Push Error: ' + err.toString());
+        showStatusMsg('Push Error: ' + err.toString(), 'error');
       }
     }
   };
 
-
   return (
     <div className="dashboard-layout">
       <VendorSidebar />
-      <main style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0 }}>Vendor Profile</h2>
+      <main style={{ flex: 1, padding: '2rem', minWidth: 0 }}>
+        <h2 style={{ fontSize: '2rem', color: 'var(--text-highlight)', marginTop: 0, fontWeight: '800' }}>Vendor Profile</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Manage your business information and settings.</p>
-        <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '1.5rem' }} />
+        <hr style={{ borderColor: 'var(--surface-border)', marginBottom: '2rem' }} />
         
-        {loading ? <p>Loading profile...</p> : (
+        {msg && (
+          <div style={{ 
+            padding: '1rem 1.5rem', 
+            marginBottom: '1.5rem', 
+            borderRadius: '8px', 
+            background: msgType === 'success' ? 'rgba(36, 134, 54, 0.15)' : msgType === 'error' ? 'rgba(248, 81, 73, 0.15)' : 'rgba(52, 152, 219, 0.15)', 
+            color: msgType === 'success' ? '#3fb950' : msgType === 'error' ? '#f85149' : '#58a6ff', 
+            border: msgType === 'success' ? '1px solid rgba(36, 134, 54, 0.3)' : msgType === 'error' ? '1px solid rgba(248, 81, 73, 0.3)' : '1px solid rgba(52, 152, 219, 0.3)',
+            fontWeight: '600',
+            fontSize: '0.95rem'
+          }}>
+            {msgType === 'success' ? '✨ ' : msgType === 'error' ? '⚠️ ' : 'ℹ️ '} {msg}
+          </div>
+        )}
+
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="skeleton-pulse" style={{ height: '80px', borderRadius: '12px' }}></div>
+            <div className="glass-panel" style={{ padding: '2rem', borderRadius: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                <div className="skeleton-pulse" style={{ height: '70px', borderRadius: '8px' }}></div>
+                <div className="skeleton-pulse" style={{ height: '70px', borderRadius: '8px' }}></div>
+                <div className="skeleton-pulse" style={{ height: '70px', borderRadius: '8px' }}></div>
+                <div className="skeleton-pulse" style={{ height: '70px', borderRadius: '8px' }}></div>
+              </div>
+            </div>
+          </div>
+        ) : (
           <div>
             {/* QC Verification Status Banner */}
             <div style={{
-              padding: '1.5rem',
-              marginBottom: '1.5rem',
+              padding: '1.5rem 2rem',
+              marginBottom: '2rem',
               background: profile?.verification_status === 'Verified' 
-                ? 'rgba(36, 134, 54, 0.2)' 
+                ? 'rgba(36, 134, 54, 0.08)' 
                 : profile?.verification_status === 'Rejected'
-                ? 'rgba(248, 81, 73, 0.2)'
-                : 'rgba(212, 162, 11, 0.2)',
-              border: `2px solid ${
+                ? 'rgba(248, 81, 73, 0.08)'
+                : 'rgba(212, 162, 11, 0.08)',
+              borderLeft: `5px solid ${
                 profile?.verification_status === 'Verified' 
-                  ? '#238636' 
+                  ? '#2ea043' 
                   : profile?.verification_status === 'Rejected'
                   ? '#f85149'
                   : '#d4a20b'
               }`,
-              borderRadius: '8px'
+              borderTop: '1px solid var(--surface-border)',
+              borderRight: '1px solid var(--surface-border)',
+              borderBottom: '1px solid var(--surface-border)',
+              borderRadius: '12px',
+              backdropFilter: 'blur(4px)'
             }}>
               <h3 style={{ 
                 color: profile?.verification_status === 'Verified' 
-                  ? '#238636' 
+                  ? '#3fb950' 
                   : profile?.verification_status === 'Rejected'
                   ? '#f85149'
                   : '#d4a20b',
-                margin: '0 0 0.5rem 0'
+                margin: '0 0 0.5rem 0',
+                fontSize: '1.2rem',
+                fontWeight: '800',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
                 {profile?.verification_status === 'Verified' 
                   ? '✓ QC Verified' 
@@ -176,94 +217,178 @@ function VendorProfile() {
                   : '⏳ Pending QC Verification'
                 }
               </h3>
-              <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-secondary)' }}>
+              <p style={{ margin: '0.4rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
                 {profile?.verification_status === 'Verified' 
-                  ? 'Your business has been verified. Your products and services are visible to customers.' 
+                  ? 'Your business profile has been reviewed and verified. Your active catalog products and services are now visible to all platform customers.' 
                   : profile?.verification_status === 'Rejected'
-                  ? 'Your business verification was rejected. Please contact admin for details.'
-                  : 'Your business is under review. Please wait for admin approval. Your products won\'t be visible to customers until verified.'
+                  ? 'Your business verification has been rejected. Please review your credentials or contact the support admin team.'
+                  : 'Your business application is currently under manual verification review. Catalog listings will activate once approved.'
                 }
               </p>
               {profile?.qc_score !== undefined && profile?.verification_status === 'Verified' && (
-                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem' }}>
-                  <strong>QC Score:</strong> {profile.qc_score}/100
+                <p style={{ margin: '0.8rem 0 0 0', fontSize: '0.9rem', color: 'var(--text-highlight)' }}>
+                  <strong>QC Score Rating:</strong> <span style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--surface-border)', fontWeight: 'bold' }}>{profile.qc_score}/100</span>
                 </p>
               )}
             </div>
 
-            <div className="glass-panel" style={{ padding: '2rem' }}>
-              {msg && <p style={{ color: 'var(--primary-color)', marginBottom: '1rem' }}>{msg}</p>}
+            <div className="glass-panel" style={{ padding: '2rem', borderRadius: '16px' }}>
               
               {!editMode ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <p><strong>Business Name:</strong> {profile.company_name}</p>
-                <p><strong>Owner Name:</strong> {profile.name}</p>
-                <p><strong>Email:</strong> {profile.email} (Non-editable)</p>
-                <p><strong>Phone:</strong> {profile.phone}</p>
-                <p><strong>GST Number:</strong> {profile.gst_number || 'Not provided'}</p>
-                <p><strong>Address:</strong> {profile.address || 'Not provided'}</p>
-                <p><strong>City:</strong> {profile.city || 'Not provided'}</p>
-                <p><strong>State:</strong> {profile.state || 'Not provided'}</p>
-                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                   <button onClick={() => setEditMode(true)} className="btn">Edit Business Info</button>
-                   <button onClick={handleLogout} className="btn danger">Logout</button>
-                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                  
+                  {/* Grid of Business Information Cells */}
+                  <div className="profile-info-grid">
+                    <div className="profile-info-cell">
+                      <div className="label">Business Name</div>
+                      <div className="value">{profile.company_name}</div>
+                    </div>
+                    <div className="profile-info-cell">
+                      <div className="label">Owner Name</div>
+                      <div className="value">{profile.name}</div>
+                    </div>
+                    <div className="profile-info-cell">
+                      <div className="label">GST Number</div>
+                      <div className="value">{profile.gst_number || 'Not provided'}</div>
+                    </div>
+                    <div className="profile-info-cell">
+                      <div className="label">Email Address</div>
+                      <div className="value" style={{ fontSize: '0.9rem' }}>{profile.email}</div>
+                    </div>
+                    <div className="profile-info-cell">
+                      <div className="label">Phone Number</div>
+                      <div className="value">{profile.phone}</div>
+                    </div>
+                    <div className="profile-info-cell">
+                      <div className="label">City</div>
+                      <div className="value">{profile.city || 'Not provided'}</div>
+                    </div>
+                    <div className="profile-info-cell">
+                      <div className="label">State</div>
+                      <div className="value">{profile.state || 'Not provided'}</div>
+                    </div>
+                    <div className="profile-info-cell" style={{ gridColumn: 'span 2' }}>
+                      <div className="label">Business Address</div>
+                      <div className="value" style={{ wordBreak: 'normal' }}>{profile.address || 'Not provided'}</div>
+                    </div>
+                  </div>
 
-                 <AddressBook role="Vendor" />
+                  {/* Profile Actions */}
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <button onClick={() => setEditMode(true)} className="btn" style={{ fontWeight: '600' }}>Edit Business Info ⚙️</button>
+                    <button onClick={handleLogout} className="btn danger" style={{ fontWeight: '600' }}>Logout 🚪</button>
+                  </div>
 
-                 <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                   <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0' }}>🔔 Browser Notifications</h4>
-                   <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                     Status: <span style={{ color: pushStatus === 'Subscribed' ? 'var(--primary-color)' : 'var(--warning-color)' }}>{pushStatus}</span>
-                   </p>
-                   {pushStatus !== 'Subscribed' && (
-                     <button onClick={handleSubscribePush} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
-                       {pushStatus === 'Subscribing...' ? 'Working...' : 'Enable Alert Notifications'}
-                     </button>
-                   )}
-                 </div>
+                  {/* Address Book Card */}
+                  <AddressBook role="Vendor" />
 
-              </div>
-            ) : (
-              <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <div style={{ flex: 1 }}>
-                    <label className="input-label">Business Name</label>
-                    <input type="text" name="company_name" value={formData.company_name || ''} onChange={handleChange} className="input-field" required />
+                  {/* Notification card widget */}
+                  <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)', borderRadius: '12px' }}>
+                    <h4 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0', fontSize: '1.05rem', fontWeight: '700' }}>🔔 Browser Notifications</h4>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.2rem', marginTop: '0.2rem' }}>
+                      Get instant alerts when you match a new customer RFQ. Status: <span style={{ color: pushStatus === 'Subscribed' ? 'var(--primary-color)' : 'var(--warning-color)', fontWeight: '700' }}>{pushStatus}</span>
+                    </p>
+                    {pushStatus !== 'Subscribed' && (
+                      <button onClick={handleSubscribePush} className="btn" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem', fontWeight: '600', borderRadius: '6px' }}>
+                        {pushStatus === 'Subscribing...' ? 'Working...' : 'Enable Alert Notifications 🔔'}
+                      </button>
+                    )}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label className="input-label">Owner Name</label>
-                    <input type="text" name="name" value={formData.name || ''} onChange={handleChange} className="input-field" required />
+
+                </div>
+              ) : (
+                <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem 0', fontWeight: '700' }}>Edit Business Details</h3>
+                  
+                  <div style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '220px' }}>
+                      <label className="input-label" style={{ fontWeight: '600' }}>Business Name</label>
+                      <input 
+                        type="text" 
+                        name="company_name" 
+                        value={formData.company_name || ''} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        required 
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div style={{ flex: 1, minWidth: '220px' }}>
+                      <label className="input-label" style={{ fontWeight: '600' }}>Owner Name</label>
+                      <input 
+                        type="text" 
+                        name="name" 
+                        value={formData.name || ''} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        required 
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="input-label">Phone No</label>
-                  <input type="text" name="phone" value={formData.phone || ''} onChange={handleChange} className="input-field" required />
-                </div>
-                <div>
-                  <label className="input-label">GST Number</label>
-                  <input type="text" name="gst_number" value={formData.gst_number || ''} onChange={handleChange} className="input-field" />
-                </div>
-                <div>
-                  <label className="input-label">Address</label>
-                  <textarea name="address" value={formData.address || ''} onChange={handleChange} className="input-field" style={{ minHeight: '80px', paddingTop: '10px' }} />
-                </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <div style={{ flex: 1 }}>
-                    <label className="input-label">City</label>
-                    <input type="text" name="city" value={formData.city || ''} onChange={handleChange} className="input-field" />
+                  <div>
+                    <label className="input-label" style={{ fontWeight: '600' }}>Phone Number</label>
+                    <input 
+                      type="text" 
+                      name="phone" 
+                      value={formData.phone || ''} 
+                      onChange={handleChange} 
+                      className="input-field" 
+                      required 
+                      style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
+                    />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label className="input-label">State</label>
-                    <input type="text" name="state" value={formData.state || ''} onChange={handleChange} className="input-field" />
+                  <div>
+                    <label className="input-label" style={{ fontWeight: '600' }}>GST Number</label>
+                    <input 
+                      type="text" 
+                      name="gst_number" 
+                      value={formData.gst_number || ''} 
+                      onChange={handleChange} 
+                      className="input-field" 
+                      style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
+                    />
                   </div>
-                </div>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button type="submit" className="btn">Save Changes</button>
-                  <button type="button" onClick={() => setEditMode(false)} className="btn" style={{ background: 'var(--text-secondary)' }}>Cancel</button>
-                </div>
-              </form>
-            )}
+                  <div>
+                    <label className="input-label" style={{ fontWeight: '600' }}>Business Address</label>
+                    <textarea 
+                      name="address" 
+                      value={formData.address || ''} 
+                      onChange={handleChange} 
+                      className="input-field" 
+                      style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box', minHeight: '80px', paddingTop: '10px' }} 
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <label className="input-label" style={{ fontWeight: '600' }}>City</label>
+                      <input 
+                        type="text" 
+                        name="city" 
+                        value={formData.city || ''} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <label className="input-label" style={{ fontWeight: '600' }}>State</label>
+                      <input 
+                        type="text" 
+                        name="state" 
+                        value={formData.state || ''} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button type="submit" className="btn" style={{ fontWeight: '600' }}>Save Changes</button>
+                    <button type="button" onClick={() => setEditMode(false)} className="btn" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', fontWeight: '600' }}>Cancel</button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         )}

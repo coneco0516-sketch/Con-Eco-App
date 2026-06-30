@@ -23,7 +23,6 @@ function CustomerItemDetail() {
   const [submittingBulk, setSubmittingBulk] = useState(false);
 
   const fetchReviews = () => {
-    // Reviews are fetched optionally from public or authenticated.
     fetch(`${API}/api/customer/reviews/${type.toLowerCase()}/${id}`)
       .then(res => res.json())
       .then(data => {
@@ -66,7 +65,7 @@ function CustomerItemDetail() {
       });
       const data = await resp.json();
       if (data.status === 'success') {
-        setMessage({ type: 'success', text: isProduct ? 'Added to cart!' : 'Service added to cart! Proceed to checkout.' });
+        setMessage({ type: 'success', text: isProduct ? 'Item added to cart!' : 'Service booked and added to cart! Proceed to checkout.' });
         setTimeout(() => setMessage({ type: '', text: '' }), 2000);
       } else {
         setMessage({ type: 'error', text: 'Failed to process request' });
@@ -145,28 +144,63 @@ function CustomerItemDetail() {
   return (
     <div className="dashboard-layout">
       <CustomerSidebar />
-      <main style={{ flex: 1 }}>
+      <main style={{ flex: 1, padding: '2rem', minWidth: 0 }}>
+        
+        {/* Back navigation */}
         <button
           onClick={() => navigate(-1)}
           className="btn"
-          style={{ background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}
+          style={{ 
+            background: 'transparent', 
+            border: '1px solid var(--surface-border)', 
+            color: 'var(--text-secondary)', 
+            marginBottom: '1.5rem',
+            padding: '0.5rem 1.2rem',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            fontWeight: '600'
+          }}
         >
-          &larr; Back
+          ← Back
         </button>
 
         {message.text && (
-          <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', background: message.type === 'success' ? 'rgba(36, 134, 54, 0.3)' : 'rgba(248, 81, 73, 0.3)', color: message.type === 'success' ? '#238636' : '#f85149' }}>
-            {message.text}
+          <div style={{ 
+            padding: '1rem 1.5rem', 
+            marginBottom: '1.5rem', 
+            borderRadius: '8px', 
+            background: message.type === 'success' ? 'rgba(36, 134, 54, 0.15)' : 'rgba(248, 81, 73, 0.15)', 
+            color: message.type === 'success' ? '#3fb950' : '#f85149', 
+            border: message.type === 'success' ? '1px solid rgba(36, 134, 54, 0.3)' : '1px solid rgba(248, 81, 73, 0.3)',
+            fontWeight: '600',
+            fontSize: '0.95rem'
+          }}>
+            {message.type === 'success' ? '✨ ' : '⚠️ '} {message.text}
           </div>
         )}
 
         {loading ? (
-          <p>Loading details...</p>
+          <div className="glass-panel animate-pulse" style={{ padding: '2rem', display: 'flex', gap: '2rem', flexWrap: 'wrap', borderRadius: '16px' }}>
+            {/* Split Skeletons */}
+            <div className="skeleton-pulse" style={{ flex: '1 1 400px', height: '320px', borderRadius: '12px' }}></div>
+            <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              <div className="skeleton-pulse" style={{ height: '35px', width: '75%', borderRadius: '6px' }}></div>
+              <div className="skeleton-pulse" style={{ height: '20px', width: '40%', borderRadius: '6px' }}></div>
+              <div className="skeleton-pulse" style={{ height: '110px', borderRadius: '8px' }}></div>
+              <div className="skeleton-pulse" style={{ height: '80px', borderRadius: '8px' }}></div>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto' }}>
+                <div className="skeleton-pulse" style={{ height: '45px', flex: 1, borderRadius: '6px' }}></div>
+                <div className="skeleton-pulse" style={{ height: '45px', flex: 1, borderRadius: '6px' }}></div>
+              </div>
+            </div>
+          </div>
         ) : item ? (
           <>
-            <div className="glass-panel" style={{ padding: '2rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-              {/* Image Section */}
-              <div style={{ flex: '1 1 400px' }}>
+            <div className="glass-panel" style={{ padding: '2rem', display: 'flex', gap: '2.5rem', flexWrap: 'wrap', borderRadius: '16px' }}>
+              
+              {/* Left Column: Image Section */}
+              <div style={{ flex: '1 1 400px', minWidth: 0 }}>
                 {item.image_url ? (
                   <img
                     src={item.image_url}
@@ -175,80 +209,90 @@ function CustomerItemDetail() {
                       e.target.onerror = null;
                       e.target.src = "https://placehold.co/800x600?text=" + encodeURIComponent(item.name);
                     }}
-                    style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }}
+                    style={{ width: '100%', borderRadius: '12px', objectFit: 'cover', border: '1px solid var(--surface-border)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
                   />
                 ) : (
-                  <div style={{ width: '100%', height: '300px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                    No Image Available
+                  <div style={{ width: '100%', height: '320px', background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--surface-border)', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '3rem', marginBottom: '0.8rem' }}>🧱</span>
+                    <span>No Image Available</span>
                   </div>
                 )}
               </div>
 
-              {/* Details Section */}
-              <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column' }}>
-                <h1 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '0.5rem', fontSize: '2.5rem' }}>{item.name}</h1>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                  <p style={{ color: 'var(--primary-color)', fontSize: '1.2rem', margin: 0 }}>
-                    Provider: <span style={{ color: 'var(--text-highlight)' }}>{item.vendor_name}</span>
+              {/* Right Column: Details Section */}
+              <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <h1 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '0.6rem', fontSize: '2.2rem', fontWeight: '800' }}>{item.name}</h1>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', margin: 0 }}>
+                    Provider: <strong style={{ color: 'var(--primary-color)' }}>{item.vendor_name}</strong>
                   </p>
                   {reviewsData.stats.total_reviews > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,215,0,0.1)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
-                      <span style={{ color: '#ffd700', fontSize: '1.1rem', marginRight: '0.3rem' }}>★</span>
-                      <span style={{ color: 'var(--text-highlight)', fontWeight: 'bold' }}>{reviewsData.stats.average_rating}</span>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginLeft: '0.4rem' }}>({reviewsData.stats.total_reviews} reviews)</span>
+                    <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.2)', padding: '0.3rem 0.8rem', borderRadius: '20px' }}>
+                      <span style={{ color: '#ffd700', fontSize: '1rem', marginRight: '0.3rem' }}>★</span>
+                      <span style={{ color: 'var(--text-highlight)', fontWeight: '700', fontSize: '0.9rem' }}>{reviewsData.stats.average_rating}</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginLeft: '0.4rem' }}>({reviewsData.stats.total_reviews} reviews)</span>
                     </div>
                   )}
                 </div>
 
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-                  <h3 style={{ color: 'var(--text-secondary)', marginTop: 0 }}>Pricing Details</h3>
-                  <p style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>Base: ₹{item.price} {item.unit ? `/ ${item.unit}` : ''}</p>
-                  <p style={{ color: '#ffd700', margin: '0.5rem 0' }}>Est. Commission: ₹{(item.price * parseFloat(commRate) / 100).toFixed(2)} ({commRate}%)</p>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.5rem', margin: '1rem 0 0 0', borderTop: '1px solid var(--surface-border)', paddingTop: '1rem' }}>
-                    Est. Total: ₹{(parseFloat(item.price) * (1 + parseFloat(commRate) / 100)).toFixed(2)} (+ applicable taxes)
+                {/* Price Breakdown Panel */}
+                <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--surface-border)', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+                  <h3 style={{ color: 'var(--text-secondary)', marginTop: 0, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '700' }}>Pricing Breakup</h3>
+                  <p style={{ fontSize: '1.2rem', margin: '0.5rem 0', color: 'var(--text-highlight)' }}>
+                    Base: <strong>₹{item.price}</strong> {item.unit ? `/ ${item.unit}` : ''}
+                  </p>
+                  <p style={{ color: '#ffd700', margin: '0.5rem 0', fontSize: '0.9rem' }}>
+                    Est. Comm. ({commRate}%): <strong>₹{(item.price * parseFloat(commRate) / 100).toFixed(2)}</strong>
+                  </p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: '800', fontSize: '1.6rem', margin: '1rem 0 0 0', borderTop: '1px solid var(--surface-border)', paddingTop: '1rem' }}>
+                    Est. Total: ₹{(parseFloat(item.price) * (1 + parseFloat(commRate) / 100)).toFixed(2)}
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', fontWeight: '400', marginTop: '0.2rem' }}>(+ applicable local taxes & shipping)</span>
                   </p>
                 </div>
 
                 <div style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>Description</h3>
-                  <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                  <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '700' }}>Description</h3>
+                  <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', fontSize: '0.95rem' }}>
                     {item.description || 'No description provided.'}
                   </p>
 
                   {item.specifications && (
                     <div style={{ marginTop: '1.5rem' }}>
-                      <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>Specifications / Features</h3>
-                      <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                      <h3 style={{ color: 'var(--text-highlight)', marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '700' }}>Specifications / Features</h3>
+                      <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap', fontSize: '0.92rem' }}>
                         {item.specifications}
                       </p>
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
                     {item.category && (
-                      <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                        <strong>Category:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.category}</span>
-                      </p>
+                      <span style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--surface-border)', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                        📂 <strong>Category:</strong> {item.category}
+                      </span>
                     )}
                     {item.brand && (
-                      <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                        <strong>Brand:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.brand}</span>
-                      </p>
+                      <span style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--surface-border)', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                        🏷️ <strong>Brand:</strong> {item.brand}
+                      </span>
                     )}
                     {item.delivery_time && (
-                      <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                        <strong>Delivery / Availability:</strong> <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{item.delivery_time}</span>
-                      </p>
+                      <span style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--surface-border)', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                        🚚 <strong>Lead Time:</strong> {item.delivery_time}
+                      </span>
                     )}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                    <label className="input-label" style={{ marginBottom: 0 }}>Quantity</label>
-                    <div className="quantity-selector" style={{ width: '130px' }}>
+                {/* Actions & Quantity Selectors */}
+                <div style={{ display: 'flex', gap: '1.2rem', marginTop: 'auto', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label className="input-label" style={{ marginBottom: 0, fontWeight: '600' }}>Quantity</label>
+                    <div className="quantity-selector" style={{ width: '130px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--surface-border)', borderRadius: '8px', overflow: 'hidden' }}>
                       <button 
                         className="quantity-btn"
+                        style={{ border: 'none', background: 'none', color: 'var(--text-highlight)', cursor: 'pointer', padding: '0.5rem 0.7rem' }}
                         onClick={() => {
                           const currentQty = parseInt(quantity) || 1;
                           setQuantity(Math.max(1, currentQty - 1));
@@ -261,6 +305,7 @@ function CustomerItemDetail() {
                         type="number" 
                         min="0" 
                         value={quantity} 
+                        style={{ border: 'none', background: 'none', color: 'var(--text-highlight)', textAlign: 'center', fontWeight: '700' }}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === '') {
@@ -278,6 +323,7 @@ function CustomerItemDetail() {
                       />
                       <button 
                         className="quantity-btn"
+                        style={{ border: 'none', background: 'none', color: 'var(--text-highlight)', cursor: 'pointer', padding: '0.5rem 0.7rem' }}
                         onClick={() => {
                           const currentQty = parseInt(quantity) || 0;
                           setQuantity(currentQty + 1);
@@ -287,21 +333,22 @@ function CustomerItemDetail() {
                       </button>
                     </div>
                   </div>
-                  <div style={{ flex: 1, display: 'flex', gap: '1rem' }}>
+                  
+                  <div style={{ flex: 1, display: 'flex', gap: '1rem', flexWrap: 'wrap', minWidth: '240px' }}>
                     <button
                       onClick={handleAction}
                       className="btn"
-                      style={{ background: '#238636', flex: 1, padding: '1rem', fontSize: '1.1rem' }}
+                      style={{ background: '#238636', flex: 1, padding: '0.85rem', fontSize: '1rem', fontWeight: '700', borderRadius: '8px' }}
                     >
-                      {isProduct ? 'Add to Cart' : 'Book Service'}
+                      {isProduct ? 'Add to Cart 🛒' : 'Book Service 👷'}
                     </button>
                     {isProduct && (
                       <button
                         onClick={() => setShowBulkModal(true)}
                         className="btn"
-                        style={{ background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', flex: 1, padding: '1rem', fontSize: '1.1rem' }}
+                        style={{ background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', flex: 1, padding: '0.85rem', fontSize: '1rem', fontWeight: '700', borderRadius: '8px' }}
                       >
-                        Request Bulk Price
+                        Request Bulk Price 🤝
                       </button>
                     )}
                   </div>
@@ -309,17 +356,17 @@ function CustomerItemDetail() {
               </div>
             </div>
 
-            {/* Bulk Modal */}
+            {/* Bulk Negotiation Modal */}
             {showBulkModal && (
               <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(10px)' }}>
-                <div className="glass-panel" style={{ width: '90%', maxWidth: '500px', padding: '2.5rem', position: 'relative' }}>
-                  <button onClick={() => setShowBulkModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'var(--text-highlight)', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
-                  <h2 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '1rem' }}>Bulk Negotiation</h2>
-                  <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Send a request to the vendor for a customized bulk price for {quantity} units.</p>
+                <div className="glass-panel" style={{ width: '90%', maxWidth: '500px', padding: '2.5rem', position: 'relative', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <button onClick={() => setShowBulkModal(false)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'var(--text-highlight)', cursor: 'pointer', fontSize: '1.8rem', opacity: 0.7 }}onMouseOver={(e)=>e.target.style.opacity=1}onMouseOut={(e)=>e.target.style.opacity=0.7}>×</button>
+                  <h2 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '0.5rem', fontWeight: '800' }}>Bulk Negotiation</h2>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>Send a request to the vendor for a customized bulk price for <strong>{quantity}</strong> units.</p>
                   
                   <form onSubmit={sendBulkRequest} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                     <div>
-                      <label className="input-label">Delivery Address</label>
+                      <label className="input-label" style={{ fontWeight: '600' }}>Delivery Address</label>
                       <input 
                         type="text" 
                         className="input-field" 
@@ -327,11 +374,12 @@ function CustomerItemDetail() {
                         value={bulkData.address} 
                         onChange={e => setBulkData({...bulkData, address: e.target.value})}
                         required
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
                       />
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                       <div style={{ flex: 1 }}>
-                        <label className="input-label">City</label>
+                        <label className="input-label" style={{ fontWeight: '600' }}>City</label>
                         <input 
                           type="text" 
                           className="input-field" 
@@ -339,10 +387,11 @@ function CustomerItemDetail() {
                           value={bulkData.city} 
                           onChange={e => setBulkData({...bulkData, city: e.target.value})}
                           required
+                          style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div style={{ flex: 1 }}>
-                        <label className="input-label">State</label>
+                        <label className="input-label" style={{ fontWeight: '600' }}>State</label>
                         <input 
                           type="text" 
                           className="input-field" 
@@ -350,21 +399,23 @@ function CustomerItemDetail() {
                           value={bulkData.state} 
                           onChange={e => setBulkData({...bulkData, state: e.target.value})}
                           required
+                          style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="input-label">Meassage (Optional)</label>
+                      <label className="input-label" style={{ fontWeight: '600' }}>Message (Optional)</label>
                       <textarea 
                         className="input-field" 
                         placeholder="Mention your target price or requirements..." 
                         rows="3"
                         value={bulkData.message}
                         onChange={e => setBulkData({...bulkData, message: e.target.value})}
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box', minHeight: '80px' }}
                       ></textarea>
                     </div>
-                    <button type="submit" disabled={submittingBulk} className="btn" style={{ background: 'var(--primary-color)', padding: '1rem', fontSize: '1.1rem', marginTop: '1rem' }}>
-                      {submittingBulk ? 'Sending Request...' : 'Send Request to Vendor'}
+                    <button type="submit" disabled={submittingBulk} className="btn" style={{ background: 'var(--primary-color)', padding: '0.95rem', fontSize: '1.05rem', marginTop: '1rem', fontWeight: '700', borderRadius: '8px', cursor: 'pointer', width: '100%' }}>
+                      {submittingBulk ? 'Sending Request...' : 'Send Request to Vendor ✉️'}
                     </button>
                   </form>
                 </div>
@@ -372,23 +423,23 @@ function CustomerItemDetail() {
             )}
 
             {/* Reviews Section */}
-            <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
-              <h2 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '1rem' }}>
+            <div className="glass-panel" style={{ padding: '2rem', marginTop: '2.5rem', borderRadius: '16px' }}>
+              <h2 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '1rem', fontWeight: '800' }}>
                 Customer Reviews
               </h2>
 
               {reviewsData.reviews.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginBottom: '2rem' }}>
                   {reviewsData.reviews.map(review => (
-                    <div key={review.review_id} style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                        <strong style={{ color: 'var(--text-highlight)' }}>{review.customer_name}</strong>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{review.date}</span>
+                    <div key={review.review_id} style={{ background: 'rgba(255,255,255,0.01)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--surface-border)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <strong style={{ color: 'var(--text-highlight)', fontSize: '1rem' }}>{review.customer_name}</strong>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{review.date}</span>
                       </div>
-                      <div style={{ color: '#ffd700', marginBottom: '0.8rem', fontSize: '1.1rem' }}>
+                      <div style={{ color: '#ffd700', marginBottom: '0.8rem', fontSize: '1rem' }}>
                         {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
                       </div>
-                      <p style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                      <p style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6', fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>
                         {review.comment}
                       </p>
                     </div>
@@ -396,21 +447,21 @@ function CustomerItemDetail() {
                 </div>
               ) : (
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontStyle: 'italic' }}>
-                  No reviews yet. Be the first to review this {item.type.toLowerCase()}!
+                  No reviews yet. Be the first to review this {type.toLowerCase()}!
                 </p>
               )}
 
               {/* Write a Review Form */}
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-                <h3 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '1rem' }}>Write a Review</h3>
-                <form onSubmit={submitReview} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <label style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>Rating:</label>
+              <div style={{ background: 'rgba(0,0,0,0.15)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--surface-border)' }}>
+                <h3 style={{ color: 'var(--text-highlight)', marginTop: 0, marginBottom: '1rem', fontWeight: '700' }}>Write a Review</h3>
+                <form onSubmit={submitReview} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                    <label style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>Rating:</label>
                     <select
                       className="input-field"
                       value={reviewForm.rating}
                       onChange={e => setReviewForm({ ...reviewForm, rating: e.target.value })}
-                      style={{ width: '150px' }}
+                      style={{ width: '160px', padding: '0.5rem', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', cursor: 'pointer' }}
                     >
                       <option value="5">★★★★★ (5)</option>
                       <option value="4">★★★★☆ (4)</option>
@@ -420,7 +471,7 @@ function CustomerItemDetail() {
                     </select>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ color: 'var(--text-secondary)', fontWeight: 'bold' }}>Your Experience:</label>
+                    <label style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>Your Experience:</label>
                     <textarea
                       className="input-field"
                       placeholder="Share your thoughts about this item..."
@@ -428,18 +479,22 @@ function CustomerItemDetail() {
                       value={reviewForm.comment}
                       onChange={e => setReviewForm({ ...reviewForm, comment: e.target.value })}
                       required
+                      style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box', minHeight: '100px' }}
                     ></textarea>
                   </div>
-                  <button type="submit" className="btn" disabled={submittingReview} style={{ background: 'var(--primary-color)', alignSelf: 'flex-start', padding: '0.8rem 2rem' }}>
-                    {submittingReview ? 'Submitting...' : 'Submit Review'}
+                  <button type="submit" className="btn" disabled={submittingReview} style={{ background: 'var(--primary-color)', alignSelf: 'flex-start', padding: '0.8rem 2rem', fontWeight: '700', borderRadius: '8px', cursor: 'pointer' }}>
+                    {submittingReview ? 'Submitting...' : 'Submit Review ✨'}
                   </button>
                 </form>
               </div>
             </div>
           </>
         ) : (
-          <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-            <h3 style={{ color: 'var(--text-secondary)' }}>Item not found.</h3>
+          <div className="glass-panel" style={{ padding: '5rem 2rem', textAlign: 'center', borderRadius: '16px' }}>
+            <span style={{ fontSize: '4rem', display: 'block', marginBottom: '1.5rem' }}>⚠️</span>
+            <h3 style={{ color: 'var(--text-highlight)', fontSize: '1.4rem', margin: '0 0 0.5rem 0', fontWeight: '700' }}>Item Not Found</h3>
+            <p style={{ color: 'var(--text-secondary)', margin: '0 0 2rem 0', fontSize: '0.95rem' }}>This item may have been removed or is temporarily unavailable.</p>
+            <button onClick={() => navigate(-1)} className="btn" style={{ background: 'var(--primary-color)', padding: '0.8rem 2rem', fontWeight: '600', borderRadius: '8px' }}>Go Back</button>
           </div>
         )}
       </main>
