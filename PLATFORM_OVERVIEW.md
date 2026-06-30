@@ -20,6 +20,8 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 - **PWA Experience**: Install ConEco on your phone's home screen.
 - **Smart GST Billing**: GST (18%) is added to your total **only if the vendor is GST-registered**. The GST Bill option is automatically hidden for unregistered vendors.
 - **Service Milestone Payments**: For long-term service bookings, view the vendor's milestone plan, track work progress phase by phase, approve completed milestones, and release payment only after you're satisfied — a built-in **offline escrow** protecting both parties.
+- **Project-Based Procurement**: Create **Project Sites** (e.g., a construction site or factory floor) and link every order to a specific project. Track all site-wise procurement in one place.
+- **RFQ Engine (Reverse Auction)**: Post a Request for Quotation — specify item, quantity, and deadline. Vendors compete by submitting bids. You review all offers and place the order with your preferred vendor.
 
 ### 🏪 For Vendors (Sellers)
 - **Comprehensive Dashboard**: Track Gross Sales, Platform Commissions, and Net Earnings in real-time.
@@ -32,8 +34,9 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 
 ### 🛡️ For Platform Management (Admin Levels)
 - **Super Admin**: Platform owners with full financial control, bank payouts, staff management, and system settings access.
-- **Admin**: Mid-level managers focused on vendor/customer verification, commission reports, and bulk pricing controls.
+- **Admin**: Mid-level managers focused on vendor/customer verification, commission reports, bulk pricing controls, and **RFQ oversight**.
 - **Employee**: Operational staff focused on order tracking, customer support, and contact message handling.
+- **RFQ Monitor**: Admins can view all active RFQ requests and submitted bids across the platform for transparency and dispute handling.
 
 ---
 
@@ -43,6 +46,8 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 3. **Synchronized Pricing**: Daily price updates keep listings competitive.
 4. **Quality First**: Every vendor is audited; every product tracked.
 5. **Legally Compliant GST Billing**: GST is only applied where legally required — based on the vendor's actual GST registration status.
+6. **Competitive Pricing via RFQ**: Buyers post requirements; multiple vendors compete. Best price wins — true reverse auction.
+7. **Project-Centric Procurement**: Manage all materials for a single project site in one unified view.
 
 ---
 
@@ -50,11 +55,13 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 
 ### For Customers
 1. **Search**: Find construction materials or services.
-2. **Pricing**: Cart total includes 18% GST **only if the vendor is GST-registered**. Unregistered vendor = no GST added.
-3. **Bill Type**: "GST Bill" option shown only if vendor has a GST number. Both bill types cost the same amount.
-4. **Order**: COD or Pay Later credit.
-5. **Negotiate**: Send a "Bulk Request" for large quantities.
-6. **Download Bill**: Once the vendor uploads the bill, download it from "My Orders."
+2. **Project Site** *(optional)*: Create a project site and tag your orders to it for organised procurement.
+3. **RFQ** *(alternative to direct order)*: Post an RFQ with specs and deadline. Wait for vendor bids, then pick the best one.
+4. **Pricing**: Cart total includes 18% GST **only if the vendor is GST-registered**. Unregistered vendor = no GST added.
+5. **Bill Type**: "GST Bill" option shown only if vendor has a GST number. Both bill types cost the same amount.
+6. **Order**: COD or Pay Later credit.
+7. **Negotiate**: Send a "Bulk Request" for large quantities.
+8. **Download Bill**: Once the vendor uploads the bill, download it from "My Orders."
 
 ### For Vendors
 1. **List**: Upload your catalogue with images and specifications.
@@ -69,6 +76,30 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 1. **Super Admin**: Manages the platform's core, handles financial payouts, and manages staff accounts.
 2. **Admin**: Approves new vendors/customers and monitors automated commission invoicing.
 3. **Employee**: Manages customer inquiries and monitors daily order fulfillment status.
+
+---
+
+## 🏗️ Project-Based Procurement
+
+Customers managing ongoing construction, manufacturing, or infrastructure projects can create **Project Sites** to organise procurement:
+
+- Create a named site (e.g., "Pune Factory Phase 2") with address and project type.
+- Link any order at checkout directly to a project site.
+- View all orders tagged to a specific project from the **Project Sites** dashboard.
+- Track per-project procurement spend in one consolidated view.
+
+---
+
+## 🔁 RFQ Engine (Reverse Auction)
+
+Instead of browsing the catalogue, customers can post a **Request for Quotation**:
+
+1. **Customer posts RFQ** — Item name, quantity, specs, deadline.
+2. **Vendors browse** the open RFQ board and submit competitive bids.
+3. **Customer reviews bids** — price, delivery terms, and vendor profile.
+4. **Customer accepts best bid** — instantly converts to a confirmed order.
+
+This is ideal for **bulk, custom, or non-standard** procurement where the market should set the price.
 
 ---
 
@@ -147,6 +178,26 @@ Vendor has GST Number in profile?
 > 2. [Product Name B] — ₹[New Price]
 >
 > *Note: Please mention if any product is currently 'Out of Stock' or if there are new arrivals.*
+
+---
+
+## 🎨 UI/UX Design System
+
+ConEco uses a consistent **dark-mode glassmorphism** design language across all 20+ pages:
+
+- **Design Tokens**: `var(--primary-color)`, `var(--text-highlight)`, `var(--surface-border)` for consistency.
+- **Glass Panels**: Frosted-glass cards with backdrop blur and subtle borders.
+- **Micro-animations**: Hover lifts, shimmer skeleton loaders, slide-in toasts, and smooth tab transitions.
+- **Responsive Sidebars**: Role-aware navigation for Customer, Vendor, and Admin with active indicators.
+- **Stat Cards**: Animated KPI tiles on every dashboard.
+
+### Pages Polished (4-Phase UI Overhaul — June 2026)
+| Phase | Pages Covered |
+|---|---|
+| **Phase 1** | Home, Dashboards (Customer/Vendor/Admin), Sidebars, FAQ, Analytics, OrderSuccess |
+| **Phase 2** | Login, Register, AdminDashboard, Products, Services, AdminRFQMonitor |
+| **Phase 3** | Cart, MyOrders, VendorDashboard, CustomerDashboard, FAQ (search), ForgotPassword, ResetPassword |
+| **Phase 4** | Checkout, CustomerProfile, VendorProfile, Earnings (KPI), CustomerItemDetail, MyBookedServices |
 
 ---
 

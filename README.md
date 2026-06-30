@@ -45,6 +45,8 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - Real-time order tracking with automated status updates.
 - **Download Bill**: Once the vendor uploads the bill post-delivery, customers can download it directly from "My Orders."
 - **Service Milestone Payments**: For long-term service bookings, customers can view the vendor's milestone payment plan, track progress per phase, approve completed work, and release payment milestone-by-milestone — acting as a built-in offline escrow.
+- **Project-Based Procurement**: Customers can create and manage **Project Sites** (e.g., a construction site or factory), then directly link orders to a project for organised, site-wise procurement tracking.
+- **RFQ Engine (Reverse Auction)**: Submit a Request for Quotation with quantity, description, and deadline. Vendors browse and submit competitive bids. Customer selects the best offer and places the order directly from the RFQ.
 - **PWA Ready**: Installable on mobile and desktop for a native experience.
 
 ### 🏪 Vendors
@@ -64,6 +66,13 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - **Employee**: Support role focused on order tracking and customer contact message replies.
 - **Commission Penalty System**: Automated "Strike" system for overdue payments.
 - **Credit Limit Management**: Assign and monitor customer Pay Later credit.
+- **RFQ Monitor**: Admins can view all active RFQ submissions across the platform for oversight and dispute handling.
+
+### 🎨 UI/UX — Premium Glassmorphism Design System
+- Full platform redesigned across **4 polish phases** covering all 20+ pages.
+- Consistent dark-mode glassmorphism design language (`glass-panel`, gradient accents, `var(--primary-color)` tokens).
+- Responsive sidebars, animated stat cards, shimmer skeleton loaders, and micro-animations throughout.
+- Polished pages include: Home, Login, Register, Dashboards (Customer/Vendor/Admin), Cart, Checkout, My Orders, My Booked Services, FAQ, Forgot/Reset Password, Earnings KPI, Profiles (Customer/Vendor), Item Detail pages, and Analytics views.
 
 ---
 
@@ -98,11 +107,18 @@ ConEco/
 │   ├── invoice_generator.py     # Professional PDF Invoice Logic
 │   ├── commission_invoicing.py  # Billing & Penalty Automation
 │   ├── migrate_gst_billing.py   # GST billing schema migration
+│   ├── migrate_project_sites.py # ProjectSites table migration
+│   ├── migrate_rfq_system.py    # RFQ / Reverse Auction schema migration
 │   └── migrate_milestones.py    # ServiceMilestones table migration
 │
 ├── Frontend/
 │   ├── src/
-│   │   ├── pages/               # Functional UI Components
+│   │   ├── pages/               # Functional UI Components (20+ pages)
+│   │   │   ├── ProjectSites.jsx       # Project Site management (new)
+│   │   │   ├── ProjectSiteDetail.jsx  # Per-site order tracking (new)
+│   │   │   ├── CustomerRFQ.jsx        # RFQ submission & bidding (new)
+│   │   │   ├── VendorRFQBoard.jsx     # Vendor bid submission board (new)
+│   │   │   └── AdminRFQMonitor.jsx    # Admin RFQ overview (new)
 │   │   ├── components/          # Reusable Layouts & Elements
 │   │   └── App.jsx              # Application Routing
 │   └── public/                  # Assets & PWA Manifest
@@ -144,6 +160,12 @@ python migrate_gst_billing.py
 
 # Run Multi-Tier Role migration (adds Super Admin, Admin, Employee roles)
 python migrate_multi_tier_roles.py
+
+# Run Project Sites migration (creates ProjectSites table)
+python migrate_project_sites.py
+
+# Run RFQ Engine migration (creates RFQ and Bids tables)
+python migrate_rfq_system.py
 
 # Run Service Milestone migration (creates ServiceMilestones table)
 python migrate_milestones.py
