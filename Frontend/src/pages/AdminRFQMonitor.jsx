@@ -25,80 +25,94 @@ const AdminRFQMonitor = () => {
         fetchRfqs();
     }, []);
 
+    const statusColor = (status) => {
+        if (status === 'Open') return { color: '#3fb950', background: 'rgba(46,160,67,0.15)', border: '1px solid rgba(46,160,67,0.3)' };
+        if (status === 'Awarded') return { color: '#58a6ff', background: 'rgba(56,112,224,0.15)', border: '1px solid rgba(56,112,224,0.3)' };
+        return { color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)' };
+    };
+
     if (loading) return (
         <div className="dashboard-layout">
             <AdminSidebar />
-            <main style={{ flex: 1, padding: '2rem' }} className="text-center text-white">Loading RFQ Monitor...</main>
+            <main style={{ flex: 1, padding: '2rem' }}>
+                <div className="glass-panel skeleton-pulse" style={{ height: '300px', borderRadius: '12px' }}></div>
+            </main>
         </div>
     );
 
     return (
         <div className="dashboard-layout">
             <AdminSidebar />
-            <main style={{ flex: 1, padding: '2rem' }}>
-                <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-                    <button className="btn" onClick={() => navigate('/admin/dashboard')} style={{ marginBottom: '1rem', background: 'var(--surface-border)', color: 'var(--text-highlight)' }}>
+            <main style={{ flex: 1, padding: '2rem', minWidth: 0 }}>
+                
+                {/* Back Button & Header */}
+                <div style={{ marginBottom: '2rem' }}>
+                    <button className="btn" onClick={() => navigate('/admin/dashboard')} style={{ marginBottom: '1rem', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
                         ← Back to Dashboard
                     </button>
-                    <div className="flex items-center gap-4 border-b border-white/10 pb-6">
-                        <div className="p-4 bg-emerald-500/20 rounded-xl border border-emerald-500/30 text-3xl">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '1.5rem' }}>
+                        <div style={{ fontSize: '2.5rem', background: 'rgba(46, 160, 67, 0.15)', padding: '0.5rem 1rem', borderRadius: '12px', border: '1px solid rgba(46, 160, 67, 0.3)' }}>
                             🖥️
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-white">Global RFQ Monitor</h1>
-                            <p className="text-gray-400">Monitor all reverse auctions across the platform.</p>
+                            <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', fontWeight: '800', color: 'var(--text-highlight)', margin: '0 0 0.3rem 0' }}>
+                                Global RFQ Monitor
+                            </h1>
+                            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
+                                Monitor and audit all active and completed reverse auctions across the platform.
+                            </p>
                         </div>
                     </div>
-
-            {rfqs.length === 0 ? (
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-10 text-center border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-2">No RFQs Active</h3>
-                    <p className="text-gray-400">There are no reverse auctions happening at the moment.</p>
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {rfqs.map(rfq => (
-                        <div key={rfq.rfq_id} className="bg-gray-900 border border-white/10 rounded-2xl p-6 hover:bg-white/5 transition-all">
-                            <div className="flex justify-between items-start mb-4">
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                                    rfq.status === 'Open' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                                    rfq.status === 'Awarded' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                                    'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                                }`}>
-                                    {rfq.status}
-                                </span>
-                                <span className="text-gray-400 text-xs">{rfq.created_at_fmt}</span>
-                            </div>
 
-                            <h3 className="text-xl font-bold text-white mb-4 line-clamp-2">{rfq.title}</h3>
+                {rfqs.length === 0 ? (
+                    <div className="empty-state">
+                        <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</span>
+                        <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem' }}>No RFQs Active</h3>
+                        <p style={{ margin: 0 }}>There are no reverse auctions running on the platform at the moment.</p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        {rfqs.map(rfq => (
+                            <div key={rfq.rfq_id} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <span style={{ ...statusColor(rfq.status), padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        {rfq.status}
+                                    </span>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{rfq.created_at_fmt}</span>
+                                </div>
 
-                            <div className="space-y-3 mb-6 p-4 bg-black/20 rounded-xl border border-white/5">
-                                <p className="text-gray-300 text-sm flex items-center gap-2">
-                                    👤 <span className="font-semibold">{rfq.customer_name}</span>
-                                </p>
-                                <p className="text-gray-300 text-sm flex items-center gap-2">
-                                    📍 {rfq.city}, {rfq.state}
-                                </p>
-                                <p className="text-gray-300 text-sm flex items-center gap-2">
-                                    ⏱️ Req: {rfq.required_by_fmt}
-                                </p>
-                            </div>
-
-                            <div className="flex justify-between items-center pt-4 border-t border-white/10">
                                 <div>
-                                    <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Requirement</p>
-                                    <p className="text-white font-semibold">{rfq.quantity} {rfq.unit} of {rfq.category}</p>
+                                    <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.2rem 0', fontSize: '1.1rem', fontWeight: '700', lineHeight: '1.3' }}>{rfq.title}</h3>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--primary-color)', fontWeight: '600' }}>Category: {rfq.category}</span>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Total Bids</p>
-                                    <p className="text-emerald-400 font-bold text-xl">{rfq.bid_count}</p>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '12px', border: '1px solid var(--surface-border)', fontSize: '0.85rem' }}>
+                                    <div style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span>👤</span> <strong style={{ color: 'var(--text-highlight)' }}>{rfq.customer_name}</strong>
+                                    </div>
+                                    <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span>📍</span> {rfq.city}, {rfq.state}
+                                    </div>
+                                    <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span>⏱️</span> Required: {rfq.required_by_fmt}
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--surface-border)', paddingTop: '1rem', marginTop: 'auto' }}>
+                                    <div>
+                                        <p style={{ margin: '0 0 0.2rem 0', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Requirement</p>
+                                        <p style={{ margin: 0, color: 'var(--text-highlight)', fontWeight: '700', fontSize: '0.95rem' }}>{rfq.quantity} {rfq.unit}</p>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <p style={{ margin: '0 0 0.2rem 0', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Bids</p>
+                                        <p style={{ margin: 0, color: '#3fb950', fontWeight: '800', fontSize: '1.2rem' }}>{rfq.bid_count}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-                </div>
+                        ))}
+                    </div>
+                )}
             </main>
         </div>
     );

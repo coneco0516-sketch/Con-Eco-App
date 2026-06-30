@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
 import { GoogleLogin } from '@react-oauth/google';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
@@ -86,13 +85,20 @@ function Login() {
   };
 
   return (
-    <div className="auth-container glass-panel">
-      <h2 className="auth-title">Welcome Back</h2>
-      {error && <p style={{ color: 'var(--danger-color)', marginBottom: '1rem', background: 'rgba(248,81,73,0.1)', padding: '0.5rem', borderRadius: '4px' }}>{error}</p>}
+    <div className="auth-container glass-panel" style={{ maxWidth: '440px', margin: '2rem auto', padding: '2.5rem' }}>
+      <h2 className="auth-title" style={{ margin: '0 0 0.5rem 0', fontWeight: '800' }}>Welcome Back</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '1.8rem', fontSize: '0.95rem' }}>Sign in to continue to ConEco</p>
+
+      {error && (
+        <div style={{ padding: '0.8rem 1rem', marginBottom: '1.5rem', borderRadius: '8px', background: 'rgba(248,81,73,0.12)', color: '#f85149', border: '1px solid rgba(248,81,73,0.25)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <span>⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
 
       <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
         <div>
-          <label className="input-label">Email Address</label>
+          <label className="input-label" style={{ fontWeight: '600' }}>Email Address</label>
           <input
             type="text"
             placeholder="Enter Email"
@@ -100,10 +106,12 @@ function Login() {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="input-field"
+            style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
           />
         </div>
+        
         <div style={{ position: 'relative' }}>
-          <label className="input-label">Password</label>
+          <label className="input-label" style={{ fontWeight: '600' }}>Password</label>
           <input
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
@@ -111,26 +119,38 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
             className="input-field"
-            style={{ paddingRight: '2.5rem' }}
+            style={{ width: '100%', padding: '0.8rem 1rem', paddingRight: '2.5rem', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', boxSizing: 'border-box' }}
           />
           <button
             type="button"
             onClick={handleTogglePassword}
-            style={{ position: 'absolute', right: '10px', top: '38px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}
+            style={{ position: 'absolute', right: '12px', top: '35px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}
           >
             {showPassword ? '👁️' : '👁️‍🗨️'}
           </button>
-          <div style={{ textAlign: 'right', marginTop: '0.3rem' }}>
-            <Link to="/forgot-password" style={{ color: 'var(--primary-color)', fontSize: '0.9rem', textDecoration: 'none' }}>Forgot Password?</Link>
+          
+          <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
+            <Link to="/forgot-password" style={{ color: 'var(--primary-color)', fontSize: '0.85rem', textDecoration: 'none', fontWeight: '600' }}>Forgot Password?</Link>
           </div>
         </div>
-        <button type="submit" className="btn" disabled={loading} style={{ marginTop: '0.5rem' }}>
+
+        <button 
+          type="submit" 
+          className="btn" 
+          disabled={loading} 
+          style={{ marginTop: '0.5rem', padding: '0.9rem', fontSize: '1rem', fontWeight: '800', width: '100%' }}
+        >
           {loading ? 'Authenticating...' : 'Sign In'}
         </button>
       </form>
 
-      <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ margin: '1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>OR</div>
+      <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '10px' }}>
+          <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600' }}>OR</div>
+          <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
+        </div>
+
         <GoogleLogin
           onSuccess={handleGoogleSuccess}
           onError={() => setError('Google Login Failed')}
@@ -138,6 +158,10 @@ function Login() {
           shape="pill"
         />
       </div>
+
+      <p style={{ marginTop: '2rem', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 0 }}>
+        Don't have an account? <Link to="/register" style={{ color: 'var(--primary-color)', fontWeight: '600', textDecoration: 'none' }}>Register here</Link>
+      </p>
     </div>
   );
 }

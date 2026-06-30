@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 
-
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
 function Register() {
@@ -170,87 +169,128 @@ function Register() {
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '0.8rem 1rem',
+    borderRadius: '8px',
+    background: 'var(--input-bg)',
+    border: '1px solid var(--surface-border)',
+    color: 'var(--text-highlight)',
+    boxSizing: 'border-box',
+    fontFamily: 'inherit',
+    outline: 'none'
+  };
+
   return (
-    <div className="auth-container glass-panel" style={{ maxWidth: '600px', margin: '2rem auto' }}>
-      <h2 className="auth-title">Create Account</h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Join ConEco to get started</p>
+    <div className="auth-container glass-panel" style={{ maxWidth: '640px', margin: '2rem auto', padding: '2.5rem' }}>
+      <h2 className="auth-title" style={{ margin: '0 0 0.5rem 0', fontWeight: '800' }}>Create Account</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '1.8rem', fontSize: '0.95rem' }}>Join ConEco to digitize and scale your transactions</p>
       
-      {error && <p style={{ color: 'var(--danger-color)', marginBottom: '1rem', background: 'rgba(248,81,73,0.1)', padding:'0.5rem', borderRadius:'4px' }}>{error}</p>}
+      {error && (
+        <div style={{ padding: '0.8rem 1rem', marginBottom: '1.5rem', borderRadius: '8px', background: 'rgba(248,81,73,0.12)', color: '#f85149', border: '1px solid rgba(248,81,73,0.25)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <span>⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
       
       <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', textAlign: 'left' }}>
         
         {/* COMMON FIELDS */}
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <div style={{ flex: 1 }}>
-            <label className="input-label">Full Name</label>
-            <input type="text" name="name" onChange={handleChange} required className="input-field" />
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 240px' }}>
+            <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Full Name</label>
+            <input type="text" name="name" onChange={handleChange} required style={inputStyle} />
           </div>
-          <div style={{ flex: 1 }}>
-            <label className="input-label">Phone No</label>
-            <input type="tel" name="phone" onChange={handleChange} required className="input-field" />
+          <div style={{ flex: '1 1 240px' }}>
+            <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Phone Number</label>
+            <input type="tel" name="phone" placeholder="10-digit mobile" onChange={handleChange} required style={inputStyle} />
           </div>
         </div>
 
         <div>
-          <label className="input-label">Email Address</label>
-          <input type="email" name="email" onChange={handleChange} required className="input-field" />
+          <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Email Address</label>
+          <input type="email" name="email" placeholder="name@example.com" onChange={handleChange} required style={inputStyle} />
         </div>
 
         <div>
-          <label className="input-label">Account Role</label>
-          <select name="role" onChange={handleChange} required className="input-field" style={{ background: 'rgba(0,0,0,0.5)' }}>
-            <option value="">Select a role</option>
-            <option value="customer">Customer</option>
-            <option value="vendor">Vendor</option>
+          <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Account Role</label>
+          <select name="role" onChange={handleChange} required style={{ ...inputStyle, cursor: 'pointer' }}>
+            <option value="">Select account type</option>
+            <option value="customer">Customer (Buy materials & hire contractors)</option>
+            <option value="vendor">Vendor (Sell materials & list services)</option>
           </select>
         </div>
 
         {/* VENDOR SECTION */}
         {formData.role === 'vendor' && (
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '1rem', color: 'var(--primary-color)' }}>Vendor Details</h3>
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-              <div style={{ flex: 1 }}><label className="input-label">Company Name</label><input type="text" name="company" onChange={handleChange} required className="input-field" /></div>
-              <div style={{ flex: 1 }}><label className="input-label">GST Number</label><input type="text" name="gst" onChange={handleChange} required className="input-field" /></div>
+          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--surface-border)', animation: 'fadeIn var(--transition-speed) ease-out' }}>
+            <h3 style={{ marginTop: 0, marginBottom: '1.2rem', color: 'var(--primary-color)', fontSize: '1.05rem', fontWeight: '700' }}>🏢 Vendor Details</h3>
+            
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 200px' }}>
+                <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Company / Firm Name</label>
+                <input type="text" name="company" onChange={handleChange} required style={inputStyle} />
+              </div>
+              <div style={{ flex: '1 1 200px' }}>
+                <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>GST Number</label>
+                <input type="text" name="gst" placeholder="15-character GSTIN" onChange={handleChange} required style={inputStyle} />
+              </div>
             </div>
+            
             <div style={{ marginBottom: '1rem' }}>
-              <label className="input-label">Address</label><input type="text" name="address" onChange={handleChange} required className="input-field" />
+              <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Business Address</label>
+              <input type="text" name="address" onChange={handleChange} required style={inputStyle} />
             </div>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <div style={{ flex: 1 }}><label className="input-label">City</label><input type="text" name="vendorCity" onChange={handleChange} required className="input-field" /></div>
-              <div style={{ flex: 1 }}><label className="input-label">State</label><input type="text" name="vendorState" onChange={handleChange} required className="input-field" /></div>
+            
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 200px' }}>
+                <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>City</label>
+                <input type="text" name="vendorCity" onChange={handleChange} required style={inputStyle} />
+              </div>
+              <div style={{ flex: '1 1 200px' }}>
+                <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>State</label>
+                <input type="text" name="vendorState" onChange={handleChange} required style={inputStyle} />
+              </div>
             </div>
           </div>
         )}
 
         {/* CUSTOMER SECTION */}
         {formData.role === 'customer' && (
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '1rem', color: 'var(--primary-color)' }}>Customer Details</h3>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <div style={{ flex: 1 }}><label className="input-label">City</label><input type="text" name="customerCity" onChange={handleChange} required className="input-field" /></div>
-              <div style={{ flex: 1 }}><label className="input-label">State</label><input type="text" name="customerState" onChange={handleChange} required className="input-field" /></div>
+          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--surface-border)', animation: 'fadeIn var(--transition-speed) ease-out' }}>
+            <h3 style={{ marginTop: 0, marginBottom: '1.2rem', color: 'var(--primary-color)', fontSize: '1.05rem', fontWeight: '700' }}>📍 Customer Location</h3>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 200px' }}>
+                <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>City</label>
+                <input type="text" name="customerCity" onChange={handleChange} required style={inputStyle} />
+              </div>
+              <div style={{ flex: '1 1 200px' }}>
+                <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>State</label>
+                <input type="text" name="customerState" onChange={handleChange} required style={inputStyle} />
+              </div>
             </div>
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <div style={{ flex: 1, position: 'relative' }}>
-            <label className="input-label">Password</label>
-            <input type={showPassword ? "text" : "password"} name="password" onChange={handleChange} required className="input-field" style={{ paddingRight: '2.5rem' }} />
-            <button type="button" onClick={handleTogglePassword} style={{ position: 'absolute', right: '10px', top: '38px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}>
+        {/* PASSWORDS */}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 240px', position: 'relative' }}>
+            <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Password</label>
+            <input type={showPassword ? "text" : "password"} name="password" onChange={handleChange} required style={{ ...inputStyle, paddingRight: '2.5rem' }} />
+            <button type="button" onClick={handleTogglePassword} style={{ position: 'absolute', right: '12px', top: '35px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}>
               {showPassword ? '👁️' : '👁️‍🗨️'}
             </button>
           </div>
-          <div style={{ flex: 1, position: 'relative' }}>
-            <label className="input-label">Confirm Password</label>
-            <input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" onChange={handleChange} required className="input-field" style={{ paddingRight: '2.5rem' }} />
-            <button type="button" onClick={handleToggleConfirmPassword} style={{ position: 'absolute', right: '10px', top: '38px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}>
+          <div style={{ flex: '1 1 240px', position: 'relative' }}>
+            <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>Confirm Password</label>
+            <input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" onChange={handleChange} required style={{ ...inputStyle, paddingRight: '2.5rem' }} />
+            <button type="button" onClick={handleToggleConfirmPassword} style={{ position: 'absolute', right: '12px', top: '35px', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, fontSize: '1.2rem', padding: 0 }}>
               {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
             </button>
           </div>
         </div>
 
+        {/* TERMS */}
         <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start', marginTop: '0.5rem', marginBottom: '0.5rem' }}>
           <input 
             type="checkbox" 
@@ -258,21 +298,27 @@ function Register() {
             checked={acceptedTerms} 
             onChange={(e) => setAcceptedTerms(e.target.checked)} 
             required 
-            style={{ width: 'auto', marginTop: '0.3rem', cursor: 'pointer' }}
+            style={{ width: 'auto', marginTop: '0.25rem', cursor: 'pointer' }}
           />
-          <label htmlFor="acceptTerms" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', cursor: 'pointer', lineHeight: '1.4' }}>
-            I have read <Link to="/privacy" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Privacy Policy</Link> and <Link to="/terms" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>Terms and Conditions</Link> and accept all the policies and Terms
+          <label htmlFor="acceptTerms" style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', cursor: 'pointer', lineHeight: '1.5' }}>
+            I have read and agree to ConEco's <Link to="/privacy" target="_blank" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600' }}>Privacy Policy</Link> and <Link to="/terms" target="_blank" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600' }}>Terms & Conditions</Link>.
           </label>
         </div>
 
-        <button type="submit" className="btn" disabled={loading} style={{ marginTop: '0.5rem' }}>
+        <button 
+          type="submit" 
+          className="btn" 
+          disabled={loading} 
+          style={{ marginTop: '0.5rem', padding: '0.9rem', fontSize: '1rem', fontWeight: '800', width: '100%' }}
+        >
           {loading ? 'Registering...' : 'Register'}
         </button>
 
-        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+        {/* SOCIAL REGISTER */}
+        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '10px' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>OR REGISTER WITH</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600' }}>OR REGISTER WITH</div>
             <div style={{ flex: 1, height: '1px', background: 'var(--surface-border)' }}></div>
           </div>
           
@@ -285,13 +331,16 @@ function Register() {
           />
           
           {formData.role === 'vendor' && (
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '80%' }}>
-              Note: Vendors registering via Google can complete their business details (GST, Company Name) in their profile settings after login.
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '85%', margin: 0, lineHeight: '1.4' }}>
+              Note: Vendors registering via Google can complete their company name, GST, and business addresses inside their Profile Settings after activation.
             </p>
           )}
         </div>
       </form>
-      <p style={{ marginTop: '1.5rem', color: 'var(--text-secondary)' }}>Already have an account? <Link to="/login" style={{ color: 'var(--primary-color)' }}>Login here</Link></p>
+      
+      <p style={{ marginTop: '2rem', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 0 }}>
+        Already have an account? <Link to="/login" style={{ color: 'var(--primary-color)', fontWeight: '600', textDecoration: 'none' }}>Login here</Link>
+      </p>
     </div>
   );
 }
