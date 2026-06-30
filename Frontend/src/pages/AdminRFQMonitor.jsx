@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import AdminSidebar from '../components/AdminSidebar';
+import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
 const AdminRFQMonitor = () => {
+    const navigate = useNavigate();
     const [rfqs, setRfqs] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -22,19 +25,30 @@ const AdminRFQMonitor = () => {
         fetchRfqs();
     }, []);
 
-    if (loading) return <div className="p-8 text-center text-white">Loading RFQ Monitor...</div>;
+    if (loading) return (
+        <div className="dashboard-layout">
+            <AdminSidebar />
+            <main style={{ flex: 1, padding: '2rem' }} className="text-center text-white">Loading RFQ Monitor...</main>
+        </div>
+    );
 
     return (
-        <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 animate-fade-in" style={{marginLeft: '250px'}}>
-            <div className="flex items-center gap-4 border-b border-white/10 pb-6">
-                <div className="p-4 bg-emerald-500/20 rounded-xl border border-emerald-500/30 text-3xl">
-                    🖥️
-                </div>
-                <div>
-                    <h1 className="text-3xl font-bold text-white">Global RFQ Monitor</h1>
-                    <p className="text-gray-400">Monitor all reverse auctions across the platform.</p>
-                </div>
-            </div>
+        <div className="dashboard-layout">
+            <AdminSidebar />
+            <main style={{ flex: 1, padding: '2rem' }}>
+                <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+                    <button className="btn" onClick={() => navigate('/admin/dashboard')} style={{ marginBottom: '1rem', background: 'var(--surface-border)', color: 'var(--text-highlight)' }}>
+                        ← Back to Dashboard
+                    </button>
+                    <div className="flex items-center gap-4 border-b border-white/10 pb-6">
+                        <div className="p-4 bg-emerald-500/20 rounded-xl border border-emerald-500/30 text-3xl">
+                            🖥️
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold text-white">Global RFQ Monitor</h1>
+                            <p className="text-gray-400">Monitor all reverse auctions across the platform.</p>
+                        </div>
+                    </div>
 
             {rfqs.length === 0 ? (
                 <div className="bg-white/5 backdrop-blur-md rounded-2xl p-10 text-center border border-white/10">
@@ -84,6 +98,8 @@ const AdminRFQMonitor = () => {
                     ))}
                 </div>
             )}
+                </div>
+            </main>
         </div>
     );
 };

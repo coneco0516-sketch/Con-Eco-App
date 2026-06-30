@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import VendorSidebar from '../components/VendorSidebar';
+import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
 const VendorRFQBoard = () => {
+    const navigate = useNavigate();
     const [rfqs, setRfqs] = useState([]);
     const [myBids, setMyBids] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -74,14 +77,25 @@ const VendorRFQBoard = () => {
         setShowBidModal(true);
     };
 
-    if (loading) return <div className="p-8 text-center text-white">Loading RFQ Board...</div>;
+    if (loading) return (
+        <div className="dashboard-layout">
+            <VendorSidebar />
+            <main style={{ flex: 1, padding: '2rem' }} className="text-center text-white">Loading RFQ Board...</main>
+        </div>
+    );
 
     return (
-        <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 animate-fade-in" style={{marginLeft: '250px'}}>
-            <div>
-                <h1 className="text-3xl font-bold text-white mb-2">RFQ Board</h1>
-                <p className="text-gray-400">View wholesale requests matching your category and location, and submit competitive bids.</p>
-            </div>
+        <div className="dashboard-layout">
+            <VendorSidebar />
+            <main style={{ flex: 1, padding: '2rem' }}>
+                <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+                    <button className="btn" onClick={() => navigate('/vendor')} style={{ marginBottom: '1rem', background: 'var(--surface-border)', color: 'var(--text-highlight)' }}>
+                        ← Back to Dashboard
+                    </button>
+                    <div>
+                        <h1 className="text-3xl font-bold text-white mb-2">RFQ Board</h1>
+                        <p className="text-gray-400">View wholesale requests matching your category and location, and submit competitive bids.</p>
+                    </div>
 
             {/* Tabs */}
             <div className="flex border-b border-white/10">
@@ -279,6 +293,8 @@ const VendorRFQBoard = () => {
                     </div>
                 </div>
             )}
+                </div>
+            </main>
         </div>
     );
 };

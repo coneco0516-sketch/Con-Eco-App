@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import CustomerSidebar from '../components/CustomerSidebar';
+import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
 const CustomerRFQ = () => {
+    const navigate = useNavigate();
     const [rfqs, setRfqs] = useState([]);
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -133,22 +136,34 @@ const CustomerRFQ = () => {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-white">Loading RFQs...</div>;
+    if (loading) return (
+        <div className="dashboard-layout">
+            <CustomerSidebar />
+            <main style={{ flex: 1, padding: '2rem' }} className="text-center text-white">Loading RFQs...</main>
+        </div>
+    );
 
     return (
-        <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 animate-fade-in" style={{marginLeft: '250px'}}>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Reverse Auction (RFQ)</h1>
-                    <p className="text-gray-400">Request bulk pricing and let verified vendors bid for your order.</p>
-                </div>
-                <button 
-                    onClick={() => setShowCreateModal(true)}
-                    className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-emerald-500/20 transition-all duration-300"
-                >
-                    + Post New RFQ
-                </button>
-            </div>
+        <div className="dashboard-layout">
+            <CustomerSidebar />
+            <main style={{ flex: 1, padding: '2rem' }}>
+                <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+                    <button className="btn" onClick={() => navigate('/customer')} style={{ marginBottom: '1rem', background: 'var(--surface-border)', color: 'var(--text-highlight)' }}>
+                        ← Back to Dashboard
+                    </button>
+                    
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-white mb-2">Reverse Auction (RFQ)</h1>
+                            <p className="text-gray-400">Request bulk pricing and let verified vendors bid for your order.</p>
+                        </div>
+                        <button 
+                            onClick={() => setShowCreateModal(true)}
+                            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-emerald-500/20 transition-all duration-300"
+                        >
+                            + Post New RFQ
+                        </button>
+                    </div>
 
             {rfqs.length === 0 ? (
                 <div className="bg-white/5 backdrop-blur-md rounded-2xl p-10 text-center border border-white/10">
@@ -403,6 +418,8 @@ const CustomerRFQ = () => {
                     </div>
                 </div>
             )}
+                </div>
+            </main>
         </div>
     );
 };
