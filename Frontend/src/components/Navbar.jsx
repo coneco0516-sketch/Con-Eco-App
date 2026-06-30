@@ -54,7 +54,11 @@ function Navbar() {
           <div className="nav-brand" style={{ display: 'flex', alignItems: 'center' }}>
             <img src="/Logo.svg" alt="ConEco Logo" className="nav-logo" />
             <span>ConEco</span>
-            {userRole && <span className="portal-badge">{userRole} Portal</span>}
+            {userRole && (
+              <span className={`portal-badge ${userRole.toLowerCase().replace(' ', '-')}`}>
+                {userRole} Portal
+              </span>
+            )}
           </div>
         )}
         <button 
