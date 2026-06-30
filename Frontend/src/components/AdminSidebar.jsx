@@ -66,7 +66,15 @@ function AdminSidebar() {
         {userRole !== 'Employee' && (
           <li>
             <Link to="/admin/commissions" className={`nav-item ${isActive('/admin/commissions')}`} style={{ display: 'block', padding: '0.6rem 1rem', textDecoration: 'none', transition: 'all 0.2s' }}>
-              📈 Commissions
+              💰 Commissions
+            </Link>
+          </li>
+        )}
+
+        {userRole !== 'Employee' && (
+          <li>
+            <Link to="/admin/analytics" className={`nav-item ${isActive('/admin/analytics')}`} style={{ display: 'block', padding: '0.6rem 1rem', textDecoration: 'none', transition: 'all 0.2s' }}>
+              📈 Platform Analytics
             </Link>
           </li>
         )}
