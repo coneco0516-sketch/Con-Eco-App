@@ -13,6 +13,7 @@ function VendorSidebar() {
       <ul className={`sidebar-links ${isOpen ? 'show' : ''}`} style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
         <li><Link to="/vendor" className="nav-item">Dashboard</Link></li>
         <li><Link to="/vendor/catalogue" className="nav-item">My Catalogue</Link></li>
+        <li><Link to="/vendor/rfq" className="nav-item">RFQ Board</Link></li>
         <li><Link to="/vendor/orders" className="nav-item">Incoming Orders</Link></li>
         <li><Link to="/vendor/earnings" className="nav-item">Earnings</Link></li>
         <li><Link to="/vendor/billing" className="nav-item">Commission Bills</Link></li>

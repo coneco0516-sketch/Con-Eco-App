@@ -24,6 +24,7 @@ function AdminSidebar() {
         
         <li><Link to="/admin/customers" className="nav-item">Customer Verification</Link></li>
         <li><Link to="/admin/orders" className="nav-item">Orders Details</Link></li>
+        <li><Link to="/admin/rfq" className="nav-item">RFQ Monitor</Link></li>
         
         {userRole === 'Super Admin' && (
           <li><Link to="/admin/payments" className="nav-item">Payments</Link></li>

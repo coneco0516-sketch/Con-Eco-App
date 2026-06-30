@@ -895,3 +895,115 @@ def get_invoices(user = Depends(check_vendor)):
         return {"status": "success", "invoices": invoices}
     finally:
         conn.close()
+
+# --- RFQ ENGINE (Vendor) ---
+
+@router.get("/rfq")
+def get_vendor_rfqs(user = Depends(check_vendor)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        vendor_id = user['user_id']
+        
+        cursor.execute("SELECT city, state FROM Vendors WHERE vendor_id=%s", (vendor_id,))
+        vendor_info = cursor.fetchone()
+        if not vendor_info:
+            raise HTTPException(status_code=404, detail="Vendor info not found")
+            
+        v_city = vendor_info['city']
+        v_state = vendor_info['state']
+        
+        # Vendor sees RFQs where:
+        # 1. status = 'Open'
+        # 2. category matches any category they sell
+        # 3. city/state match (for localized fulfillment)
+        sql = """
+            SELECT r.*, c.city as cust_city, c.state as cust_state,
+                   TO_CHAR(r.required_by, 'DD Mon YYYY') as required_by_fmt,
+                   TO_CHAR(r.created_at, 'DD Mon YYYY') as created_at_fmt
+            FROM RFQRequests r
+            JOIN Customers c ON r.customer_id = c.customer_id
+            WHERE r.status = 'Open'
+              AND r.city = %s 
+              AND r.state = %s
+              AND r.category IN (
+                  SELECT category FROM Products WHERE vendor_id = %s
+                  UNION 
+                  SELECT category FROM Services WHERE vendor_id = %s
+              )
+              AND NOT EXISTS (
+                  SELECT 1 FROM RFQBids WHERE rfq_id = r.rfq_id AND vendor_id = %s
+              )
+            ORDER BY r.created_at DESC
+        """
+        cursor.execute(sql, (v_city, v_state, vendor_id, vendor_id, vendor_id))
+        rfqs = cursor.fetchall()
+        
+        return {"status": "success", "rfqs": rfqs}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+class SubmitBidData(BaseModel):
+    rfq_id: int
+    unit_price: float
+    delivery_days: int
+    note: Optional[str] = None
+
+@router.post("/rfq/bid")
+def submit_rfq_bid(data: SubmitBidData, user = Depends(check_vendor)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        vendor_id = user['user_id']
+        
+        cursor.execute("SELECT quantity, status FROM RFQRequests WHERE rfq_id=%s", (data.rfq_id,))
+        rfq = cursor.fetchone()
+        if not rfq:
+            raise HTTPException(status_code=404, detail="RFQ not found")
+        if rfq['status'] != 'Open':
+             raise HTTPException(status_code=400, detail="RFQ is no longer open for bidding")
+             
+        cursor.execute("SELECT bid_id FROM RFQBids WHERE rfq_id=%s AND vendor_id=%s", (data.rfq_id, vendor_id))
+        if cursor.fetchone():
+             raise HTTPException(status_code=400, detail="You have already placed a bid for this RFQ")
+             
+        total_price = float(data.unit_price) * rfq['quantity']
+        
+        cursor.execute("""
+            INSERT INTO RFQBids (rfq_id, vendor_id, unit_price, total_price, delivery_days, note)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING bid_id
+        """, (data.rfq_id, vendor_id, data.unit_price, total_price, data.delivery_days, data.note))
+        
+        conn.commit()
+        return {"status": "success", "message": "Bid submitted successfully"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@router.get("/rfq/my_bids")
+def get_vendor_bids(user = Depends(check_vendor)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        vendor_id = user['user_id']
+        
+        cursor.execute("""
+            SELECT b.*, r.title, r.category, r.item_type, r.quantity, r.unit,
+                   r.city, r.state, r.status as rfq_status,
+                   TO_CHAR(b.created_at, 'DD Mon YYYY') as bid_date,
+                   TO_CHAR(r.required_by, 'DD Mon YYYY') as required_by_fmt
+            FROM RFQBids b
+            JOIN RFQRequests r ON b.rfq_id = r.rfq_id
+            WHERE b.vendor_id = %s
+            ORDER BY b.created_at DESC
+        """, (vendor_id,))
+        bids = cursor.fetchall()
+        
+        return {"status": "success", "bids": bids}
+    finally:
+        conn.close()

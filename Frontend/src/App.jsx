@@ -12,6 +12,7 @@ import AdminProfile from './pages/AdminProfile';
 import AdminContactMessages from './pages/AdminContactMessages';
 import AdminCommissions from './pages/AdminCommissions';
 import AdminBulkPriceUpdater from './pages/AdminBulkPriceUpdater';
+import AdminRFQMonitor from './pages/AdminRFQMonitor';
 import PlatformSettings from './pages/PlatformSettings';
 import Register from './pages/Register';
 import About from './pages/About';
@@ -40,7 +41,9 @@ import MyBookedServices from './pages/MyBookedServices';
 import CustomerProfile from './pages/CustomerProfile';
 import ProjectSites from './pages/ProjectSites';
 import ProjectSiteDetail from './pages/ProjectSiteDetail';
+import CustomerRFQ from './pages/CustomerRFQ';
 import VendorDashboard from './pages/VendorDashboard';
+import VendorRFQBoard from './pages/VendorRFQBoard';
 import Catalogue from './pages/Catalogue';
 import VendorOrders from './pages/VendorOrders';
 import Earnings from './pages/Earnings';
@@ -266,6 +269,7 @@ function AppContent() {
           <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['Super Admin']}><PlatformSettings /></ProtectedRoute>} />
           <Route path="/admin/contact-messages" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminContactMessages /></ProtectedRoute>} />
           <Route path="/admin/bulk-pricing" element={<ProtectedRoute allowedRoles={['Super Admin', 'Employee']}><AdminBulkPriceUpdater /></ProtectedRoute>} />
+          <Route path="/admin/rfq" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminRFQMonitor /></ProtectedRoute>} />
           
           {/* Customer Routes */}
           <Route path="/customer" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerDashboard /></ProtectedRoute>} />
@@ -281,10 +285,12 @@ function AppContent() {
           <Route path="/customer/booked-services" element={<ProtectedRoute allowedRoles={['Customer']}><MyBookedServices /></ProtectedRoute>} />
           <Route path="/customer/projects" element={<ProtectedRoute allowedRoles={['Customer']}><ProjectSites /></ProtectedRoute>} />
           <Route path="/customer/projects/:id" element={<ProtectedRoute allowedRoles={['Customer']}><ProjectSiteDetail /></ProtectedRoute>} />
+          <Route path="/customer/rfq" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerRFQ /></ProtectedRoute>} />
           <Route path="/customer/profile" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerProfile /></ProtectedRoute>} />
 
           {/* Vendor Routes */}
           <Route path="/vendor" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorDashboard /></ProtectedRoute>} />
+          <Route path="/vendor/rfq" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorRFQBoard /></ProtectedRoute>} />
           <Route path="/vendor/catalogue" element={<ProtectedRoute allowedRoles={['Vendor']}><Catalogue /></ProtectedRoute>} />
           <Route path="/vendor/orders" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorOrders /></ProtectedRoute>} />
           <Route path="/vendor/earnings" element={<ProtectedRoute allowedRoles={['Vendor']}><Earnings /></ProtectedRoute>} />

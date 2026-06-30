@@ -18,6 +18,7 @@ function CustomerSidebar() {
         <li><Link to="/customer/orders" className="nav-item">My Orders</Link></li>
         <li><Link to="/customer/booked-services" className="nav-item">My Booked Services</Link></li>
         <li><Link to="/customer/projects" className="nav-item">My Projects</Link></li>
+        <li><Link to="/customer/rfq" className="nav-item">Reverse Auction</Link></li>
         <li><Link to="/customer/profile" className="nav-item">My Profile</Link></li>
       </ul>
     </aside>

@@ -705,3 +705,179 @@ def delete_project_site(site_id: int, user = Depends(check_customer)):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
+
+# --- RFQ ENGINE (Customer) ---
+
+class RFQData(BaseModel):
+    site_id: Optional[int] = None
+    item_type: str
+    category: str
+    title: str
+    description: str
+    quantity: int
+    unit: str
+    required_by: str
+    delivery_address: str
+    city: str
+    state: str
+
+@router.post("/rfq")
+def create_rfq(data: RFQData, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+             raise HTTPException(status_code=404, detail="Customer not found")
+        cust_id = cust['customer_id']
+        
+        cursor.execute("""
+            INSERT INTO RFQRequests (
+                customer_id, site_id, item_type, category, title, description, 
+                quantity, unit, required_by, delivery_address, city, state
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING rfq_id
+        """, (
+            cust_id, data.site_id, data.item_type, data.category, data.title, 
+            data.description, data.quantity, data.unit, data.required_by, 
+            data.delivery_address, data.city, data.state
+        ))
+        result = cursor.fetchone()
+        rfq_id = result['rfq_id'] if isinstance(result, dict) else result[0]
+        conn.commit()
+        return {"status": "success", "rfq_id": rfq_id, "message": "RFQ created successfully"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@router.get("/rfq")
+def get_customer_rfqs(user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust = cursor.fetchone()
+        if not cust:
+             raise HTTPException(status_code=404, detail="Customer not found")
+        cust_id = cust['customer_id']
+        
+        cursor.execute("""
+            SELECT r.*, 
+                   TO_CHAR(r.required_by, 'DD Mon YYYY') as required_by_fmt,
+                   TO_CHAR(r.created_at, 'DD Mon YYYY') as created_at_fmt,
+                   (SELECT COUNT(*) FROM RFQBids WHERE rfq_id = r.rfq_id) as bid_count
+            FROM RFQRequests r
+            WHERE r.customer_id = %s
+            ORDER BY r.created_at DESC
+        """, (cust_id,))
+        rfqs = cursor.fetchall()
+        
+        return {"status": "success", "rfqs": rfqs}
+    finally:
+        conn.close()
+
+@router.get("/rfq/{rfq_id}/bids")
+def get_rfq_bids(rfq_id: int, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust_id = cursor.fetchone()['customer_id']
+        
+        cursor.execute("SELECT * FROM RFQRequests WHERE rfq_id=%s AND customer_id=%s", (rfq_id, cust_id))
+        rfq = cursor.fetchone()
+        if not rfq:
+            raise HTTPException(status_code=404, detail="RFQ not found")
+            
+        cursor.execute("""
+            SELECT b.*, v.company_name as vendor_name, v.qc_score,
+                   TO_CHAR(b.created_at, 'DD Mon YYYY') as bid_date
+            FROM RFQBids b
+            JOIN Vendors v ON b.vendor_id = v.vendor_id
+            WHERE b.rfq_id = %s
+            ORDER BY b.total_price ASC
+        """, (rfq_id,))
+        bids = cursor.fetchall()
+        
+        return {"status": "success", "rfq": rfq, "bids": bids}
+    finally:
+        conn.close()
+
+class AcceptBidData(BaseModel):
+    rfq_id: int
+    bid_id: int
+
+@router.post("/rfq/accept_bid")
+def accept_rfq_bid(data: AcceptBidData, user = Depends(check_customer)):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT customer_id FROM Customers WHERE customer_id=%s", (user['user_id'],))
+        cust_id = cursor.fetchone()['customer_id']
+        
+        cursor.execute("SELECT * FROM RFQRequests WHERE rfq_id=%s AND customer_id=%s AND status='Open'", (data.rfq_id, cust_id))
+        rfq = cursor.fetchone()
+        if not rfq:
+            raise HTTPException(status_code=404, detail="Open RFQ not found or access denied")
+            
+        cursor.execute("SELECT * FROM RFQBids WHERE bid_id=%s AND rfq_id=%s AND status='Pending'", (data.bid_id, data.rfq_id))
+        bid = cursor.fetchone()
+        if not bid:
+            raise HTTPException(status_code=404, detail="Bid not found or already processed")
+            
+        # 1. Update RFQ status to Awarded
+        cursor.execute("UPDATE RFQRequests SET status='Awarded' WHERE rfq_id=%s", (data.rfq_id,))
+        
+        # 2. Update winning Bid status to Accepted, other bids to Rejected
+        cursor.execute("UPDATE RFQBids SET status='Accepted' WHERE bid_id=%s", (data.bid_id,))
+        cursor.execute("UPDATE RFQBids SET status='Rejected' WHERE rfq_id=%s AND bid_id!=%s", (data.rfq_id, data.bid_id))
+        
+        # 3. Create an Order from the winning bid
+        base_amount = float(bid['total_price'])
+        gst_amount = round(base_amount * 0.18, 2) # simplified GST
+        
+        comm_key = 'product_commission_pct' if rfq['item_type'] == 'Product' else 'service_commission_pct'
+        commission_rate = float(get_platform_setting(comm_key, 3.0))
+        commission_amount = round(base_amount * commission_rate / 100, 2)
+        total_amount = round(base_amount + gst_amount + commission_amount, 2)
+        
+        full_address = f"{rfq['delivery_address']}, {rfq['city']}, {rfq['state']}"
+        
+        cursor.execute("""
+            INSERT INTO Orders (
+                customer_id, vendor_id, order_type, item_id, quantity, 
+                amount, base_amount, gst_amount, commission_amount, total_amount,
+                status, delivery_address, payment_method, site_id, is_bulk_request, customer_message, negotiated_price
+            ) VALUES (%s, %s, %s, NULL, %s, %s, %s, %s, %s, %s, 'Pending', %s, 'To Be Paid', %s, TRUE, %s, %s)
+            RETURNING order_id
+        """, (
+            cust_id, bid['vendor_id'], rfq['item_type'], rfq['quantity'],
+            total_amount, base_amount, gst_amount, commission_amount, total_amount,
+            full_address, rfq['site_id'], f"RFQ Order: {rfq['title']}", float(bid['unit_price'])
+        ))
+        
+        order_res = cursor.fetchone()
+        order_id = order_res['order_id'] if isinstance(order_res, dict) else order_res[0]
+        
+        # Track commission
+        cursor.execute(
+            """INSERT INTO commissions (order_id, vendor_id, commission_amount, commission_rate, status) 
+               VALUES (%s,%s,%s,%s,'Pending')""",
+            (order_id, bid['vendor_id'], commission_amount, commission_rate)
+        )
+        
+        # Placeholder Payment
+        txn_id = 'RFQ-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        cursor.execute("INSERT INTO Payments (txn_id, order_id, amount, status) VALUES (%s, %s, %s, 'Pending')",
+                       (txn_id, order_id, total_amount))
+                       
+        conn.commit()
+        return {"status": "success", "message": "Bid accepted and order generated successfully", "order_id": order_id}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()

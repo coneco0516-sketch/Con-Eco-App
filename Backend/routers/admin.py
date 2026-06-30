@@ -892,3 +892,30 @@ def delete_staff(user_id: int, user = Depends(require_super_admin)):
         return {"status": "success", "message": "Staff member deleted"}
     finally:
         conn.close()
+
+# --- RFQ ENGINE (Admin) ---
+
+@router.get("/rfq")
+def get_all_rfqs(user = Depends(require_admin_above)):
+    """Admin view: Monitor all RFQs platform-wide"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT r.*, 
+                   u.name as customer_name, u.phone as customer_phone,
+                   TO_CHAR(r.required_by, 'DD Mon YYYY') as required_by_fmt,
+                   TO_CHAR(r.created_at, 'DD Mon YYYY') as created_at_fmt,
+                   (SELECT COUNT(*) FROM RFQBids WHERE rfq_id = r.rfq_id) as bid_count
+            FROM RFQRequests r
+            JOIN Customers c ON r.customer_id = c.customer_id
+            JOIN Users u ON c.customer_id = u.user_id
+            ORDER BY r.created_at DESC
+        """)
+        rfqs = cursor.fetchall()
+        
+        # We can also fetch all bids if we want a detailed view, but usually
+        # admin can just click into an RFQ to see bids in a separate call if needed.
+        return {"status": "success", "rfqs": rfqs}
+    finally:
+        conn.close()
