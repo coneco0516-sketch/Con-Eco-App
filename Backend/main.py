@@ -165,7 +165,7 @@ async def contact_us(form: ContactForm, background_tasks: BackgroundTasks = None
 
     return {"status": "success", "message": "Your message has been sent. You will receive a confirmation email shortly."}
 
-from routers import auth, admin, customer, vendor, payment, invoice, addresses
+from routers import auth, admin, customer, vendor, payment, invoice, addresses, milestones
 
 # Mount routers here
 app.include_router(auth.router,    prefix="/api/auth",    tags=["auth"])
@@ -175,6 +175,7 @@ app.include_router(vendor.router,  prefix="/api/vendor",  tags=["vendor"])
 app.include_router(payment.router, prefix="/api/payment", tags=["payment"])
 app.include_router(invoice.router, prefix="/api/invoice", tags=["invoice"])
 app.include_router(addresses.router, prefix="/api/addresses", tags=["addresses"])
+app.include_router(milestones.router, prefix="/api/milestones", tags=["milestones"])
 
 @app.get("/db-check")
 def db_check():

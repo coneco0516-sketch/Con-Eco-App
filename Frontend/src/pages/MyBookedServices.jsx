@@ -49,8 +49,211 @@ function ConfirmModal({ open, onClose, onConfirm, title, message, confirmLabel, 
   );
 }
 
+function CustomerMilestonesSection({ orderId, orderAmount, orderStatus, onRefresh }) {
+  const [expanded, setExpanded] = useState(false);
+  const [milestones, setMilestones] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
+  const [customerNote, setCustomerNote] = useState('');
+
+  const fetchMilestones = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/api/milestones/${orderId}`, { credentials: 'include' });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setMilestones(data.milestones || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [orderId]);
+
+  useEffect(() => {
+    if (expanded) {
+      fetchMilestones();
+    }
+  }, [expanded, fetchMilestones]);
+
+  const handleApproveMilestone = async (milestoneId) => {
+    try {
+      const res = await fetch(`${API}/api/milestones/customer/milestones/${milestoneId}/approve`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: customerNote }),
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        setApprovingId(null);
+        setCustomerNote('');
+        fetchMilestones();
+        if (onRefresh) onRefresh();
+      } else {
+        alert(data.detail || data.message || 'Error approving milestone');
+      }
+    } catch (err) {
+      alert('Network error');
+    }
+  };
+
+  const completedCount = milestones.filter(m => m.status === 'Approved').length;
+  const totalAmountReleased = milestones.filter(m => m.status === 'Approved').reduce((acc, m) => acc + parseFloat(m.payment_amount || 0), 0);
+
+  return (
+    <div style={{ borderTop: '1px solid var(--surface-border)', padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.01)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '1.1rem' }}>📅</span>
+          <span style={{ fontWeight: 600, color: 'var(--text-highlight)', fontSize: '0.9rem' }}>
+            Milestones Progress ({completedCount}/{milestones.length || 0} Released)
+          </span>
+          {milestones.length > 0 && (
+            <span style={{ fontSize: '0.8rem', color: '#2ea043', background: 'rgba(46,160,67,0.12)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(46,160,67,0.25)', fontWeight: 600 }}>
+              ₹{totalAmountReleased.toLocaleString()} / ₹{orderAmount.toLocaleString()} Released
+            </span>
+          )}
+        </div>
+        
+        <button 
+          className="btn" 
+          onClick={() => setExpanded(!expanded)}
+          style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-secondary)' }}
+        >
+          {expanded ? 'Hide Milestones Plan 🔼' : 'Show Milestones Plan 🔽'}
+        </button>
+      </div>
+
+      {expanded && (
+        <div style={{ marginTop: '1.25rem' }}>
+          {loading ? (
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Loading milestones...</div>
+          ) : milestones.length === 0 ? (
+            <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.1)', borderRadius: '8px', border: '1px dashed var(--surface-border)', textAlign: 'center' }}>
+              <span style={{ fontSize: '1.5rem' }}>📋</span>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '8px 0 0 0' }}>The service provider hasn't set up the milestone payment plan yet.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderLeft: '2px solid var(--surface-border)', marginLeft: '12px', paddingLeft: '20px', marginTop: '1rem' }}>
+              {milestones.map((m) => {
+                let statusColor = '#8b949e';
+                let statusLabel = 'Awaiting Work';
+                if (m.status === 'In Progress') { statusColor = '#3b82f6'; statusLabel = 'In Progress'; }
+                else if (m.status === 'Done') { statusColor = '#ffd700'; statusLabel = 'Work Completed - Pending Approval'; }
+                else if (m.status === 'Approved') { statusColor = '#2ea043'; statusLabel = 'Approved & Released'; }
+
+                return (
+                  <div key={m.milestone_id} style={{ position: 'relative', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
+                    <div style={{ 
+                      position: 'absolute', 
+                      left: '-29px', 
+                      top: '18px', 
+                      width: '16px', 
+                      height: '16px', 
+                      borderRadius: '50%', 
+                      background: statusColor,
+                      border: '3px solid #0d1117'
+                    }} />
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <h5 style={{ margin: '0 0 4px 0', color: 'var(--text-highlight)', fontWeight: 700, fontSize: '0.92rem' }}>
+                          {m.title}
+                        </h5>
+                        <p style={{ margin: '0 0 6px 0', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+                          {m.description || 'No description provided'}
+                        </p>
+                        <div style={{ display: 'flex', gap: '12px', fontSize: '0.78rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
+                          <span>📅 Target: {m.scheduled_date || 'Not scheduled'}</span>
+                          {m.completed_at && <span>Completed: {m.completed_at}</span>}
+                          {m.approved_at && <span>Approved: {m.approved_at}</span>}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--primary-color)', fontSize: '0.9rem' }}>
+                          ₹{parseFloat(m.payment_amount).toFixed(2)} ({m.payment_percentage}%)
+                        </span>
+                        <span style={{ 
+                          fontSize: '0.72rem', 
+                          fontWeight: 700, 
+                          color: statusColor, 
+                          background: `${statusColor}15`, 
+                          border: `1px solid ${statusColor}30`,
+                          padding: '2px 8px',
+                          borderRadius: '12px'
+                        }}>
+                          {statusLabel}
+                        </span>
+                      </div>
+                    </div>
+
+                    {m.status === 'Done' && (
+                      <div style={{ marginTop: '10px', borderTop: '1px dashed var(--surface-border)', paddingTop: '10px' }}>
+                        {approvingId === m.milestone_id ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '400px' }}>
+                            <input 
+                              type="text" 
+                              placeholder="Add feedback/note (optional)..." 
+                              className="input-field" 
+                              style={{ padding: '0.45rem', fontSize: '0.8rem' }}
+                              value={customerNote} 
+                              onChange={e => setCustomerNote(e.target.value)} 
+                            />
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button 
+                                className="btn" 
+                                onClick={() => handleApproveMilestone(m.milestone_id)}
+                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', background: '#2ea043' }}
+                              >
+                                Approve & Release Payment
+                              </button>
+                              <button 
+                                className="btn danger" 
+                                onClick={() => { setApprovingId(null); setCustomerNote(''); }}
+                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button 
+                            className="btn" 
+                            onClick={() => setApprovingId(m.milestone_id)}
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', background: 'var(--primary-color)' }}
+                          >
+                            ✅ Approve Work & Release Payment
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {m.vendor_note && (
+                      <div style={{ marginTop: '8px', fontSize: '0.78rem', padding: '6px 8px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', borderLeft: '2px solid var(--primary-color)' }}>
+                        <strong style={{ color: 'var(--text-highlight)' }}>Vendor Note:</strong> {m.vendor_note}
+                      </div>
+                    )}
+                    {m.customer_note && (
+                      <div style={{ marginTop: '6px', fontSize: '0.78rem', padding: '6px 8px', background: 'rgba(46,160,67,0.05)', borderRadius: '4px', borderLeft: '2px solid #2ea043' }}>
+                        <strong style={{ color: '#2ea043' }}>Customer Note:</strong> {m.customer_note}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // --- Booking Card ---
-function BookingCard({ s, onPayNow, onCancel, onDownloadSummary }) {
+function BookingCard({ s, onPayNow, onCancel, onDownloadSummary, onRefresh }) {
   const st = STATUS_CONFIG[s.status] || STATUS_CONFIG['Pending'];
   const pst = PAYMENT_STATUS_CONFIG[s.payment_status] || PAYMENT_STATUS_CONFIG['Pending'];
   const canCancel = s.status === 'Pending';
@@ -161,6 +364,13 @@ function BookingCard({ s, onPayNow, onCancel, onDownloadSummary }) {
           )}
         </div>
       </div>
+
+      <CustomerMilestonesSection 
+        orderId={s.order_id} 
+        orderAmount={parseFloat(s.amount)} 
+        orderStatus={s.status}
+        onRefresh={onRefresh}
+      />
     </div>
   );
 }
@@ -319,6 +529,7 @@ function MyBookedServices() {
                 onPayNow={handlePayNow}
                 onCancel={(id) => setConfirmModal({ open: true, orderId: id })}
                 onDownloadSummary={handleDownloadSummary}
+                onRefresh={fetchServices}
               />
             ))}
           </div>
