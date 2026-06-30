@@ -14,24 +14,13 @@ const CustomerRFQ = () => {
     const [bids, setBids] = useState([]);
     const [loadingBids, setLoadingBids] = useState(false);
 
-    // Form State
     const [formData, setFormData] = useState({
-        item_type: 'Product',
-        category: 'Cement',
-        title: '',
-        description: '',
-        quantity: 1,
-        unit: 'Tons',
-        required_by: '',
-        site_id: '',
-        delivery_address: '',
-        city: '',
-        state: ''
+        item_type: 'Product', category: 'Cement', title: '', description: '',
+        quantity: 1, unit: 'Tons', required_by: '', site_id: '',
+        delivery_address: '', city: '', state: ''
     });
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    useEffect(() => { fetchData(); }, []);
 
     const fetchData = async () => {
         try {
@@ -55,21 +44,9 @@ const CustomerRFQ = () => {
         const siteId = e.target.value;
         const site = sites.find(s => s.site_id.toString() === siteId);
         if (site) {
-            setFormData({
-                ...formData,
-                site_id: siteId,
-                delivery_address: site.site_address || '',
-                city: site.city || '',
-                state: site.state || ''
-            });
+            setFormData({ ...formData, site_id: siteId, delivery_address: site.site_address || '', city: site.city || '', state: site.state || '' });
         } else {
-            setFormData({
-                ...formData,
-                site_id: '',
-                delivery_address: '',
-                city: '',
-                state: ''
-            });
+            setFormData({ ...formData, site_id: '', delivery_address: '', city: '', state: '' });
         }
     };
 
@@ -86,11 +63,7 @@ const CustomerRFQ = () => {
             if (data.status === 'success') {
                 setShowCreateModal(false);
                 fetchData();
-                setFormData({
-                    item_type: 'Product', category: 'Cement', title: '', description: '',
-                    quantity: 1, unit: 'Tons', required_by: '', site_id: '',
-                    delivery_address: '', city: '', state: ''
-                });
+                setFormData({ item_type: 'Product', category: 'Cement', title: '', description: '', quantity: 1, unit: 'Tons', required_by: '', site_id: '', delivery_address: '', city: '', state: '' });
             } else {
                 alert(data.message || "Failed to create RFQ");
             }
@@ -115,7 +88,7 @@ const CustomerRFQ = () => {
     };
 
     const acceptBid = async (bidId) => {
-        if (!window.confirm("Are you sure you want to accept this bid? It will automatically generate an order.")) return;
+        if (!window.confirm("Accept this bid? It will automatically generate an order.")) return;
         try {
             const token = localStorage.getItem('token');
             const res = await fetch(`${API}/api/customer/rfq/accept_bid`, {
@@ -136,289 +109,232 @@ const CustomerRFQ = () => {
         }
     };
 
+    const statusColor = (status) => {
+        if (status === 'Open') return { color: '#3fb950', background: 'rgba(46,160,67,0.15)', border: '1px solid rgba(46,160,67,0.3)' };
+        if (status === 'Awarded') return { color: '#58a6ff', background: 'rgba(56,112,224,0.15)', border: '1px solid rgba(56,112,224,0.3)' };
+        return { color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)' };
+    };
+
+    const inputStyle = {
+        width: '100%', padding: '0.8rem 1rem', borderRadius: '8px',
+        background: 'var(--input-bg)', border: '1px solid var(--surface-border)',
+        color: 'var(--text-highlight)', fontSize: '0.95rem', outline: 'none',
+        boxSizing: 'border-box', fontFamily: 'inherit'
+    };
+
     if (loading) return (
         <div className="dashboard-layout">
             <CustomerSidebar />
-            <main style={{ flex: 1, padding: '2rem' }} className="text-center text-white">Loading RFQs...</main>
+            <main style={{ flex: 1, padding: '2rem' }}>
+                <div className="glass-panel skeleton-pulse" style={{ height: '300px', borderRadius: '12px' }}></div>
+            </main>
         </div>
     );
 
     return (
         <div className="dashboard-layout">
             <CustomerSidebar />
-            <main style={{ flex: 1, padding: '2rem' }}>
-                <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-                    <button className="btn" onClick={() => navigate('/customer')} style={{ marginBottom: '1rem', background: 'var(--surface-border)', color: 'var(--text-highlight)' }}>
-                        ← Back to Dashboard
-                    </button>
-                    
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold text-white mb-2">Reverse Auction (RFQ)</h1>
-                            <p className="text-gray-400">Request bulk pricing and let verified vendors bid for your order.</p>
-                        </div>
-                        <button 
-                            onClick={() => setShowCreateModal(true)}
-                            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-emerald-500/20 transition-all duration-300"
-                        >
-                            + Post New RFQ
+            <main style={{ flex: 1, padding: '2rem', minWidth: 0 }}>
+
+                {/* Header */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '2rem' }}>
+                    <div>
+                        <button className="btn" onClick={() => navigate('/customer')} style={{ marginBottom: '1rem', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
+                            ← Back to Dashboard
                         </button>
+                        <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', fontWeight: '800', color: 'var(--text-highlight)', margin: '0 0 0.3rem 0' }}>
+                            🔄 Reverse Auction (RFQ)
+                        </h1>
+                        <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
+                            Request bulk pricing and let verified nearby vendors bid for your order.
+                        </p>
                     </div>
-
-            {rfqs.length === 0 ? (
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-10 text-center border border-white/10">
-                    <h3 className="text-xl font-semibold text-white mb-2">No Active RFQs</h3>
-                    <p className="text-gray-400">Create your first Request for Quotation to start receiving competitive bids.</p>
+                    <button className="btn" onClick={() => setShowCreateModal(true)} style={{ padding: '0.8rem 1.8rem', fontSize: '1rem', fontWeight: '700', boxShadow: '0 4px 15px var(--accent-glow)', whiteSpace: 'nowrap' }}>
+                        + Post New RFQ
+                    </button>
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {rfqs.map(rfq => (
-                        <div key={rfq.rfq_id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
-                            <div className="flex justify-between items-start mb-4">
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                                    rfq.status === 'Open' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                                    rfq.status === 'Awarded' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                                    'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                                }`}>
-                                    {rfq.status}
-                                </span>
-                                <span className="text-gray-400 text-sm">{rfq.created_at_fmt}</span>
-                            </div>
-                            
-                            <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">{rfq.title}</h3>
-                            <div className="space-y-2 mb-6">
-                                <p className="text-gray-300 text-sm flex items-center gap-2">
-                                    📦 {rfq.quantity} {rfq.unit} of {rfq.category}
-                                </p>
-                                <p className="text-gray-300 text-sm flex items-center gap-2">
-                                    ⏱️ Required by: {rfq.required_by_fmt}
-                                </p>
-                                <p className="text-gray-300 text-sm flex items-center gap-2">
-                                    📍 {rfq.city}, {rfq.state}
-                                </p>
-                            </div>
 
-                            <button 
-                                onClick={() => viewBids(rfq)}
-                                className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors flex justify-center items-center gap-2"
-                            >
-                                View {rfq.bid_count} Bids
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {showCreateModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b border-white/10 flex justify-between items-center sticky top-0 bg-gray-900 z-10">
-                            <h2 className="text-2xl font-bold text-white">Post New RFQ</h2>
-                            <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-white text-2xl">
-                                ✕
-                            </button>
-                        </div>
-                        <form onSubmit={handleCreateSubmit} className="p-6 space-y-6">
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Item Type</label>
-                                    <select 
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                        value={formData.item_type}
-                                        onChange={e => setFormData({...formData, item_type: e.target.value})}
-                                    >
-                                        <option value="Product">Product</option>
-                                        <option value="Service">Service</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Category</label>
-                                    <select 
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                        value={formData.category}
-                                        onChange={e => setFormData({...formData, category: e.target.value})}
-                                    >
-                                        <option value="Cement">Cement</option>
-                                        <option value="Steel">Steel</option>
-                                        <option value="Bricks">Bricks</option>
-                                        <option value="Sand">Sand</option>
-                                        <option value="Electrical">Electrical</option>
-                                        <option value="Plumbing">Plumbing</option>
-                                        <option value="Architecture">Architecture</option>
-                                        <option value="Labor">Labor</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">RFQ Title</label>
-                                <input 
-                                    type="text" required
-                                    placeholder="e.g. 50 Tons of Ultratech Cement for new site"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                    value={formData.title}
-                                    onChange={e => setFormData({...formData, title: e.target.value})}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Quantity</label>
-                                    <input 
-                                        type="number" required min="1"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                        value={formData.quantity}
-                                        onChange={e => setFormData({...formData, quantity: parseInt(e.target.value)})}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Unit</label>
-                                    <input 
-                                        type="text" required placeholder="Tons, Pieces, SqFt"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                        value={formData.unit}
-                                        onChange={e => setFormData({...formData, unit: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Required By Date</label>
-                                <input 
-                                    type="date" required
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
-                                    value={formData.required_by}
-                                    onChange={e => setFormData({...formData, required_by: e.target.value})}
-                                />
-                            </div>
-
-                            <div className="border-t border-white/10 pt-6">
-                                <h3 className="text-lg font-semibold text-white mb-4">Delivery / Execution Details</h3>
-                                
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Link to Project Site (Optional)</label>
-                                    <select 
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                        value={formData.site_id}
-                                        onChange={handleSiteChange}
-                                    >
-                                        <option value="">-- No Project Site --</option>
-                                        {sites.map(s => (
-                                            <option key={s.site_id} value={s.site_id}>{s.site_name} - {s.city}</option>
-                                        ))}
-                                    </select>
-                                    <p className="text-xs text-emerald-400 mt-2">Selecting a site auto-fills the delivery address.</p>
+                {/* RFQ Cards */}
+                {rfqs.length === 0 ? (
+                    <div className="empty-state">
+                        <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</span>
+                        <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem' }}>No Active RFQs</h3>
+                        <p style={{ margin: 0 }}>Create your first Request for Quotation to start receiving competitive bids from verified vendors.</p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        {rfqs.map(rfq => (
+                            <div key={rfq.rfq_id} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <span style={{ ...statusColor(rfq.status), padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        {rfq.status}
+                                    </span>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{rfq.created_at_fmt}</span>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <input 
-                                        type="text" required placeholder="Street Address"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                        value={formData.delivery_address}
-                                        onChange={e => setFormData({...formData, delivery_address: e.target.value})}
-                                    />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <input 
-                                            type="text" required placeholder="City"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                            value={formData.city}
-                                            onChange={e => setFormData({...formData, city: e.target.value})}
-                                        />
-                                        <input 
-                                            type="text" required placeholder="State"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                            value={formData.state}
-                                            onChange={e => setFormData({...formData, state: e.target.value})}
-                                        />
+                                <h3 style={{ color: 'var(--text-highlight)', margin: 0, fontSize: '1.1rem', fontWeight: '700', lineHeight: '1.3' }}>{rfq.title}</h3>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                                    <span>📦 {rfq.quantity} {rfq.unit} of <strong style={{ color: 'var(--text-primary)' }}>{rfq.category}</strong></span>
+                                    <span>⏱️ Required by: <strong style={{ color: 'var(--text-primary)' }}>{rfq.required_by_fmt}</strong></span>
+                                    <span>📍 {rfq.city}, {rfq.state}</span>
+                                </div>
+
+                                <button
+                                    onClick={() => viewBids(rfq)}
+                                    className="btn"
+                                    style={{ marginTop: 'auto', width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', textAlign: 'center' }}
+                                >
+                                    View {rfq.bid_count} Bid{rfq.bid_count !== 1 ? 's' : ''}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Create RFQ Modal */}
+                {showCreateModal && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+                        <div className="glass-panel" style={{ width: '100%', maxWidth: '620px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '20px', padding: 0 }}>
+                            <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'var(--surface-color)', backdropFilter: 'var(--glass-blur)', zIndex: 1 }}>
+                                <h2 style={{ margin: 0, color: 'var(--text-highlight)', fontSize: '1.4rem', fontWeight: '800' }}>📋 Post New RFQ</h2>
+                                <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: 'var(--text-secondary)', lineHeight: 1 }}>✕</button>
+                            </div>
+                            <form onSubmit={handleCreateSubmit} style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Item Type</label>
+                                        <select style={inputStyle} value={formData.item_type} onChange={e => setFormData({ ...formData, item_type: e.target.value })}>
+                                            <option value="Product">Product</option>
+                                            <option value="Service">Service</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Category</label>
+                                        <select style={inputStyle} value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
+                                            <option>Cement</option><option>Steel</option><option>Bricks</option>
+                                            <option>Sand</option><option>Electrical</option><option>Plumbing</option>
+                                            <option>Architecture</option><option>Labor</option>
+                                        </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Detailed Description / Instructions</label>
-                                <textarea 
-                                    rows="3" required
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
-                                    value={formData.description}
-                                    onChange={e => setFormData({...formData, description: e.target.value})}
-                                ></textarea>
-                            </div>
-
-                            <button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-500/20 transition-all">
-                                Publish RFQ
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {selectedRfq && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b border-white/10 flex justify-between items-center sticky top-0 bg-gray-900 z-10">
-                            <div>
-                                <h2 className="text-2xl font-bold text-white">{selectedRfq.title}</h2>
-                                <p className="text-gray-400 text-sm mt-1">Bids received for {selectedRfq.quantity} {selectedRfq.unit}</p>
-                            </div>
-                            <button onClick={() => setSelectedRfq(null)} className="text-gray-400 hover:text-white text-2xl">
-                                ✕
-                            </button>
-                        </div>
-                        
-                        <div className="p-6">
-                            {loadingBids ? (
-                                <div className="text-center text-white py-10">Loading bids...</div>
-                            ) : bids.length === 0 ? (
-                                <div className="text-center py-10">
-                                    <p className="text-gray-400 text-lg">No bids received yet.</p>
-                                    <p className="text-sm text-gray-500 mt-2">Vendors matching your category and city will be notified automatically.</p>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>RFQ Title</label>
+                                    <input type="text" required placeholder="e.g. 50 Tons of Ultratech Cement for new site" style={inputStyle} value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
                                 </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {bids.map(bid => (
-                                        <div key={bid.bid_id} className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <h4 className="text-xl font-bold text-white">{bid.vendor_name}</h4>
-                                                    {bid.qc_score >= 80 && (
-                                                        <span className="bg-amber-500/20 text-amber-400 text-xs px-2 py-1 rounded border border-amber-500/30 flex items-center gap-1">
-                                                            Top Rated QC
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Quantity</label>
+                                        <input type="number" required min="1" style={inputStyle} value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: parseInt(e.target.value) })} />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Unit</label>
+                                        <input type="text" required placeholder="Tons, Pieces, SqFt" style={inputStyle} value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Required By Date</label>
+                                    <input type="date" required style={{ ...inputStyle, colorScheme: 'dark' }} value={formData.required_by} onChange={e => setFormData({ ...formData, required_by: e.target.value })} />
+                                </div>
+
+                                <div style={{ borderTop: '1px solid var(--surface-border)', paddingTop: '1.5rem' }}>
+                                    <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '700' }}>📍 Delivery Details</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Link to Project Site (Optional)</label>
+                                            <select style={inputStyle} value={formData.site_id} onChange={handleSiteChange}>
+                                                <option value="">-- No Project Site --</option>
+                                                {sites.map(s => (<option key={s.site_id} value={s.site_id}>{s.site_name} - {s.city}</option>))}
+                                            </select>
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--primary-color)', margin: '0.4rem 0 0' }}>Selecting a site auto-fills the delivery address.</p>
+                                        </div>
+                                        <input type="text" required placeholder="Street Address" style={inputStyle} value={formData.delivery_address} onChange={e => setFormData({ ...formData, delivery_address: e.target.value })} />
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <input type="text" required placeholder="City" style={inputStyle} value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
+                                            <input type="text" required placeholder="State" style={inputStyle} value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Description / Requirements</label>
+                                    <textarea rows="3" required placeholder="Specify grade, brand preference, delivery terms..." style={{ ...inputStyle, resize: 'vertical' }} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}></textarea>
+                                </div>
+
+                                <button type="submit" className="btn" style={{ width: '100%', padding: '1rem', fontSize: '1.05rem', fontWeight: '800', boxShadow: '0 4px 15px var(--accent-glow)' }}>
+                                    🚀 Publish RFQ
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* View Bids Modal */}
+                {selectedRfq && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+                        <div className="glass-panel" style={{ width: '100%', maxWidth: '780px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '20px', padding: 0 }}>
+                            <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'var(--surface-color)', backdropFilter: 'var(--glass-blur)', zIndex: 1 }}>
+                                <div>
+                                    <h2 style={{ margin: '0 0 0.2rem', color: 'var(--text-highlight)', fontSize: '1.3rem', fontWeight: '800' }}>{selectedRfq.title}</h2>
+                                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Bids for {selectedRfq.quantity} {selectedRfq.unit}</p>
+                                </div>
+                                <button onClick={() => setSelectedRfq(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: 'var(--text-secondary)', lineHeight: 1 }}>✕</button>
+                            </div>
+
+                            <div style={{ padding: '1.5rem 2rem' }}>
+                                {loadingBids ? (
+                                    <div className="glass-panel skeleton-pulse" style={{ height: '150px', borderRadius: '12px' }}></div>
+                                ) : bids.length === 0 ? (
+                                    <div className="empty-state">
+                                        <span style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⏳</span>
+                                        <p style={{ margin: 0 }}>No bids received yet. Vendors in your area will be notified automatically.</p>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {bids.map(bid => (
+                                            <div key={bid.bid_id} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '14px', display: 'flex', flexWrap: 'wrap', gap: '1.5rem', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ flex: 1, minWidth: '200px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
+                                                        <h4 style={{ margin: 0, color: 'var(--text-highlight)', fontSize: '1.1rem', fontWeight: '700' }}>{bid.vendor_name}</h4>
+                                                        {bid.qc_score >= 80 && (
+                                                            <span style={{ fontSize: '0.72rem', fontWeight: '700', padding: '0.2rem 0.6rem', borderRadius: '20px', background: 'rgba(255,215,0,0.1)', color: '#ffd700', border: '1px solid rgba(255,215,0,0.3)', letterSpacing: '0.5px' }}>
+                                                                ⭐ TOP QC
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p style={{ margin: '0 0 0.3rem', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
+                                                        Delivers in: <strong style={{ color: 'var(--text-primary)' }}>{bid.delivery_days} days</strong>
+                                                    </p>
+                                                    {bid.note && <p style={{ margin: '0 0 0.3rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic' }}>"{bid.note}"</p>}
+                                                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.78rem' }}>Bid placed: {bid.bid_date}</p>
+                                                </div>
+
+                                                <div style={{ textAlign: 'center', padding: '1rem 1.5rem', background: 'rgba(46,160,67,0.06)', borderRadius: '12px', border: '1px solid rgba(46,160,67,0.2)', minWidth: '160px' }}>
+                                                    <p style={{ margin: '0 0 0.2rem', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>Total Bid Value</p>
+                                                    <p style={{ margin: '0 0 0.2rem', color: '#3fb950', fontSize: '1.8rem', fontWeight: '800' }}>₹{parseFloat(bid.total_price).toLocaleString('en-IN')}</p>
+                                                    <p style={{ margin: '0 0 1rem', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>₹{parseFloat(bid.unit_price).toLocaleString('en-IN')} / {selectedRfq.unit}</p>
+                                                    {selectedRfq.status === 'Open' ? (
+                                                        <button onClick={() => acceptBid(bid.bid_id)} className="btn" style={{ width: '100%', fontSize: '0.9rem', padding: '0.6rem 1rem', boxShadow: '0 4px 10px var(--accent-glow)' }}>
+                                                            Accept & Order
+                                                        </button>
+                                                    ) : (
+                                                        <span style={{ ...statusColor(bid.status), padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700' }}>
+                                                            {bid.status}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <p className="text-gray-300 text-sm mb-1">Delivers in: <span className="text-white font-medium">{bid.delivery_days} days</span></p>
-                                                {bid.note && <p className="text-gray-400 text-sm italic">"{bid.note}"</p>}
-                                                <p className="text-gray-500 text-xs mt-2">Bid placed on {bid.bid_date}</p>
                                             </div>
-                                            
-                                            <div className="text-left md:text-right w-full md:w-auto bg-black/20 p-4 rounded-lg">
-                                                <p className="text-sm text-gray-400 mb-1">Total Bid Value</p>
-                                                <p className="text-3xl font-bold text-emerald-400 mb-3">₹{parseFloat(bid.total_price).toLocaleString('en-IN')}</p>
-                                                <p className="text-xs text-gray-500 mb-4">₹{parseFloat(bid.unit_price).toLocaleString('en-IN')} / {selectedRfq.unit}</p>
-                                                
-                                                {selectedRfq.status === 'Open' ? (
-                                                    <button 
-                                                        onClick={() => acceptBid(bid.bid_id)}
-                                                        className="w-full md:w-auto px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-colors"
-                                                    >
-                                                        Accept Bid & Order
-                                                    </button>
-                                                ) : (
-                                                    <span className={`px-4 py-2 rounded-lg font-medium ${bid.status === 'Accepted' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                        {bid.status}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-                </div>
+                )}
             </main>
         </div>
     );

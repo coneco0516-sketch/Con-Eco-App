@@ -10,19 +10,11 @@ const VendorRFQBoard = () => {
     const [myBids, setMyBids] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('available');
-    
-    // Bidding Modal State
     const [showBidModal, setShowBidModal] = useState(false);
     const [selectedRfq, setSelectedRfq] = useState(null);
-    const [bidData, setBidData] = useState({
-        unit_price: '',
-        delivery_days: '',
-        note: ''
-    });
+    const [bidData, setBidData] = useState({ unit_price: '', delivery_days: '', note: '' });
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    useEffect(() => { fetchData(); }, []);
 
     const fetchData = async () => {
         setLoading(true);
@@ -50,12 +42,7 @@ const VendorRFQBoard = () => {
             const res = await fetch(`${API}/api/vendor/rfq/bid`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    rfq_id: selectedRfq.rfq_id,
-                    unit_price: parseFloat(bidData.unit_price),
-                    delivery_days: parseInt(bidData.delivery_days),
-                    note: bidData.note
-                })
+                body: JSON.stringify({ rfq_id: selectedRfq.rfq_id, unit_price: parseFloat(bidData.unit_price), delivery_days: parseInt(bidData.delivery_days), note: bidData.note })
             });
             const data = await res.json();
             if (data.status === 'success') {
@@ -77,223 +64,206 @@ const VendorRFQBoard = () => {
         setShowBidModal(true);
     };
 
+    const inputStyle = {
+        width: '100%', padding: '0.8rem 1rem', borderRadius: '8px',
+        background: 'var(--input-bg)', border: '1px solid var(--surface-border)',
+        color: 'var(--text-highlight)', fontSize: '0.95rem', outline: 'none',
+        boxSizing: 'border-box', fontFamily: 'inherit'
+    };
+
+    const bidStatusStyle = (status) => {
+        if (status === 'Pending') return { color: '#ffd700', background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)' };
+        if (status === 'Accepted') return { color: '#3fb950', background: 'rgba(46,160,67,0.15)', border: '1px solid rgba(46,160,67,0.3)' };
+        return { color: '#f85149', background: 'rgba(248,81,73,0.1)', border: '1px solid rgba(248,81,73,0.3)' };
+    };
+
     if (loading) return (
         <div className="dashboard-layout">
             <VendorSidebar />
-            <main style={{ flex: 1, padding: '2rem' }} className="text-center text-white">Loading RFQ Board...</main>
+            <main style={{ flex: 1, padding: '2rem' }}>
+                <div className="glass-panel skeleton-pulse" style={{ height: '300px', borderRadius: '12px' }}></div>
+            </main>
         </div>
     );
 
     return (
         <div className="dashboard-layout">
             <VendorSidebar />
-            <main style={{ flex: 1, padding: '2rem' }}>
-                <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-                    <button className="btn" onClick={() => navigate('/vendor')} style={{ marginBottom: '1rem', background: 'var(--surface-border)', color: 'var(--text-highlight)' }}>
+            <main style={{ flex: 1, padding: '2rem', minWidth: 0 }}>
+
+                {/* Header */}
+                <div style={{ marginBottom: '2rem' }}>
+                    <button className="btn" onClick={() => navigate('/vendor')} style={{ marginBottom: '1rem', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-highlight)', fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
                         ← Back to Dashboard
                     </button>
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">RFQ Board</h1>
-                        <p className="text-gray-400">View wholesale requests matching your category and location, and submit competitive bids.</p>
-                    </div>
+                    <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', fontWeight: '800', color: 'var(--text-highlight)', margin: '0 0 0.3rem 0' }}>
+                        🔔 RFQ Board
+                    </h1>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
+                        View bulk purchase requests matching your category and location. Submit competitive bids to win orders.
+                    </p>
+                </div>
 
-            {/* Tabs */}
-            <div className="flex border-b border-white/10">
-                <button 
-                    onClick={() => setActiveTab('available')}
-                    className={`pb-4 px-6 font-semibold text-lg transition-colors relative ${activeTab === 'available' ? 'text-emerald-400' : 'text-gray-400 hover:text-white'}`}
-                >
-                    Available RFQs
-                    {activeTab === 'available' && <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-500 rounded-t-md" />}
-                </button>
-                <button 
-                    onClick={() => setActiveTab('bids')}
-                    className={`pb-4 px-6 font-semibold text-lg transition-colors relative ${activeTab === 'bids' ? 'text-emerald-400' : 'text-gray-400 hover:text-white'}`}
-                >
-                    My Bids
-                    {activeTab === 'bids' && <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-500 rounded-t-md" />}
-                </button>
-            </div>
+                {/* Tabs */}
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--surface-border)', marginBottom: '2rem', gap: '0.5rem' }}>
+                    {['available', 'bids'].map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            style={{
+                                padding: '0.8rem 1.5rem', background: 'none', border: 'none', cursor: 'pointer',
+                                fontFamily: 'inherit', fontSize: '1rem', fontWeight: '700', transition: 'all 0.2s',
+                                color: activeTab === tab ? 'var(--primary-color)' : 'var(--text-secondary)',
+                                borderBottom: activeTab === tab ? '2px solid var(--primary-color)' : '2px solid transparent',
+                                marginBottom: '-1px'
+                            }}
+                        >
+                            {tab === 'available' ? `📋 Available RFQs (${rfqs.length})` : `📨 My Bids (${myBids.length})`}
+                        </button>
+                    ))}
+                </div>
 
-            {/* Content: Available RFQs */}
-            {activeTab === 'available' && (
-                <div className="space-y-6">
-                    {rfqs.length === 0 ? (
-                        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-10 text-center border border-white/10">
-                            <h3 className="text-xl font-semibold text-white mb-2">No Matching RFQs</h3>
-                            <p className="text-gray-400">There are currently no open requests in your city that match your product categories.</p>
+                {/* Available RFQs Tab */}
+                {activeTab === 'available' && (
+                    rfqs.length === 0 ? (
+                        <div className="empty-state">
+                            <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</span>
+                            <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem' }}>No Matching RFQs</h3>
+                            <p style={{ margin: 0 }}>There are currently no open requests in your city matching your product categories.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
                             {rfqs.map(rfq => (
-                                <div key={rfq.rfq_id} className="bg-gray-900 border border-white/10 rounded-2xl p-6 shadow-xl">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <h3 className="text-xl font-bold text-white line-clamp-1 flex-1">{rfq.title}</h3>
-                                        <span className="text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-lg ml-4">
+                                <div key={rfq.rfq_id} className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <h3 style={{ margin: 0, color: 'var(--text-highlight)', fontSize: '1.05rem', fontWeight: '700', lineHeight: '1.3', flex: 1 }}>{rfq.title}</h3>
+                                        <span style={{ marginLeft: '0.8rem', padding: '0.2rem 0.7rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: '700', background: 'rgba(46,160,67,0.12)', color: 'var(--primary-color)', border: '1px solid rgba(46,160,67,0.25)', whiteSpace: 'nowrap' }}>
                                             {rfq.category}
                                         </span>
                                     </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-4 mb-6 bg-white/5 rounded-xl p-4">
-                                        <div>
-                                            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Requirement</p>
-                                            <p className="text-white font-semibold text-lg">{rfq.quantity} {rfq.unit}</p>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '10px', padding: '0.8rem' }}>
+                                            <p style={{ margin: '0 0 0.2rem', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Requirement</p>
+                                            <p style={{ margin: 0, color: 'var(--text-highlight)', fontWeight: '700', fontSize: '1rem' }}>{rfq.quantity} {rfq.unit}</p>
                                         </div>
-                                        <div>
-                                            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Required By</p>
-                                            <p className="text-white font-medium flex items-center gap-1">
-                                                ⏱️ {rfq.required_by_fmt}
-                                            </p>
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '10px', padding: '0.8rem' }}>
+                                            <p style={{ margin: '0 0 0.2rem', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Required By</p>
+                                            <p style={{ margin: 0, color: 'var(--text-highlight)', fontWeight: '600', fontSize: '0.88rem' }}>⏱️ {rfq.required_by_fmt}</p>
                                         </div>
                                     </div>
-                                    
-                                    <div className="mb-6">
-                                        <p className="text-gray-400 text-sm mb-2 font-medium">Description</p>
-                                        <p className="text-gray-300 text-sm line-clamp-3 bg-black/20 p-3 rounded-lg border border-white/5">{rfq.description}</p>
+
+                                    <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '0.8rem', border: '1px solid var(--surface-border)' }}>
+                                        <p style={{ margin: '0 0 0.3rem', fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Description</p>
+                                        <p style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.85rem', lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rfq.description}</p>
                                     </div>
-                                    
-                                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                                        <div className="text-gray-400 text-sm flex items-center gap-2">
-                                            📍 Delivery: <span className="text-white">{rfq.cust_city}, {rfq.cust_state}</span>
-                                        </div>
-                                        <button 
-                                            onClick={() => openBidModal(rfq)}
-                                            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
-                                        >
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>📍 {rfq.cust_city}, {rfq.cust_state}</span>
+                                        <button onClick={() => openBidModal(rfq)} className="btn" style={{ padding: '0.6rem 1.4rem', fontSize: '0.9rem', fontWeight: '700', boxShadow: '0 4px 10px var(--accent-glow)' }}>
                                             Submit Bid
                                         </button>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    )}
-                </div>
-            )}
+                    )
+                )}
 
-            {/* Content: My Bids */}
-            {activeTab === 'bids' && (
-                <div className="space-y-6">
-                    {myBids.length === 0 ? (
-                        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-10 text-center border border-white/10">
-                            <h3 className="text-xl font-semibold text-white mb-2">No Bids Submitted</h3>
-                            <p className="text-gray-400">You have not submitted any bids yet.</p>
+                {/* My Bids Tab */}
+                {activeTab === 'bids' && (
+                    myBids.length === 0 ? (
+                        <div className="empty-state">
+                            <span style={{ fontSize: '3rem', marginBottom: '1rem' }}>📨</span>
+                            <h3 style={{ color: 'var(--text-highlight)', margin: '0 0 0.5rem' }}>No Bids Submitted</h3>
+                            <p style={{ margin: 0 }}>You haven't submitted any bids yet. Browse available RFQs to start bidding.</p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                        <div className="table-responsive">
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                                 <thead>
-                                    <tr className="border-b border-white/10 text-gray-400 text-sm uppercase tracking-wider">
-                                        <th className="p-4">RFQ Details</th>
-                                        <th className="p-4">My Bid (₹)</th>
-                                        <th className="p-4">Delivery</th>
-                                        <th className="p-4">Status</th>
-                                        <th className="p-4">Date</th>
+                                    <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
+                                        {['RFQ Details', 'My Bid (₹)', 'Delivery', 'Status', 'Date'].map(h => (
+                                            <th key={h} style={{ padding: '0.8rem 1rem', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                                        ))}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {myBids.map(bid => (
-                                        <tr key={bid.bid_id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                            <td className="p-4">
-                                                <p className="text-white font-semibold line-clamp-1">{bid.title}</p>
-                                                <p className="text-gray-400 text-xs mt-1">{bid.quantity} {bid.unit} • {bid.category}</p>
+                                        <tr key={bid.bid_id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s' }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            <td style={{ padding: '1rem' }}>
+                                                <p style={{ margin: '0 0 0.2rem', color: 'var(--text-highlight)', fontWeight: '600', fontSize: '0.9rem' }}>{bid.title}</p>
+                                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.78rem' }}>{bid.quantity} {bid.unit} • {bid.category}</p>
                                             </td>
-                                            <td className="p-4">
-                                                <p className="text-emerald-400 font-bold">₹{parseFloat(bid.total_price).toLocaleString('en-IN')}</p>
-                                                <p className="text-gray-500 text-xs mt-1">₹{parseFloat(bid.unit_price).toLocaleString('en-IN')}/{bid.unit}</p>
+                                            <td style={{ padding: '1rem' }}>
+                                                <p style={{ margin: '0 0 0.2rem', color: '#3fb950', fontWeight: '700' }}>₹{parseFloat(bid.total_price).toLocaleString('en-IN')}</p>
+                                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.78rem' }}>₹{parseFloat(bid.unit_price).toLocaleString('en-IN')}/{bid.unit}</p>
                                             </td>
-                                            <td className="p-4">
-                                                <p className="text-white">{bid.delivery_days} days</p>
-                                            </td>
-                                            <td className="p-4">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                                                    bid.status === 'Pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                                                    bid.status === 'Accepted' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                                                    'bg-red-500/20 text-red-400 border border-red-500/30'
-                                                }`}>
+                                            <td style={{ padding: '1rem', color: 'var(--text-primary)' }}>{bid.delivery_days} days</td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <span style={{ ...bidStatusStyle(bid.status), padding: '0.25rem 0.7rem', borderRadius: '20px', fontSize: '0.72rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                                     {bid.status}
                                                 </span>
                                             </td>
-                                            <td className="p-4 text-gray-400 text-sm">
-                                                {bid.bid_date}
-                                            </td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{bid.bid_date}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-                    )}
-                </div>
-            )}
+                    )
+                )}
 
-            {/* Bid Modal */}
-            {showBidModal && selectedRfq && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-                        <div className="p-6 border-b border-white/10 flex justify-between items-center bg-gray-900">
-                            <h2 className="text-xl font-bold text-white">Submit Your Bid</h2>
-                            <button onClick={() => setShowBidModal(false)} className="text-gray-400 hover:text-white transition-colors text-2xl">
-                                ✕
-                            </button>
-                        </div>
-                        
-                        <div className="p-6 bg-black/20">
-                            <p className="text-sm text-gray-400 mb-1">Requesting</p>
-                            <p className="text-lg text-white font-semibold mb-4">{selectedRfq.quantity} {selectedRfq.unit} of {selectedRfq.category}</p>
-                            
-                            <form onSubmit={handleBidSubmit} className="space-y-5">
+                {/* Bid Submission Modal */}
+                {showBidModal && selectedRfq && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+                        <div className="glass-panel" style={{ width: '100%', maxWidth: '480px', borderRadius: '20px', padding: 0, overflow: 'hidden' }}>
+                            <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--surface-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <h2 style={{ margin: 0, color: 'var(--text-highlight)', fontSize: '1.3rem', fontWeight: '800' }}>💰 Submit Your Bid</h2>
+                                <button onClick={() => setShowBidModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: 'var(--text-secondary)', lineHeight: 1 }}>✕</button>
+                            </div>
+
+                            <div style={{ padding: '1.5rem 2rem', background: 'rgba(46,160,67,0.04)', borderBottom: '1px solid var(--surface-border)' }}>
+                                <p style={{ margin: '0 0 0.2rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Requesting</p>
+                                <p style={{ margin: 0, color: 'var(--text-highlight)', fontWeight: '700', fontSize: '1.1rem' }}>
+                                    {selectedRfq.quantity} {selectedRfq.unit} of {selectedRfq.category}
+                                </p>
+                            </div>
+
+                            <form onSubmit={handleBidSubmit} style={{ padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                                         Unit Price (₹ per {selectedRfq.unit})
                                     </label>
-                                    <input 
-                                        type="number" required step="0.01" min="1"
-                                        className="w-full bg-gray-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                                        placeholder="e.g. 500"
-                                        value={bidData.unit_price}
-                                        onChange={e => setBidData({...bidData, unit_price: e.target.value})}
-                                    />
+                                    <input type="number" required step="0.01" min="1" placeholder="e.g. 500" style={inputStyle} value={bidData.unit_price} onChange={e => setBidData({ ...bidData, unit_price: e.target.value })} />
                                     {bidData.unit_price && (
-                                        <p className="text-emerald-400 text-sm mt-2">
+                                        <p style={{ margin: '0.4rem 0 0', color: 'var(--primary-color)', fontSize: '0.88rem', fontWeight: '600' }}>
                                             Total Bid: ₹{(parseFloat(bidData.unit_price) * selectedRfq.quantity).toLocaleString('en-IN')}
                                         </p>
                                     )}
                                 </div>
-                                
+
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                                        Delivery Time (Days)
-                                    </label>
-                                    <input 
-                                        type="number" required min="1"
-                                        className="w-full bg-gray-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                                        placeholder="e.g. 3"
-                                        value={bidData.delivery_days}
-                                        onChange={e => setBidData({...bidData, delivery_days: e.target.value})}
-                                    />
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Delivery Time (Days)</label>
+                                    <input type="number" required min="1" placeholder="e.g. 3" style={inputStyle} value={bidData.delivery_days} onChange={e => setBidData({ ...bidData, delivery_days: e.target.value })} />
                                 </div>
-                                
+
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                                        Notes to Customer (Optional)
-                                    </label>
-                                    <textarea 
-                                        rows="2"
-                                        className="w-full bg-gray-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                                        placeholder="Any specific brands, terms, etc."
-                                        value={bidData.note}
-                                        onChange={e => setBidData({...bidData, note: e.target.value})}
-                                    ></textarea>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Notes to Customer (Optional)</label>
+                                    <textarea rows="2" placeholder="Brand, quality grade, terms..." style={{ ...inputStyle, resize: 'vertical' }} value={bidData.note} onChange={e => setBidData({ ...bidData, note: e.target.value })}></textarea>
                                 </div>
-                                
-                                <button type="submit" className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-emerald-500/20 transition-all mt-4">
-                                    Place Bid
+
+                                <button type="submit" className="btn" style={{ width: '100%', padding: '0.9rem', fontSize: '1rem', fontWeight: '800', boxShadow: '0 4px 15px var(--accent-glow)', marginTop: '0.5rem' }}>
+                                    🚀 Place Bid
                                 </button>
                             </form>
                         </div>
                     </div>
-                </div>
-            )}
-                </div>
+                )}
+
             </main>
         </div>
     );
