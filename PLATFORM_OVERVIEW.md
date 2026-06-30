@@ -19,6 +19,7 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 - **Real-time Order Tracking**: Web Push and Email notifications from "Order Placed" to "Delivered."
 - **PWA Experience**: Install ConEco on your phone's home screen.
 - **Smart GST Billing**: GST (18%) is added to your total **only if the vendor is GST-registered**. The GST Bill option is automatically hidden for unregistered vendors.
+- **Service Milestone Payments**: For long-term service bookings, view the vendor's milestone plan, track work progress phase by phase, approve completed milestones, and release payment only after you're satisfied — a built-in **offline escrow** protecting both parties.
 
 ### 🏪 For Vendors (Sellers)
 - **Comprehensive Dashboard**: Track Gross Sales, Platform Commissions, and Net Earnings in real-time.
@@ -27,6 +28,7 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 - **QC Reliability Score**: High-performing vendors get better platform visibility.
 - **Weekly Billing**: Automated commission invoices generated every Monday.
 - **Bill Upload System**: Upload official bill documents (PDF or image) from the Orders dashboard. Each order shows a badge with the customer's requested bill type.
+- **Service Milestone Management**: For service orders, create a structured milestone plan (title, description, scheduled date, payment %). Mark each milestone as completed with progress notes. Customer approves the work and releases that phase's payment — protecting vendor cashflow across long-term projects.
 
 ### 🛡️ For Platform Management (Admin Levels)
 - **Super Admin**: Platform owners with full financial control, bank payouts, staff management, and system settings access.
@@ -58,14 +60,44 @@ ConEco is more than just an app; it is a business ecosystem. We simplify bulk pr
 1. **List**: Upload your catalogue with images and specifications.
 2. **GST Registration**: Add your `gst_number` to your profile to serve GST-invoice-needing business buyers.
 3. **Fulfill**: Manage orders through the dashboard.
-4. **Upload Bill**: After delivery, upload the official bill. The order card shows the customer's requested bill type.
-5. **Withdraw**: Request payouts from your wallet.
-6. **Maintain**: Pay weekly commission invoices to avoid "Strikes."
+4. **Milestone Plan** *(Service orders)*: Create a milestone payment plan splitting the total into phases. Mark each phase as completed with a progress note.
+5. **Upload Bill**: After delivery, upload the official bill. The order card shows the customer's requested bill type.
+6. **Withdraw**: Request payouts from your wallet.
+7. **Maintain**: Pay weekly commission invoices to avoid "Strikes."
 
 ### For Admin & Staff
 1. **Super Admin**: Manages the platform's core, handles financial payouts, and manages staff accounts.
 2. **Admin**: Approves new vendors/customers and monitors automated commission invoicing.
 3. **Employee**: Manages customer inquiries and monitors daily order fulfillment status.
+
+---
+
+## 💰 Service Milestone Payments (Offline Escrow)
+
+For long-term service bookings (e.g., construction, installation, consulting), ConEco uses a milestone-based payment system that acts as an **offline escrow**:
+
+```
+Customer books service → ₹0 paid upfront (COD — customer holds their cash)
+        ↓
+Vendor creates milestone plan (e.g., 3 phases splitting 100% of order value)
+        ↓
+Vendor completes Phase 1 → marks as Done with progress note
+        ↓
+Customer reviews work → approves → hands over Phase 1 cash payment
+        ↓
+... repeats per milestone ...
+        ↓
+All milestones approved → Order auto-marked as Completed
+```
+
+### Why This Works
+| Role | Protection |
+|---|---|
+| **Customer** | Pays only after seeing completed work per phase |
+| **Vendor** | Gets paid progressively; not a lump-sum risk |
+| **Platform** | No money held digitally — no RBI license required |
+
+> **Future**: When ConEco integrates Razorpay Route, milestone approvals will automatically trigger digital payouts to vendors — becoming a true digital escrow without any code changes to the milestone logic.
 
 ---
 

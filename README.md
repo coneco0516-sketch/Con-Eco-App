@@ -44,6 +44,7 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - **GST & Non-GST Billing**: Select bill type at checkout — GST Tax Invoice for ITC claims or a Simple Bill for retail purchases. GST option is auto-restricted if vendor is not GST-registered.
 - Real-time order tracking with automated status updates.
 - **Download Bill**: Once the vendor uploads the bill post-delivery, customers can download it directly from "My Orders."
+- **Service Milestone Payments**: For long-term service bookings, customers can view the vendor's milestone payment plan, track progress per phase, approve completed work, and release payment milestone-by-milestone — acting as a built-in offline escrow.
 - **PWA Ready**: Installable on mobile and desktop for a native experience.
 
 ### 🏪 Vendors
@@ -53,6 +54,7 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 - **Dynamic Order Acceptance**: Accept custom bulk negotiations and directly alter unit pricing from the dashboard.
 - **Vendor Wallet**: Automated earnings tracking with Bank Withdrawal (Payout) requests.
 - **Bill Upload System**: Upload GST Tax Invoices or Simple Bills for each order from the dashboard. Each order card clearly shows the customer's requested bill type.
+- **Service Milestone Management**: For service orders, vendors can define a structured milestone payment plan (title, description, scheduled date, payment %). Mark each milestone as completed with progress notes; customer then approves and releases that phase's payment.
 - Weekly automated billing system with downloadable compliance receipts.
 - Professional QC verification system for platform-wide quality control.
 
@@ -86,7 +88,8 @@ A professional full-stack B2B marketplace designed to connect **Customers**, **V
 ```
 ConEco/
 ├── Backend/
-│   ├── routers/                 # API Endpoints (Auth, Vendor, Customer, Admin, Payment, Invoice)
+│   ├── routers/                 # API Endpoints (Auth, Vendor, Customer, Admin, Payment, Invoice, Milestones)
+│   │   └── milestones.py        # Service Milestone Payments API
 │   ├── main.py                  # Core Application & Scheduler
 │   ├── email_service.py         # Brevo Email Infrastructure
 │   ├── push_service.py          # Web Push Notification Engine
@@ -94,7 +97,8 @@ ConEco/
 │   ├── setup_neon.py            # DB Schema Setup Script
 │   ├── invoice_generator.py     # Professional PDF Invoice Logic
 │   ├── commission_invoicing.py  # Billing & Penalty Automation
-│   └── migrate_gst_billing.py   # GST billing schema migration
+│   ├── migrate_gst_billing.py   # GST billing schema migration
+│   └── migrate_milestones.py    # ServiceMilestones table migration
 │
 ├── Frontend/
 │   ├── src/
@@ -140,6 +144,9 @@ python migrate_gst_billing.py
 
 # Run Multi-Tier Role migration (adds Super Admin, Admin, Employee roles)
 python migrate_multi_tier_roles.py
+
+# Run Service Milestone migration (creates ServiceMilestones table)
+python migrate_milestones.py
 ```
 
 ### 3. Running Locally
@@ -273,6 +280,7 @@ We are actively developing the platform before moving to mobile apps. Planned fe
 3. **Material Comparison Tool**
 4. **Live Negotiation Chat**
 5. **Logistics & Freight Calculator**
+6. **Online Escrow Payments** — When Razorpay Route is integrated, milestone approvals will auto-release digital payments to vendors (currently works as offline escrow via COD)
 
 > See `Documents/Plan/Future_Features_Roadmap.md` for the complete 3-month implementation timeline.
 
