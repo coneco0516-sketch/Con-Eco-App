@@ -352,6 +352,18 @@ Accessible by: Admin, Super Admin, Employee roles.
 
 ---
 
+### 8D. `Register.jsx` — Registration Page
+
+Accessible by: Any logged-out user.
+
+**Referral Capabilities:**
+1. **Auto-fills code** if user arrives via `?ref=XXXXXXXX` URL parameter.
+2. **Manual Entry** allows users to type in a code they received via text/word-of-mouth.
+3. Shows a **✅ Applied!** badge when a valid 8-character code is detected.
+4. Passes the `referral_code` safely to the backend on submission.
+
+---
+
 ## 9. Admin Dashboard — Actual Capabilities
 
 | Capability | Available |
