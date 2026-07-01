@@ -363,6 +363,51 @@ function Register() {
           </div>
         </div>
 
+        {/* REFERRAL CODE */}
+        <div>
+          <label className="input-label" style={{ fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>
+            Referral Code
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 400, marginLeft: '0.4rem' }}>
+              (optional — enter if a friend referred you)
+            </span>
+          </label>
+          <div style={{ position: 'relative' }}>
+            <input
+              id="referral-code-input"
+              type="text"
+              placeholder="e.g. AB3KX9QZ"
+              value={referralCode}
+              onChange={e => setReferralCode(e.target.value.toUpperCase().trim())}
+              maxLength={8}
+              style={{
+                ...inputStyle,
+                fontFamily: 'monospace',
+                letterSpacing: '3px',
+                fontSize: '1rem',
+                paddingRight: referralCode.length === 8 ? '7rem' : '1rem',
+                border: referralCode.length === 8
+                  ? '1px solid rgba(46,160,67,0.6)'
+                  : '1px solid var(--surface-border)',
+              }}
+            />
+            {referralCode.length === 8 && (
+              <span style={{
+                position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                background: 'rgba(46,160,67,0.15)', color: '#3fb950',
+                fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '5px',
+                border: '1px solid rgba(46,160,67,0.35)', whiteSpace: 'nowrap'
+              }}>
+                ✅ Applied!
+              </span>
+            )}
+          </div>
+          {referralCode.length > 0 && referralCode.length < 8 && (
+            <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#d4a20b' }}>
+              ⚠️ Referral codes are 8 characters long
+            </p>
+          )}
+        </div>
+
         {/* TERMS */}
         <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start', marginTop: '0.5rem', marginBottom: '0.5rem' }}>
           <input 
