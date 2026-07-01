@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import VendorSidebar from '../components/VendorSidebar';
+import ReferralCard from '../components/ReferralCard';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
@@ -188,6 +189,9 @@ function VendorDashboard() {
               <Link to="/vendor/billing" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>Pay Invoice →</Link>
             </div>
           </div>
+
+          {/* Referral Loyalty Program Card */}
+          <ReferralCard />
 
           {/* Row 2: Guide Card & Action Hub */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>

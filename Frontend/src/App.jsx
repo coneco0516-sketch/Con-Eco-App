@@ -50,6 +50,8 @@ import Earnings from './pages/Earnings';
 import VendorAnalytics from './pages/VendorAnalytics';
 import VendorProfile from './pages/VendorProfile';
 import VendorBilling from './pages/VendorBilling';
+import ReferralPage from './pages/ReferralPage';
+import AdminReferrals from './pages/AdminReferrals';
 import './index.css';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
@@ -287,6 +289,7 @@ function AppContent() {
           <Route path="/customer/projects/:id" element={<ProtectedRoute allowedRoles={['Customer']}><ProjectSiteDetail /></ProtectedRoute>} />
           <Route path="/customer/rfq" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerRFQ /></ProtectedRoute>} />
           <Route path="/customer/profile" element={<ProtectedRoute allowedRoles={['Customer']}><CustomerProfile /></ProtectedRoute>} />
+          <Route path="/referral" element={<ProtectedRoute allowedRoles={['Customer', 'Vendor']}><ReferralPage /></ProtectedRoute>} />
 
           {/* Vendor Routes */}
           <Route path="/vendor" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorDashboard /></ProtectedRoute>} />
@@ -297,6 +300,10 @@ function AppContent() {
           <Route path="/vendor/billing" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorBilling /></ProtectedRoute>} />
           <Route path="/vendor/analytics" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorAnalytics /></ProtectedRoute>} />
           <Route path="/vendor/profile" element={<ProtectedRoute allowedRoles={['Vendor']}><VendorProfile /></ProtectedRoute>} />
+          <Route path="/vendor/referral" element={<ProtectedRoute allowedRoles={['Vendor']}><ReferralPage /></ProtectedRoute>} />
+
+          {/* Admin — Referrals */}
+          <Route path="/admin/referrals" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'Employee']}><AdminReferrals /></ProtectedRoute>} />
 
           {/* Catch all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

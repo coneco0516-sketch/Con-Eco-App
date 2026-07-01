@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import CustomerSidebar from '../components/CustomerSidebar';
+import ReferralCard from '../components/ReferralCard';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
 
@@ -142,6 +143,11 @@ function CustomerDashboard() {
             <p className="stat-value">{loading ? '...' : (stats ? stats.rfq_count : 0)}</p>
             <Link to="/customer/rfq" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '600', marginTop: '10px', display: 'inline-block' }}>RFQ Board →</Link>
           </div>
+        </div>
+
+        {/* Referral Loyalty Program Card */}
+        <div style={{ marginBottom: '2rem' }}>
+          <ReferralCard />
         </div>
 
         {/* Row 2: Recent Activity & Quick Navigation */}

@@ -61,6 +61,11 @@ function CustomerSidebar() {
             👤 My Profile
           </Link>
         </li>
+        <li>
+          <Link to="/referral" className={`nav-item ${isActive('/referral')}`} style={{ display: 'block', padding: '0.6rem 1rem', textDecoration: 'none', transition: 'all 0.2s', background: isActive('/referral') ? '' : 'linear-gradient(90deg, rgba(46,160,67,0.05), transparent)' }}>
+            🎯 Referral Program
+          </Link>
+        </li>
       </ul>
     </aside>
   );

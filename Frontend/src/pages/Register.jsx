@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 
 const API = import.meta.env.VITE_API_URL || 'https://api.coneco.store';
@@ -15,7 +15,14 @@ function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) setReferralCode(ref.toUpperCase());
+  }, [searchParams]);
 
   const handleTogglePassword = () => {
     setShowPassword(true);
@@ -90,6 +97,7 @@ function Register() {
       address: formData.role === 'vendor' ? formData.address : null,
       city: formData.role === 'vendor' ? formData.vendorCity : (formData.role === 'customer' ? formData.customerCity : null),
       state: formData.role === 'vendor' ? formData.vendorState : (formData.role === 'customer' ? formData.customerState : null),
+      referral_code: referralCode || null,
     };
 
     try {
@@ -194,6 +202,18 @@ function Register() {
     <div className="auth-container glass-panel" style={{ maxWidth: '640px', margin: '2rem auto', padding: '2.5rem' }}>
       <h2 className="auth-title" style={{ margin: '0 0 0.5rem 0', fontWeight: '800' }}>Create Account</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.8rem', fontSize: '0.95rem' }}>Join ConEco to digitize and scale your transactions</p>
+
+      {/* Referral Badge */}
+      {referralCode && (
+        <div style={{
+          padding: '0.7rem 1rem', marginBottom: '1.2rem', borderRadius: '8px',
+          background: 'rgba(46,160,67,0.1)', border: '1px solid rgba(46,160,67,0.35)',
+          color: '#3fb950', fontSize: '0.88rem', fontWeight: 600,
+          display: 'flex', alignItems: 'center', gap: '0.5rem'
+        }}>
+          🎉 <span>Referral code <strong>{referralCode}</strong> applied! You're joining via a friend's invite.</span>
+        </div>
+      )}
       
       {error && (
         <div style={{ padding: '0.8rem 1rem', marginBottom: '1.5rem', borderRadius: '8px', background: 'rgba(248,81,73,0.12)', color: '#f85149', border: '1px solid rgba(248,81,73,0.25)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>

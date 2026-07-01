@@ -210,34 +210,68 @@ class RegisterRequest(BaseModel):
     company_name: Optional[str] = None
     gst_number: Optional[str] = None
     address: Optional[str] = None
+    referral_code: Optional[str] = None  # Referral code of the referrer
 
 @router.post("/register")
 def register(request: RegisterRequest, background_tasks: BackgroundTasks):
+    import string as _string
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT user_id FROM users WHERE email=%s", (request.email,))
         if cursor.fetchone():
             return {"status": "error", "message": "Email already exists"}
-            
+
         hashed_pass = hash_password(request.password)
         token = secrets.token_hex(20)
-        cursor.execute("INSERT INTO users (name, email, phone, password_hash, role, email_verified, email_verification_token, email_verification_sent_at) VALUES (%s, %s, %s, %s, %s, FALSE, %s, NOW()) RETURNING user_id",
-                       (request.full_name, request.email, request.phone_number, hashed_pass, request.role, token))
+
+        # --- Resolve referrer (any role allowed) ---
+        referred_by_user_id = None
+        if request.referral_code:
+            cursor.execute(
+                "SELECT user_id FROM users WHERE referral_code = %s",
+                (request.referral_code.strip().upper(),)
+            )
+            referrer = cursor.fetchone()
+            if referrer:
+                referred_by_user_id = referrer['user_id']
+
+        # --- Generate unique referral code for new user ---
+        new_code = None
+        for _ in range(10):
+            candidate = ''.join(secrets.choice(_string.ascii_uppercase + _string.digits) for _ in range(8))
+            cursor.execute("SELECT user_id FROM users WHERE referral_code = %s", (candidate,))
+            if not cursor.fetchone():
+                new_code = candidate
+                break
+
+        cursor.execute(
+            "INSERT INTO users (name, email, phone, password_hash, role, email_verified, email_verification_token, email_verification_sent_at, referral_code, referred_by_user_id) VALUES (%s, %s, %s, %s, %s, FALSE, %s, NOW(), %s, %s) RETURNING user_id",
+            (request.full_name, request.email, request.phone_number, hashed_pass, request.role, token, new_code, referred_by_user_id)
+        )
         res = cursor.fetchone()
         user_id = res['user_id'] if hasattr(res, '__getitem__') and 'user_id' in res else res[0]
-        
+
         # Dispatch the verification email in background
         background_tasks.add_task(send_email_verification, request.email, request.full_name, token)
-        
+
         if request.role == 'Customer':
             cursor.execute("INSERT INTO customers (customer_id, city, state) VALUES (%s, %s, %s)",
                            (user_id, request.city, request.state))
         elif request.role == 'Vendor':
             cursor.execute("INSERT INTO vendors (vendor_id, company_name, gst_number, address, city, state) VALUES (%s, %s, %s, %s, %s, %s)",
                            (user_id, request.company_name, request.gst_number, request.address, request.city, request.state))
-        
+
         conn.commit()
+
+        # Check if referrer hit a new milestone (async-safe: done in background)
+        if referred_by_user_id:
+            try:
+                from routers.referrals import check_and_award_milestones
+                check_and_award_milestones(referred_by_user_id, conn)
+            except Exception as ref_err:
+                print(f"[REFERRAL] Milestone check failed: {ref_err}")
+
         return {"status": "success", "message": "Registration successful"}
     finally:
         conn.close()

@@ -97,6 +97,11 @@ function AdminSidebar() {
             💬 Contact Messages
           </Link>
         </li>
+        <li>
+          <Link to="/admin/referrals" className={`nav-item ${isActive('/admin/referrals')}`} style={{ display: 'block', padding: '0.6rem 1rem', textDecoration: 'none', transition: 'all 0.2s' }}>
+            🎯 Referral Monitor
+          </Link>
+        </li>
         
         {userRole === 'Super Admin' && (
           <li>

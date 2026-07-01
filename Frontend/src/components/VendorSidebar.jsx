@@ -56,6 +56,11 @@ function VendorSidebar() {
             👤 My Profile
           </Link>
         </li>
+        <li>
+          <Link to="/vendor/referral" className={`nav-item ${isActive('/vendor/referral')}`} style={{ display: 'block', padding: '0.6rem 1rem', textDecoration: 'none', transition: 'all 0.2s', background: isActive('/vendor/referral') ? '' : 'linear-gradient(90deg, rgba(46,160,67,0.05), transparent)' }}>
+            🎯 Referral Program
+          </Link>
+        </li>
       </ul>
     </aside>
   );
