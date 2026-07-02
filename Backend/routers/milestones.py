@@ -191,6 +191,13 @@ def approve_milestone(milestone_id: int, data: MilestoneNote, user = Depends(che
             cursor.execute("UPDATE Orders SET status = 'Completed' WHERE order_id = %s", (order_id,))
             cursor.execute("UPDATE Payments SET status = 'Completed' WHERE order_id = %s", (order_id,))
             
+            # Trigger referral milestone check
+            try:
+                from routers.referrals import trigger_referral_check_for_order
+                trigger_referral_check_for_order(order_id, conn)
+            except Exception as e:
+                print(f"[REFERRAL] Error triggering check on milestone complete: {e}")
+            
         conn.commit()
         return {"status": "success", "message": "Milestone approved and payment released"}
     except Exception as e:

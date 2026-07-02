@@ -61,6 +61,7 @@ function ReferralCard() {
   /* ── Next milestone progress ── */
   const nextM = stats?.next_milestone;
   const totalReferrals = stats?.total_referrals ?? 0;
+  const pendingReferrals = stats?.total_pending_referrals ?? 0;
   const progressPct = nextM
     ? Math.min(100, Math.round((totalReferrals / nextM.required) * 100))
     : 100;
@@ -195,8 +196,8 @@ function ReferralCard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.82rem' }}>
               <span style={{ color: 'var(--text-secondary)' }}>
                 {nextM
-                  ? <>You've referred <strong style={{ color: 'var(--text-highlight)' }}>{totalReferrals}</strong> / {nextM.required}</>
-                  : <span style={{ color: '#ffd700' }}>🎉 All milestones achieved!</span>}
+                  ? <>You have <strong style={{ color: 'var(--text-highlight)' }}>{totalReferrals}</strong> completed / {nextM.required} <span style={{fontSize: '0.75rem', opacity: 0.8}}>({pendingReferrals} pending)</span></>
+                  : <span style={{ color: '#ffd700' }}>🎉 All milestones achieved! <span style={{fontSize: '0.75rem', opacity: 0.8}}>({pendingReferrals} pending)</span></span>}
               </span>
               {nextM && (
                 <span style={{ color: 'var(--primary-color)', fontWeight: 700 }}>

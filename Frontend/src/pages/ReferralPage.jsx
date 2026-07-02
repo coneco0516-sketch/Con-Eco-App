@@ -100,8 +100,13 @@ function ReferralPage() {
                 {loading ? '...' : totalReferrals}
               </div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                Total Referrals
+                Completed Referrals
               </div>
+              {stats?.total_pending_referrals > 0 && (
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '5px' }}>
+                  + {stats.total_pending_referrals} Pending
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -360,11 +365,11 @@ function ReferralPage() {
                       <td style={{ padding: '0.8rem' }}>
                         <span style={{
                           padding: '3px 8px', borderRadius: '5px', fontSize: '0.78rem', fontWeight: 700,
-                          background: u.email_verified ? 'rgba(46,160,67,0.12)' : 'rgba(210,109,14,0.12)',
-                          color: u.email_verified ? '#3fb950' : '#d4a20b',
-                          border: `1px solid ${u.email_verified ? 'rgba(46,160,67,0.3)' : 'rgba(210,109,14,0.3)'}`
+                          background: u.is_completed ? 'rgba(46,160,67,0.12)' : (u.email_verified ? 'rgba(56,112,224,0.1)' : 'rgba(210,109,14,0.12)'),
+                          color: u.is_completed ? '#3fb950' : (u.email_verified ? '#3870e0' : '#d4a20b'),
+                          border: `1px solid ${u.is_completed ? 'rgba(46,160,67,0.3)' : (u.email_verified ? 'rgba(56,112,224,0.3)' : 'rgba(210,109,14,0.3)')}`
                         }}>
-                          {u.email_verified ? '✅ Verified' : '⏳ Pending'}
+                          {u.is_completed ? '✅ Completed' : (u.email_verified ? '⏳ Pending Orders' : '⏳ Pending Verify')}
                         </span>
                       </td>
                     </tr>

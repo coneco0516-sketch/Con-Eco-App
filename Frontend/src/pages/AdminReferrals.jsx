@@ -120,7 +120,8 @@ function AdminReferrals() {
             { label: 'Total Users', value: users.length, icon: '👥' },
             { label: 'Vendors', value: users.filter(u => u.role === 'Vendor').length, icon: '🏭' },
             { label: 'Customers', value: users.filter(u => u.role === 'Customer').length, icon: '🛒' },
-            { label: 'Active Referrers', value: users.filter(u => u.referral_count > 0).length, icon: '🔗' },
+            { label: 'Total Signups', value: users.reduce((a, u) => a + (u.total_signups || 0), 0), icon: '🔗' },
+            { label: 'Completed Referrals', value: users.reduce((a, u) => a + (u.referral_count || 0), 0), icon: '✅' },
             { label: 'Milestones Hit', value: users.reduce((a, u) => a + (u.milestones_achieved?.length || 0), 0), icon: '🏅' },
           ].map(s => (
             <div key={s.label} className="glass-panel" style={{ padding: '1.2rem', textAlign: 'center' }}>
@@ -195,7 +196,7 @@ function AdminReferrals() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.86rem' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
-                  {['User', 'Role', 'Referral Code', 'Total Referrals', 'Milestones & Actions'].map(h => (
+                  {['User', 'Role', 'Referral Code', 'Total Signups', 'Completed Referrals', 'Milestones & Actions'].map(h => (
                     <th key={h} style={{ padding: '0.8rem', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                       {h}
                     </th>
@@ -229,11 +230,20 @@ function AdminReferrals() {
                       <td style={{ padding: '1rem 0.8rem', textAlign: 'center' }}>
                         <span style={{
                           fontSize: '1.4rem', fontWeight: 800,
+                          color: u.total_signups > 0 ? '#3870e0' : 'var(--text-secondary)'
+                        }}>
+                          {u.total_signups || 0}
+                        </span>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>signups</div>
+                      </td>
+                      <td style={{ padding: '1rem 0.8rem', textAlign: 'center' }}>
+                        <span style={{
+                          fontSize: '1.4rem', fontWeight: 800,
                           color: u.referral_count > 0 ? '#3fb950' : 'var(--text-secondary)'
                         }}>
                           {u.referral_count}
                         </span>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>referrals</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>completed</div>
                       </td>
                       <td style={{ padding: '1rem 0.8rem' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>

@@ -13,6 +13,37 @@ from routers.auth import get_current_user_from_cookie
 import secrets
 import string
 
+def trigger_referral_check_for_order(order_id: int, conn):
+    """Helper to check and award milestones when an order is completed."""
+    cursor = conn.cursor(dictionary=True)
+    # Check physical orders
+    cursor.execute("SELECT customer_id, vendor_id FROM orders WHERE order_id = %s", (order_id,))
+    order = cursor.fetchone()
+    # Check booked services if not in orders (same order_id might be used for services, or we just pass it)
+    if not order:
+        cursor.execute("SELECT customer_id, vendor_id FROM bookedservices WHERE booking_id = %s", (str(order_id),))
+        order = cursor.fetchone()
+        
+    if not order:
+        cursor.close()
+        return
+
+    # For customer
+    if order.get("customer_id"):
+        cursor.execute("SELECT referred_by_user_id FROM users WHERE user_id = %s", (order["customer_id"],))
+        c_user = cursor.fetchone()
+        if c_user and c_user.get("referred_by_user_id"):
+            check_and_award_milestones(c_user["referred_by_user_id"], conn)
+            
+    # For vendor
+    if order.get("vendor_id"):
+        cursor.execute("SELECT referred_by_user_id FROM users WHERE user_id = %s", (order["vendor_id"],))
+        v_user = cursor.fetchone()
+        if v_user and v_user.get("referred_by_user_id"):
+            check_and_award_milestones(v_user["referred_by_user_id"], conn)
+            
+    cursor.close()
+
 router = APIRouter()
 
 # ─── Milestone thresholds (same-role only) ────────────────────────────────────
@@ -68,11 +99,22 @@ def check_and_award_milestones(referrer_id: int, conn):
         return
     role = user_row["role"]
 
-    # Count ALL referrals (any role)
+    # Count ALL referrals (any role) who have met order requirements
     cursor.execute("""
         SELECT COUNT(*) as total
         FROM users u
         WHERE u.referred_by_user_id = %s AND u.email_verified = TRUE
+          AND (
+            (u.role = 'Customer' AND (
+                (SELECT COUNT(*) FROM orders o WHERE o.customer_id = u.user_id AND o.status = 'Completed') +
+                (SELECT COUNT(*) FROM bookedservices bs WHERE bs.customer_id = u.user_id AND bs.status = 'Completed')
+            ) >= 2)
+            OR
+            (u.role = 'Vendor' AND (
+                (SELECT COUNT(*) FROM orders o WHERE o.vendor_id = u.user_id AND o.status = 'Completed') +
+                (SELECT COUNT(*) FROM bookedservices bs WHERE bs.vendor_id = u.user_id AND bs.status = 'Completed')
+            ) >= 3)
+          )
     """, (referrer_id,))
     count_row = cursor.fetchone()
     total_referrals = count_row["total"] if count_row else 0
@@ -114,14 +156,23 @@ def get_my_referral_stats(request: Request):
 
         cursor = conn.cursor(dictionary=True)
 
-        # Count ALL verified referrals (any role)
+        # Count ALL verified referrals (any role) and split by qualification
         cursor.execute("""
-            SELECT COUNT(*) as total
+            SELECT 
+                COUNT(*) as total_signups,
+                SUM(CASE WHEN (
+                    (u.role = 'Customer' AND ((SELECT COUNT(*) FROM orders o WHERE o.customer_id = u.user_id AND o.status = 'Completed') + (SELECT COUNT(*) FROM bookedservices bs WHERE bs.customer_id = u.user_id AND bs.status = 'Completed')) >= 2)
+                    OR
+                    (u.role = 'Vendor' AND ((SELECT COUNT(*) FROM orders o WHERE o.vendor_id = u.user_id AND o.status = 'Completed') + (SELECT COUNT(*) FROM bookedservices bs WHERE bs.vendor_id = u.user_id AND bs.status = 'Completed')) >= 3)
+                ) THEN 1 ELSE 0 END) as total_completed
             FROM users u
             WHERE u.referred_by_user_id = %s AND u.email_verified = TRUE
         """, (user_id,))
         row = cursor.fetchone()
-        total_referrals = row["total"] if row else 0
+        total_completed = int(row["total_completed"] or 0) if row else 0
+        total_signups = int(row["total_signups"] or 0) if row else 0
+        total_pending = max(0, total_signups - total_completed)
+        total_referrals = total_completed # Only completed count towards milestones
 
         # Get achieved milestones
         cursor.execute("""
@@ -168,6 +219,8 @@ def get_my_referral_stats(request: Request):
             "referral_code": code,
             "referral_link": referral_link,
             "total_referrals": total_referrals,
+            "total_pending_referrals": total_pending,
+            "total_signups": total_signups,
             "role": role,
             "milestones": milestone_list,
             "next_milestone": next_milestone
@@ -192,7 +245,12 @@ def get_referral_history(request: Request):
                 u.name,
                 u.role AS referred_role,
                 TO_CHAR(u.created_at, 'DD Mon YYYY') AS joined_date,
-                u.email_verified
+                u.email_verified,
+                CASE WHEN (
+                    (u.role = 'Customer' AND ((SELECT COUNT(*) FROM orders o WHERE o.customer_id = u.user_id AND o.status = 'Completed') + (SELECT COUNT(*) FROM bookedservices bs WHERE bs.customer_id = u.user_id AND bs.status = 'Completed')) >= 2)
+                    OR
+                    (u.role = 'Vendor' AND ((SELECT COUNT(*) FROM orders o WHERE o.vendor_id = u.user_id AND o.status = 'Completed') + (SELECT COUNT(*) FROM bookedservices bs WHERE bs.vendor_id = u.user_id AND bs.status = 'Completed')) >= 3)
+                ) THEN TRUE ELSE FALSE END AS is_completed
             FROM users u
             WHERE u.referred_by_user_id = %s
             ORDER BY u.created_at DESC
@@ -228,6 +286,15 @@ def admin_get_all_referrals(request: Request):
                 (
                     SELECT COUNT(*) FROM users r
                     WHERE r.referred_by_user_id = u.user_id AND r.email_verified = TRUE
+                ) AS total_signups,
+                (
+                    SELECT COUNT(*) FROM users r
+                    WHERE r.referred_by_user_id = u.user_id AND r.email_verified = TRUE
+                      AND (
+                        (r.role = 'Customer' AND ((SELECT COUNT(*) FROM orders o WHERE o.customer_id = r.user_id AND o.status = 'Completed') + (SELECT COUNT(*) FROM bookedservices bs WHERE bs.customer_id = r.user_id AND bs.status = 'Completed')) >= 2)
+                        OR
+                        (r.role = 'Vendor' AND ((SELECT COUNT(*) FROM orders o WHERE o.vendor_id = r.user_id AND o.status = 'Completed') + (SELECT COUNT(*) FROM bookedservices bs WHERE bs.vendor_id = r.user_id AND bs.status = 'Completed')) >= 3)
+                      )
                 ) AS referral_count
             FROM users u
             WHERE u.role IN ('Customer', 'Vendor')

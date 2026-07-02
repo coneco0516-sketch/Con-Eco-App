@@ -311,6 +311,13 @@ def vendor_update_order(data: OrderStatusUpdate, user = Depends(check_vendor), b
                 # For non-cash orders, mark payment as Completed when order is Completed
                 cursor.execute("UPDATE Payments SET status='Completed' WHERE order_id=%s", (data.order_id,))
                 
+            if data.status == 'Completed':
+                # Trigger referral milestone check
+                try:
+                    from routers.referrals import trigger_referral_check_for_order
+                    trigger_referral_check_for_order(data.order_id, conn)
+                except Exception as e:
+                    print(f"[REFERRAL] Error triggering check on vendor order complete: {e}")
                 
         if data.status == 'Cancelled':
             # Check if we need to restore credit
