@@ -12,7 +12,7 @@
 The referral program mechanics are very specific. **DO NOT** use generic referral terms that aren't in the platform.
 
 1. **The Reward:** It's a **"Surprise Prize"** at each milestone. Do not say "cash", "money", or "wallet credits". 
-2. **The Condition:** A referral only counts when the new user **verifies their email**.
+2. **The Condition:** A referral only counts when the new user **verifies their email AND completes orders** (2 for Customers, 3 for Vendors).
 3. **The Tiers (Customers):** Tier 1 (25 referrals), Tier 2 (50 referrals), Tier 3 (100 referrals).
 4. **The Tiers (Vendors):** Tier 1 (50 referrals), Tier 2 (100 referrals), Tier 3 (200 referrals).
 5. **The Code:** An 8-character code like `AB3KX9QZ`.
@@ -59,8 +59,8 @@ To quickly create high-quality Instagram Reels:
 *Voiceover:* "It’s super simple. Grab your unique 8-character referral code from your dashboard. Share it with your network."
 
 **[0:15 - 0:22] The Rule**  
-*Visual:* A new user registers. A big "Email Verified ✅" stamp hits the screen.  
-*Voiceover:* "When they register and verify their email, boom—your referral count goes up."
+*Visual:* A new user registers and completes an order. A big "Qualified ✅" stamp hits the screen.  
+*Voiceover:* "When they register, verify their email, and complete their first few orders, boom—your referral count goes up."
 
 **[0:22 - 0:30] The Milestones & Call to Action**  
 *Visual:* Three locked gift boxes appear on screen. They pop open one by one as "Tier 1", "Tier 2", and "Tier 3" appear.  
@@ -83,7 +83,7 @@ To quickly create high-quality Instagram Reels:
 
 **[0:05 - 0:15] The Challenge**  
 *Visual:* Fast-paced text on screen syncing with the voice. Background shows people shaking hands or construction projects.  
-*Voiceover:* "Here is the challenge. Refer 25 verified users to unlock Tier 1. Refer 50 for Tier 2. And if you hit 100? You reach Tier 3."
+*Voiceover:* "Here is the challenge. Refer 25 qualified users to unlock Tier 1. Refer 50 for Tier 2. And if you hit 100? You reach Tier 3."
 
 **[0:15 - 0:25] The Reveal / CTA**  
 *Visual:* Screen recording of the user dashboard showing "🎉 Tier 1 Achieved!".  
@@ -106,11 +106,11 @@ To quickly create high-quality Instagram Reels:
 
 **[0:08 - 0:18] The Mechanics**  
 *Visual:* split screen. Left side: A vendor sharing a link. Right side: A new business registering.  
-*Voiceover:* "Share your referral code with other businesses. It doesn't matter if they join as a Customer or another Vendor. If they verify their email, it counts."
+*Voiceover:* "Share your referral code with other businesses. It doesn't matter if they join as a Customer or another Vendor. Once they verify their email and complete their first few orders, it counts."
 
 **[0:18 - 0:28] The Vendor Milestones**  
 *Visual:* Animated counter going from 0 to 50 (Tier 1) 🏆, then 100 (Tier 2) 🥇, then 200 (Tier 3) 👑.  
-*Voiceover:* "Hit the vendor milestones—50, 100, or 200 verified referrals—and unlock exclusive surprise rewards tailored for our top partners."
+*Voiceover:* "Hit the vendor milestones—50, 100, or 200 qualified referrals—and unlock exclusive surprise rewards tailored for our top partners."
 
 **[0:28 - 0:35] Call to Action**  
 *Visual:* Vendor dashboard showing the referral stats.  
@@ -134,7 +134,7 @@ Before making these in CapCut or InVideo, prepare:
 ```text
 Want to get rewarded just for sharing your favorite B2B platform? 🎁🏗️
 
-The Con-Eco Referral Program is live! Every time a friend or business contact registers with your code and verifies their email, you get closer to unlocking exclusive SURPRISE PRIZES. 
+The Con-Eco Referral Program is live! Every time a friend or business contact registers with your code, verifies their email, and completes their first orders on the platform, you get closer to unlocking exclusive SURPRISE PRIZES. 
 
 Hit Tier 1, 2, or 3 and our team will personally reach out with your reward. 
 
@@ -148,7 +148,7 @@ Hit Tier 1, 2, or 3 and our team will personally reach out with your reward.
 ## ✅ Final Checklist Before Publishing
 
 - [ ] Does the video say **"Surprise Prize"** instead of cash/money?
-- [ ] Does the video clarify they must **verify their email**?
+- [ ] Does the video clarify they must **verify their email AND complete orders**?
 - [ ] Are the Customer thresholds correct? (25, 50, 100)
 - [ ] Are the Vendor thresholds correct? (50, 100, 200)
 - [ ] Is the format 9:16 (vertical) for Reels?
