@@ -36,7 +36,7 @@ The Con-Eco Referral Loyalty Program is a **gamified referral system** where exi
 |----------|-------|
 | **Roles Supported** | Customer, Vendor |
 | **Referral Counting** | Counts ALL referred users regardless of role (cross-role counting ✅) |
-| **Qualifying Condition** | Referred user must have `email_verified = TRUE` |
+| **Qualifying Condition** | Referred user must complete 2 orders (Customer) or 3 orders (Vendor) |
 | **Referral Code Length** | 8 characters, uppercase alphanumeric |
 | **Referral URL Format** | `https://coneco.store/register?ref=XXXXXXXX` |
 | **Prize Nature** | Surprise prizes (not fixed wallet credits — admin decides what to give) |
@@ -68,13 +68,18 @@ The Con-Eco Referral Loyalty Program is a **gamified referral system** where exi
         ▼
 [New User Verifies Email]
         │
-        │  email_verified = TRUE → referral now COUNTS toward referrer's total
-        │  (email NOT verified → referral is PENDING, does NOT count)
+        │  email_verified = TRUE → referral tracked as PENDING
+        │
+        ▼
+[New User Completes Orders]
+        │
+        │  Customer completes 2 orders OR Vendor completes 3 orders
+        │  Referral becomes QUALIFIED and counts towards milestones
         │
         ▼
 [Referrer's Count Increases]
         │
-        │  Backend auto-checks milestones when /my-stats is fetched
+        │  Backend auto-checks milestones when /my-stats or order update is triggered
         │  If threshold crossed → milestone row inserted into referral_milestones table
         │
         ▼
@@ -164,8 +169,8 @@ Use my referral link to get started: https://coneco.store/register?ref=AB3KX9QZ"
 |------|----------------|
 | **Who can refer** | Any logged-in Customer or Vendor |
 | **Who can be referred** | Any new user — Customer or Vendor (cross-role allowed ✅) |
-| **Qualifying condition** | Referred user MUST verify their email (`email_verified = TRUE`) |
-| **When does count increase** | Only after email verification — unverified users do NOT count |
+| **Qualifying condition** | Referred user MUST complete 2 orders (Customer) or 3 orders (Vendor) and be email verified |
+| **When does count increase** | When the required number of orders are marked as 'Completed' |
 | **Self-referral** | Not explicitly blocked in code — however, the referred_by field links to another user by ID |
 | **Multiple referrers** | Each user has only ONE `referred_by_user_id` — first referral code used at registration wins |
 | **Referral code entry time** | Must be in the URL at registration — cannot be added after signup |

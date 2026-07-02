@@ -160,6 +160,19 @@ Vendor has GST Number in profile?
 
 ---
 
+## 🎁 Referral & Loyalty Program
+
+ConEco features a gamified referral program to drive platform growth.
+
+1. **Share**: Users (Customers or Vendors) share their unique 8-character referral code or link.
+2. **Register**: New users register using the link and verify their email. They are tracked as "Pending".
+3. **Qualify**: The referred user must complete orders on the platform:
+   - **Customer**: Must complete 2 orders (Products or Services).
+   - **Vendor**: Must complete 3 orders.
+4. **Milestones**: Once qualified, the referrer earns a point. Hitting milestones (Tier 1, Tier 2, Tier 3) unlocks surprise prizes fulfilled manually by the Admin.
+
+---
+
 ## 📲 Daily Price Update Protocol (WhatsApp)
 
 ### ⏰ The 9-to-10 Window
