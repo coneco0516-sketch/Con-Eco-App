@@ -193,8 +193,8 @@ function ReferralPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                 {[
                   { step: '1', text: 'Share your unique referral link with others', icon: '🔗' },
-                  { step: '2', text: 'They register on ConEco (as any role) using your link', icon: '📝' },
-                  { step: '3', text: 'Once they verify their email, you earn a referral point', icon: '✅' },
+                  { step: '2', text: 'They register and verify their email on ConEco using your link', icon: '📝' },
+                  { step: '3', text: 'You earn a point once they complete 2 orders (Customer) or 3 orders (Vendor)', icon: '✅' },
                   { step: '4', text: 'Reach milestones to unlock exclusive surprise prizes!', icon: '🎁' },
                 ].map(item => (
                   <div key={item.step} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.8rem' }}>
